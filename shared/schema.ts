@@ -1,176 +1,226 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User model
+// Users
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  email: text("email").notNull().unique(),
-  displayName: text("display_name"),
-  avatar: text("avatar"),
-  tier: text("tier").default("apprentice").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  displayName: text("display_name").notNull(),
+  plan: text("plan").notNull().default("free"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
-  email: true,
   displayName: true,
 });
 
-// Series model
+// Series
 export const series = pgTable("series", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   title: text("title").notNull(),
   description: text("description"),
-  genre: text("genre"),
-  booksPlanned: integer("books_planned").default(1),
-  progress: integer("progress").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  totalBooks: integer("total_books").notNull().default(1),
+  currentBook: integer("current_book").notNull().default(1),
+  coverImage: text("cover_image"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertSeriesSchema = createInsertSchema(series).pick({
   userId: true,
   title: true,
   description: true,
-  genre: true,
-  booksPlanned: true,
+  totalBooks: true,
+  currentBook: true,
+  coverImage: true,
 });
 
-// Book model
+// Books
 export const books = pgTable("books", {
   id: serial("id").primaryKey(),
   seriesId: integer("series_id").notNull().references(() => series.id),
   title: text("title").notNull(),
-  position: integer("position").notNull(), // For ordering in the series
-  wordCount: integer("word_count").default(0),
-  status: text("status").default("draft").notNull(), // draft, revision, final
-  progress: integer("progress").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  lastEdited: timestamp("last_edited").defaultNow().notNull(),
+  description: text("description"),
+  position: integer("position").notNull().default(1),
+  wordCount: integer("word_count").notNull().default(0),
+  status: text("status").notNull().default("in_progress"),
+  coverImage: text("cover_image"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertBookSchema = createInsertSchema(books).pick({
   seriesId: true,
   title: true,
+  description: true,
   position: true,
+  wordCount: true,
+  status: true,
+  coverImage: true,
+});
+
+// Chapters
+export const chapters = pgTable("chapters", {
+  id: serial("id").primaryKey(),
+  bookId: integer("book_id").notNull().references(() => books.id),
+  title: text("title").notNull(),
+  content: text("content"),
+  position: integer("position").notNull().default(1),
+  wordCount: integer("word_count").notNull().default(0),
+  status: text("status").notNull().default("in_progress"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertChapterSchema = createInsertSchema(chapters).pick({
+  bookId: true,
+  title: true,
+  content: true,
+  position: true,
+  wordCount: true,
   status: true,
 });
 
-// Character model
+// Characters
 export const characters = pgTable("characters", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
   seriesId: integer("series_id").notNull().references(() => series.id),
   name: text("name").notNull(),
-  role: text("role").default("supporting"), // protagonist, antagonist, supporting
+  role: text("role"),
+  age: text("age"),
   occupation: text("occupation"),
+  status: text("status"),
   description: text("description"),
-  background: text("background"),
-  attributes: jsonb("attributes").default({}), // Flexible attributes
-  arcs: integer("arcs").default(0),
-  bookAppearances: text("book_appearances").array(), // Which books they appear in
-  completeness: integer("completeness").default(0), // 0-100%
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  appearance: text("appearance"),
+  personality: text("personality"),
+  goals: text("goals"),
+  backstory: text("backstory"),
+  bookAppearances: jsonb("book_appearances").notNull().default([]),
+  isProtagonist: boolean("is_protagonist").notNull().default(false),
+  avatar: text("avatar"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertCharacterSchema = createInsertSchema(characters).pick({
-  userId: true,
   seriesId: true,
   name: true,
   role: true,
+  age: true,
   occupation: true,
+  status: true,
   description: true,
-  background: true,
+  appearance: true,
+  personality: true,
+  goals: true,
+  backstory: true,
   bookAppearances: true,
+  isProtagonist: true,
+  avatar: true,
 });
 
-// Location model
+// Character Relationships
+export const characterRelationships = pgTable("character_relationships", {
+  id: serial("id").primaryKey(),
+  sourceCharacterId: integer("source_character_id").notNull().references(() => characters.id),
+  targetCharacterId: integer("target_character_id").notNull().references(() => characters.id),
+  relationshipType: text("relationship_type").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCharacterRelationshipSchema = createInsertSchema(characterRelationships).pick({
+  sourceCharacterId: true,
+  targetCharacterId: true,
+  relationshipType: true,
+  description: true,
+});
+
+// Locations
 export const locations = pgTable("locations", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
   seriesId: integer("series_id").notNull().references(() => series.id),
   name: text("name").notNull(),
+  locationType: text("location_type"),
   description: text("description"),
-  type: text("type"), // city, forest, building, etc.
-  bookAppearances: text("book_appearances").array(),
-  keyScenes: integer("key_scenes").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  importance: text("importance").default("secondary"),
+  mapCoordinates: jsonb("map_coordinates"),
+  bookAppearances: jsonb("book_appearances").notNull().default([]),
+  image: text("image"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertLocationSchema = createInsertSchema(locations).pick({
-  userId: true,
   seriesId: true,
   name: true,
+  locationType: true,
   description: true,
-  type: true,
+  importance: true,
+  mapCoordinates: true,
   bookAppearances: true,
+  image: true,
 });
 
-// Timeline event model
-export const timelineEvents = pgTable("timeline_events", {
+// Writing Stats
+export const writingStats = pgTable("writing_stats", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
-  seriesId: integer("series_id").notNull().references(() => series.id),
-  title: text("title").notNull(),
-  description: text("description"),
-  date: text("date"), // Could be a real date or a fictional one
-  characters: integer("characters").array(), // Character IDs involved
-  locations: integer("locations").array(), // Location IDs involved
+  date: timestamp("date").notNull().defaultNow(),
+  wordsWritten: integer("words_written").notNull().default(0),
+  minutesActive: integer("minutes_active").notNull().default(0),
   bookId: integer("book_id").references(() => books.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  chapterId: integer("chapter_id").references(() => chapters.id),
 });
 
-export const insertTimelineEventSchema = createInsertSchema(timelineEvents).pick({
+export const insertWritingStatSchema = createInsertSchema(writingStats).pick({
   userId: true,
-  seriesId: true,
-  title: true,
-  description: true,
   date: true,
-  characters: true,
-  locations: true,
+  wordsWritten: true,
+  minutesActive: true,
   bookId: true,
+  chapterId: true,
 });
 
-// Writing session model
-export const writingSessions = pgTable("writing_sessions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  bookId: integer("book_id").references(() => books.id),
-  seriesId: integer("series_id").references(() => series.id),
-  wordCount: integer("word_count").notNull(),
-  duration: integer("duration"), // in minutes
-  date: timestamp("date").defaultNow().notNull(),
-});
-
-export const insertWritingSessionSchema = createInsertSchema(writingSessions).pick({
-  userId: true,
-  bookId: true,
-  seriesId: true,
-  wordCount: true,
-  duration: true,
-});
-
-// Achievement model
+// Achievements
 export const achievements = pgTable("achievements", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  type: text("type").notNull(), // streak, word_count, character_creation, etc.
-  value: integer("value").notNull(), // The value achieved
-  unlockedAt: timestamp("unlocked_at").defaultNow().notNull(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(),
+  icon: text("icon").notNull(),
+  requiredValue: integer("required_value").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertAchievementSchema = createInsertSchema(achievements).pick({
-  userId: true,
+  name: true,
+  description: true,
   type: true,
-  value: true,
+  icon: true,
+  requiredValue: true,
 });
 
-// Define export types
+// User Achievements
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  achievementId: integer("achievement_id").notNull().references(() => achievements.id),
+  earnedAt: timestamp("earned_at").notNull().defaultNow(),
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).pick({
+  userId: true,
+  achievementId: true,
+});
+
+// Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
@@ -180,17 +230,23 @@ export type InsertSeries = z.infer<typeof insertSeriesSchema>;
 export type Book = typeof books.$inferSelect;
 export type InsertBook = z.infer<typeof insertBookSchema>;
 
+export type Chapter = typeof chapters.$inferSelect;
+export type InsertChapter = z.infer<typeof insertChapterSchema>;
+
 export type Character = typeof characters.$inferSelect;
 export type InsertCharacter = z.infer<typeof insertCharacterSchema>;
+
+export type CharacterRelationship = typeof characterRelationships.$inferSelect;
+export type InsertCharacterRelationship = z.infer<typeof insertCharacterRelationshipSchema>;
 
 export type Location = typeof locations.$inferSelect;
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
 
-export type TimelineEvent = typeof timelineEvents.$inferSelect;
-export type InsertTimelineEvent = z.infer<typeof insertTimelineEventSchema>;
-
-export type WritingSession = typeof writingSessions.$inferSelect;
-export type InsertWritingSession = z.infer<typeof insertWritingSessionSchema>;
+export type WritingStat = typeof writingStats.$inferSelect;
+export type InsertWritingStat = z.infer<typeof insertWritingStatSchema>;
 
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;

@@ -1,73 +1,78 @@
-import { apiRequest } from "./queryClient";
+import { apiRequest } from "@/lib/queryClient";
 
-/**
- * Helper function to register a new user
- */
-export async function registerUser(userData: {
+interface User {
+  id: number;
   username: string;
-  email: string;
-  password: string;
-  displayName?: string;
-}) {
-  return apiRequest("POST", "/api/register", userData);
+  displayName: string;
+  plan: string;
 }
 
-/**
- * Helper function to login a user
- */
-export async function loginUser(credentials: {
-  username: string;
-  password: string;
-}) {
-  return apiRequest("POST", "/api/login", credentials);
-}
-
-/**
- * Helper function to logout a user
- */
-export async function logoutUser() {
-  return apiRequest("POST", "/api/logout", {});
-}
-
-/**
- * Helper function to get the current user
- */
-export async function getCurrentUser() {
+export async function login(username: string, password: string): Promise<User> {
   try {
-    const response = await fetch("/api/me", {
-      credentials: "include",
+    const response = await apiRequest("POST", "/api/auth/login", {
+      username,
+      password,
     });
     
     if (!response.ok) {
-      if (response.status === 401) {
-        return null;
-      }
-      throw new Error(`Error fetching user: ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Login failed");
     }
     
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Login failed. Please try again.");
+  }
+}
+
+export async function register(
+  username: string,
+  password: string,
+  displayName: string
+): Promise<User> {
+  try {
+    const response = await apiRequest("POST", "/api/auth/register", {
+      username,
+      password,
+      displayName,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Registration failed");
+    }
+    
+    // After successful registration, automatically log the user in
+    return login(username, password);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Registration failed. Please try again.");
+  }
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await apiRequest("POST", "/api/auth/logout");
+  } catch (error) {
+    console.error("Logout error:", error);
+    throw error;
+  }
+}
+
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const response = await apiRequest("GET", "/api/auth/me");
+    if (!response.ok) {
+      return null;
+    }
     return response.json();
   } catch (error) {
     console.error("Error fetching current user:", error);
     return null;
   }
-}
-
-/**
- * Helper function to update user profile
- */
-export async function updateUserProfile(userData: {
-  displayName?: string;
-  email?: string;
-}) {
-  return apiRequest("PATCH", "/api/me", userData);
-}
-
-/**
- * Helper function to change password
- */
-export async function changePassword(passwordData: {
-  currentPassword: string;
-  newPassword: string;
-}) {
-  return apiRequest("POST", "/api/change-password", passwordData);
 }

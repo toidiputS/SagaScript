@@ -1,557 +1,631 @@
 import {
-  users, type User, type InsertUser,
-  series, type Series, type InsertSeries,
-  books, type Book, type InsertBook,
-  characters, type Character, type InsertCharacter,
-  locations, type Location, type InsertLocation,
-  timelineEvents, type TimelineEvent, type InsertTimelineEvent,
-  writingSessions, type WritingSession, type InsertWritingSession,
-  achievements, type Achievement, type InsertAchievement
+  type User,
+  type InsertUser,
+  type Series,
+  type InsertSeries,
+  type Book,
+  type InsertBook,
+  type Chapter,
+  type InsertChapter,
+  type Character,
+  type InsertCharacter,
+  type CharacterRelationship,
+  type InsertCharacterRelationship,
+  type Location,
+  type InsertLocation,
+  type WritingStat,
+  type InsertWritingStat,
+  type Achievement,
+  type InsertAchievement,
+  type UserAchievement,
+  type InsertUserAchievement
 } from "@shared/schema";
-import { createHash } from "crypto";
 
 export interface IStorage {
-  // User operations
+  // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
-  // Series operations
+  // Series methods
   getSeries(id: number): Promise<Series | undefined>;
   getAllSeriesByUser(userId: number): Promise<Series[]>;
   createSeries(series: InsertSeries): Promise<Series>;
   updateSeries(id: number, series: Partial<Series>): Promise<Series | undefined>;
   deleteSeries(id: number): Promise<boolean>;
   
-  // Book operations
+  // Book methods
   getBook(id: number): Promise<Book | undefined>;
-  getBooksBySeriesId(seriesId: number): Promise<Book[]>;
+  getBooksBySeries(seriesId: number): Promise<Book[]>;
   createBook(book: InsertBook): Promise<Book>;
   updateBook(id: number, book: Partial<Book>): Promise<Book | undefined>;
   deleteBook(id: number): Promise<boolean>;
+  updateBookPositions(books: { id: number, position: number }[]): Promise<boolean>;
   
-  // Character operations
+  // Chapter methods
+  getChapter(id: number): Promise<Chapter | undefined>;
+  getChaptersByBook(bookId: number): Promise<Chapter[]>;
+  createChapter(chapter: InsertChapter): Promise<Chapter>;
+  updateChapter(id: number, chapter: Partial<Chapter>): Promise<Chapter | undefined>;
+  deleteChapter(id: number): Promise<boolean>;
+  updateChapterPositions(chapters: { id: number, position: number }[]): Promise<boolean>;
+  
+  // Character methods
   getCharacter(id: number): Promise<Character | undefined>;
-  getCharactersBySeriesId(seriesId: number): Promise<Character[]>;
+  getCharactersBySeries(seriesId: number): Promise<Character[]>;
   createCharacter(character: InsertCharacter): Promise<Character>;
   updateCharacter(id: number, character: Partial<Character>): Promise<Character | undefined>;
   deleteCharacter(id: number): Promise<boolean>;
   
-  // Location operations
+  // Character Relationship methods
+  getCharacterRelationship(id: number): Promise<CharacterRelationship | undefined>;
+  getCharacterRelationshipsByCharacter(characterId: number): Promise<CharacterRelationship[]>;
+  getCharacterRelationshipsBySeries(seriesId: number): Promise<CharacterRelationship[]>;
+  createCharacterRelationship(relationship: InsertCharacterRelationship): Promise<CharacterRelationship>;
+  updateCharacterRelationship(id: number, relationship: Partial<CharacterRelationship>): Promise<CharacterRelationship | undefined>;
+  deleteCharacterRelationship(id: number): Promise<boolean>;
+  
+  // Location methods
   getLocation(id: number): Promise<Location | undefined>;
-  getLocationsBySeriesId(seriesId: number): Promise<Location[]>;
+  getLocationsBySeries(seriesId: number): Promise<Location[]>;
   createLocation(location: InsertLocation): Promise<Location>;
   updateLocation(id: number, location: Partial<Location>): Promise<Location | undefined>;
   deleteLocation(id: number): Promise<boolean>;
   
-  // Timeline event operations
-  getTimelineEvent(id: number): Promise<TimelineEvent | undefined>;
-  getTimelineEventsBySeriesId(seriesId: number): Promise<TimelineEvent[]>;
-  createTimelineEvent(event: InsertTimelineEvent): Promise<TimelineEvent>;
-  updateTimelineEvent(id: number, event: Partial<TimelineEvent>): Promise<TimelineEvent | undefined>;
-  deleteTimelineEvent(id: number): Promise<boolean>;
+  // Writing Stats methods
+  getWritingStatsByUser(userId: number, period?: 'day' | 'week' | 'month' | 'year'): Promise<WritingStat[]>;
+  createWritingStat(stat: InsertWritingStat): Promise<WritingStat>;
   
-  // Writing session operations
-  getWritingSession(id: number): Promise<WritingSession | undefined>;
-  getWritingSessionsByUserId(userId: number): Promise<WritingSession[]>;
-  getWritingSessionsByBookId(bookId: number): Promise<WritingSession[]>;
-  getWritingSessionsBySeriesId(seriesId: number): Promise<WritingSession[]>;
-  createWritingSession(session: InsertWritingSession): Promise<WritingSession>;
-  
-  // Achievement operations
-  getAchievementsByUserId(userId: number): Promise<Achievement[]>;
+  // Achievement methods
+  getAchievements(): Promise<Achievement[]>;
+  getAchievement(id: number): Promise<Achievement | undefined>;
   createAchievement(achievement: InsertAchievement): Promise<Achievement>;
   
-  // Stats operations
-  getUserStats(userId: number): Promise<{
-    totalWordCount: number;
-    charactersCreated: number;
-    achievementsCount: number;
-    currentStreak: number;
-  }>;
+  // User Achievement methods
+  getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]>;
+  createUserAchievement(userAchievement: InsertUserAchievement): Promise<UserAchievement>;
+  checkAndAwardAchievements(userId: number): Promise<UserAchievement[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private series: Map<number, Series>;
   private books: Map<number, Book>;
+  private chapters: Map<number, Chapter>;
   private characters: Map<number, Character>;
+  private characterRelationships: Map<number, CharacterRelationship>;
   private locations: Map<number, Location>;
-  private timelineEvents: Map<number, TimelineEvent>;
-  private writingSessions: Map<number, WritingSession>;
+  private writingStats: Map<number, WritingStat>;
   private achievements: Map<number, Achievement>;
+  private userAchievements: Map<number, UserAchievement>;
   
-  private userIdCounter: number;
-  private seriesIdCounter: number;
-  private bookIdCounter: number;
-  private characterIdCounter: number;
-  private locationIdCounter: number;
-  private timelineEventIdCounter: number;
-  private writingSessionIdCounter: number;
-  private achievementIdCounter: number;
+  private currentIds: {
+    user: number;
+    series: number;
+    book: number;
+    chapter: number;
+    character: number;
+    characterRelationship: number;
+    location: number;
+    writingStat: number;
+    achievement: number;
+    userAchievement: number;
+  };
 
   constructor() {
     this.users = new Map();
     this.series = new Map();
     this.books = new Map();
+    this.chapters = new Map();
     this.characters = new Map();
+    this.characterRelationships = new Map();
     this.locations = new Map();
-    this.timelineEvents = new Map();
-    this.writingSessions = new Map();
+    this.writingStats = new Map();
     this.achievements = new Map();
+    this.userAchievements = new Map();
     
-    this.userIdCounter = 1;
-    this.seriesIdCounter = 1;
-    this.bookIdCounter = 1;
-    this.characterIdCounter = 1;
-    this.locationIdCounter = 1;
-    this.timelineEventIdCounter = 1;
-    this.writingSessionIdCounter = 1;
-    this.achievementIdCounter = 1;
+    this.currentIds = {
+      user: 1,
+      series: 1,
+      book: 1,
+      chapter: 1,
+      character: 1,
+      characterRelationship: 1,
+      location: 1,
+      writingStat: 1,
+      achievement: 1,
+      userAchievement: 1
+    };
+    
+    // Initialize sample achievements
+    this.initializeAchievements();
   }
 
-  // Helper method to hash passwords
-  private hashPassword(password: string): string {
-    return createHash('sha256').update(password).digest('hex');
+  // Initialize predefined achievements
+  private initializeAchievements() {
+    const achievements: InsertAchievement[] = [
+      {
+        name: "7-Day Streak",
+        description: "Write every day for a week",
+        type: "streak",
+        icon: "ri-fire-line",
+        requiredValue: 7
+      },
+      {
+        name: "Chapter Master",
+        description: "Complete 10 chapters",
+        type: "chapters",
+        icon: "ri-book-mark-line",
+        requiredValue: 10
+      },
+      {
+        name: "Character Creator",
+        description: "Develop 5 detailed characters",
+        type: "characters",
+        icon: "ri-user-star-line",
+        requiredValue: 5
+      },
+      {
+        name: "World Builder",
+        description: "Create 10 unique locations",
+        type: "locations",
+        icon: "ri-earth-line",
+        requiredValue: 10
+      },
+      {
+        name: "Word Count Champion",
+        description: "Write 50,000 words",
+        type: "words",
+        icon: "ri-quill-pen-line",
+        requiredValue: 50000
+      }
+    ];
+    
+    achievements.forEach(achievement => {
+      this.createAchievement(achievement);
+    });
   }
 
-  // User operations
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase(),
+      (user) => user.username === username,
     );
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email.toLowerCase() === email.toLowerCase(),
-    );
-  }
-
-  async createUser(data: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const hashedPassword = this.hashPassword(data.password);
-    const now = new Date();
-    
-    const user: User = {
-      id,
-      username: data.username,
-      password: hashedPassword,
-      email: data.email,
-      displayName: data.displayName || data.username,
-      avatar: null,
-      tier: "apprentice",
-      createdAt: now,
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentIds.user++;
+    const timestamp = new Date();
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      plan: 'free',
+      createdAt: timestamp 
     };
-    
     this.users.set(id, user);
     return user;
   }
 
-  // Series operations
+  // Series methods
   async getSeries(id: number): Promise<Series | undefined> {
     return this.series.get(id);
   }
 
   async getAllSeriesByUser(userId: number): Promise<Series[]> {
     return Array.from(this.series.values()).filter(
-      (series) => series.userId === userId,
+      (series) => series.userId === userId
     );
   }
 
-  async createSeries(data: InsertSeries): Promise<Series> {
-    const id = this.seriesIdCounter++;
-    const now = new Date();
-    
-    const newSeries: Series = {
+  async createSeries(insertSeries: InsertSeries): Promise<Series> {
+    const id = this.currentIds.series++;
+    const timestamp = new Date();
+    const series: Series = {
+      ...insertSeries,
       id,
-      userId: data.userId,
-      title: data.title,
-      description: data.description || null,
-      genre: data.genre || null,
-      booksPlanned: data.booksPlanned || 1,
-      progress: 0,
-      createdAt: now,
+      createdAt: timestamp,
+      updatedAt: timestamp
     };
-    
-    this.series.set(id, newSeries);
-    return newSeries;
+    this.series.set(id, series);
+    return series;
   }
 
-  async updateSeries(id: number, data: Partial<Series>): Promise<Series | undefined> {
-    const existing = this.series.get(id);
-    if (!existing) return undefined;
+  async updateSeries(id: number, updates: Partial<Series>): Promise<Series | undefined> {
+    const existingSeries = this.series.get(id);
+    if (!existingSeries) return undefined;
     
-    const updated = { ...existing, ...data };
-    this.series.set(id, updated);
-    return updated;
+    const updatedSeries: Series = {
+      ...existingSeries,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.series.set(id, updatedSeries);
+    return updatedSeries;
   }
 
   async deleteSeries(id: number): Promise<boolean> {
-    // Delete all related books, characters, locations, timeline events
-    const relatedBooks = Array.from(this.books.values()).filter(book => book.seriesId === id);
-    for (const book of relatedBooks) {
-      await this.deleteBook(book.id);
-    }
-    
-    Array.from(this.characters.values())
-      .filter(char => char.seriesId === id)
-      .forEach(char => this.characters.delete(char.id));
-      
-    Array.from(this.locations.values())
-      .filter(loc => loc.seriesId === id)
-      .forEach(loc => this.locations.delete(loc.id));
-      
-    Array.from(this.timelineEvents.values())
-      .filter(event => event.seriesId === id)
-      .forEach(event => this.timelineEvents.delete(event.id));
-    
     return this.series.delete(id);
   }
 
-  // Book operations
+  // Book methods
   async getBook(id: number): Promise<Book | undefined> {
     return this.books.get(id);
   }
 
-  async getBooksBySeriesId(seriesId: number): Promise<Book[]> {
+  async getBooksBySeries(seriesId: number): Promise<Book[]> {
     return Array.from(this.books.values())
       .filter(book => book.seriesId === seriesId)
       .sort((a, b) => a.position - b.position);
   }
 
-  async createBook(data: InsertBook): Promise<Book> {
-    const id = this.bookIdCounter++;
-    const now = new Date();
-    
-    const newBook: Book = {
+  async createBook(insertBook: InsertBook): Promise<Book> {
+    const id = this.currentIds.book++;
+    const timestamp = new Date();
+    const book: Book = {
+      ...insertBook,
       id,
-      seriesId: data.seriesId,
-      title: data.title,
-      position: data.position,
-      wordCount: 0,
-      status: data.status || "draft",
-      progress: 0,
-      createdAt: now,
-      lastEdited: now,
+      createdAt: timestamp,
+      updatedAt: timestamp
     };
-    
-    this.books.set(id, newBook);
-    
-    // Update series progress
-    this.updateSeriesProgress(data.seriesId);
-    
-    return newBook;
+    this.books.set(id, book);
+    return book;
   }
 
-  async updateBook(id: number, data: Partial<Book>): Promise<Book | undefined> {
-    const existing = this.books.get(id);
-    if (!existing) return undefined;
+  async updateBook(id: number, updates: Partial<Book>): Promise<Book | undefined> {
+    const existingBook = this.books.get(id);
+    if (!existingBook) return undefined;
     
-    const updated = { 
-      ...existing, 
-      ...data,
-      lastEdited: new Date() 
+    const updatedBook: Book = {
+      ...existingBook,
+      ...updates,
+      updatedAt: new Date()
     };
     
-    this.books.set(id, updated);
-    
-    // Update series progress if needed
-    if (data.progress !== undefined) {
-      this.updateSeriesProgress(existing.seriesId);
-    }
-    
-    return updated;
+    this.books.set(id, updatedBook);
+    return updatedBook;
   }
 
   async deleteBook(id: number): Promise<boolean> {
-    const book = this.books.get(id);
-    if (!book) return false;
-    
-    const seriesId = book.seriesId;
-    const result = this.books.delete(id);
-    
-    // Update positions of other books in the series
-    const seriesBooks = await this.getBooksBySeriesId(seriesId);
-    let position = 1;
-    for (const book of seriesBooks) {
-      if (book.position !== position) {
-        await this.updateBook(book.id, { position });
+    return this.books.delete(id);
+  }
+
+  async updateBookPositions(books: { id: number, position: number }[]): Promise<boolean> {
+    for (const { id, position } of books) {
+      const book = this.books.get(id);
+      if (book) {
+        this.books.set(id, { ...book, position, updatedAt: new Date() });
       }
-      position++;
     }
-    
-    // Update series progress
-    this.updateSeriesProgress(seriesId);
-    
-    return result;
+    return true;
   }
 
-  // Helper to update series progress based on books
-  private async updateSeriesProgress(seriesId: number): Promise<void> {
-    const seriesBooks = await this.getBooksBySeriesId(seriesId);
-    const series = await this.getSeries(seriesId);
-    
-    if (!series) return;
-    
-    if (seriesBooks.length === 0) {
-      await this.updateSeries(seriesId, { progress: 0 });
-      return;
-    }
-    
-    const totalProgress = seriesBooks.reduce((sum, book) => sum + (book.progress ?? 0), 0);
-    const avgProgress = Math.round(totalProgress / seriesBooks.length);
-    
-    await this.updateSeries(seriesId, { progress: avgProgress });
+  // Chapter methods
+  async getChapter(id: number): Promise<Chapter | undefined> {
+    return this.chapters.get(id);
   }
 
-  // Character operations
+  async getChaptersByBook(bookId: number): Promise<Chapter[]> {
+    return Array.from(this.chapters.values())
+      .filter(chapter => chapter.bookId === bookId)
+      .sort((a, b) => a.position - b.position);
+  }
+
+  async createChapter(insertChapter: InsertChapter): Promise<Chapter> {
+    const id = this.currentIds.chapter++;
+    const timestamp = new Date();
+    const chapter: Chapter = {
+      ...insertChapter,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.chapters.set(id, chapter);
+    return chapter;
+  }
+
+  async updateChapter(id: number, updates: Partial<Chapter>): Promise<Chapter | undefined> {
+    const existingChapter = this.chapters.get(id);
+    if (!existingChapter) return undefined;
+    
+    const updatedChapter: Chapter = {
+      ...existingChapter,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.chapters.set(id, updatedChapter);
+    return updatedChapter;
+  }
+
+  async deleteChapter(id: number): Promise<boolean> {
+    return this.chapters.delete(id);
+  }
+
+  async updateChapterPositions(chapters: { id: number, position: number }[]): Promise<boolean> {
+    for (const { id, position } of chapters) {
+      const chapter = this.chapters.get(id);
+      if (chapter) {
+        this.chapters.set(id, { ...chapter, position, updatedAt: new Date() });
+      }
+    }
+    return true;
+  }
+
+  // Character methods
   async getCharacter(id: number): Promise<Character | undefined> {
     return this.characters.get(id);
   }
 
-  async getCharactersBySeriesId(seriesId: number): Promise<Character[]> {
-    return Array.from(this.characters.values()).filter(
-      (character) => character.seriesId === seriesId,
-    );
+  async getCharactersBySeries(seriesId: number): Promise<Character[]> {
+    return Array.from(this.characters.values())
+      .filter(character => character.seriesId === seriesId);
   }
 
-  async createCharacter(data: InsertCharacter): Promise<Character> {
-    const id = this.characterIdCounter++;
-    const now = new Date();
-    
-    const newCharacter: Character = {
+  async createCharacter(insertCharacter: InsertCharacter): Promise<Character> {
+    const id = this.currentIds.character++;
+    const timestamp = new Date();
+    const character: Character = {
+      ...insertCharacter,
       id,
-      userId: data.userId,
-      seriesId: data.seriesId,
-      name: data.name,
-      role: data.role || "supporting",
-      occupation: data.occupation || null,
-      description: data.description || null,
-      background: data.background || null,
-      attributes: {},
-      arcs: 0,
-      bookAppearances: data.bookAppearances || [],
-      completeness: 0,
-      createdAt: now,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.characters.set(id, character);
+    return character;
+  }
+
+  async updateCharacter(id: number, updates: Partial<Character>): Promise<Character | undefined> {
+    const existingCharacter = this.characters.get(id);
+    if (!existingCharacter) return undefined;
+    
+    const updatedCharacter: Character = {
+      ...existingCharacter,
+      ...updates,
+      updatedAt: new Date()
     };
     
-    this.characters.set(id, newCharacter);
-    return newCharacter;
-  }
-
-  async updateCharacter(id: number, data: Partial<Character>): Promise<Character | undefined> {
-    const existing = this.characters.get(id);
-    if (!existing) return undefined;
-    
-    const updated = { ...existing, ...data };
-    this.characters.set(id, updated);
-    return updated;
+    this.characters.set(id, updatedCharacter);
+    return updatedCharacter;
   }
 
   async deleteCharacter(id: number): Promise<boolean> {
     return this.characters.delete(id);
   }
 
-  // Location operations
+  // Character Relationship methods
+  async getCharacterRelationship(id: number): Promise<CharacterRelationship | undefined> {
+    return this.characterRelationships.get(id);
+  }
+
+  async getCharacterRelationshipsByCharacter(characterId: number): Promise<CharacterRelationship[]> {
+    return Array.from(this.characterRelationships.values())
+      .filter(rel => rel.sourceCharacterId === characterId || rel.targetCharacterId === characterId);
+  }
+
+  async getCharacterRelationshipsBySeries(seriesId: number): Promise<CharacterRelationship[]> {
+    // First get all characters in the series
+    const seriesCharacters = await this.getCharactersBySeries(seriesId);
+    const characterIds = seriesCharacters.map(char => char.id);
+    
+    // Then filter relationships where both source and target are in this series
+    return Array.from(this.characterRelationships.values())
+      .filter(rel => 
+        characterIds.includes(rel.sourceCharacterId) && 
+        characterIds.includes(rel.targetCharacterId)
+      );
+  }
+
+  async createCharacterRelationship(insertRelationship: InsertCharacterRelationship): Promise<CharacterRelationship> {
+    const id = this.currentIds.characterRelationship++;
+    const timestamp = new Date();
+    const relationship: CharacterRelationship = {
+      ...insertRelationship,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.characterRelationships.set(id, relationship);
+    return relationship;
+  }
+
+  async updateCharacterRelationship(id: number, updates: Partial<CharacterRelationship>): Promise<CharacterRelationship | undefined> {
+    const existingRelationship = this.characterRelationships.get(id);
+    if (!existingRelationship) return undefined;
+    
+    const updatedRelationship: CharacterRelationship = {
+      ...existingRelationship,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.characterRelationships.set(id, updatedRelationship);
+    return updatedRelationship;
+  }
+
+  async deleteCharacterRelationship(id: number): Promise<boolean> {
+    return this.characterRelationships.delete(id);
+  }
+
+  // Location methods
   async getLocation(id: number): Promise<Location | undefined> {
     return this.locations.get(id);
   }
 
-  async getLocationsBySeriesId(seriesId: number): Promise<Location[]> {
-    return Array.from(this.locations.values()).filter(
-      (location) => location.seriesId === seriesId,
-    );
+  async getLocationsBySeries(seriesId: number): Promise<Location[]> {
+    return Array.from(this.locations.values())
+      .filter(location => location.seriesId === seriesId);
   }
 
-  async createLocation(data: InsertLocation): Promise<Location> {
-    const id = this.locationIdCounter++;
-    const now = new Date();
-    
-    const newLocation: Location = {
+  async createLocation(insertLocation: InsertLocation): Promise<Location> {
+    const id = this.currentIds.location++;
+    const timestamp = new Date();
+    const location: Location = {
+      ...insertLocation,
       id,
-      userId: data.userId,
-      seriesId: data.seriesId,
-      name: data.name,
-      description: data.description || null,
-      type: data.type || null,
-      bookAppearances: data.bookAppearances || [],
-      keyScenes: 0,
-      createdAt: now,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.locations.set(id, location);
+    return location;
+  }
+
+  async updateLocation(id: number, updates: Partial<Location>): Promise<Location | undefined> {
+    const existingLocation = this.locations.get(id);
+    if (!existingLocation) return undefined;
+    
+    const updatedLocation: Location = {
+      ...existingLocation,
+      ...updates,
+      updatedAt: new Date()
     };
     
-    this.locations.set(id, newLocation);
-    return newLocation;
-  }
-
-  async updateLocation(id: number, data: Partial<Location>): Promise<Location | undefined> {
-    const existing = this.locations.get(id);
-    if (!existing) return undefined;
-    
-    const updated = { ...existing, ...data };
-    this.locations.set(id, updated);
-    return updated;
+    this.locations.set(id, updatedLocation);
+    return updatedLocation;
   }
 
   async deleteLocation(id: number): Promise<boolean> {
     return this.locations.delete(id);
   }
 
-  // Timeline event operations
-  async getTimelineEvent(id: number): Promise<TimelineEvent | undefined> {
-    return this.timelineEvents.get(id);
-  }
-
-  async getTimelineEventsBySeriesId(seriesId: number): Promise<TimelineEvent[]> {
-    return Array.from(this.timelineEvents.values()).filter(
-      (event) => event.seriesId === seriesId,
-    );
-  }
-
-  async createTimelineEvent(data: InsertTimelineEvent): Promise<TimelineEvent> {
-    const id = this.timelineEventIdCounter++;
+  // Writing Stats methods
+  async getWritingStatsByUser(userId: number, period?: 'day' | 'week' | 'month' | 'year'): Promise<WritingStat[]> {
+    const stats = Array.from(this.writingStats.values())
+      .filter(stat => stat.userId === userId);
+    
+    if (!period) return stats;
+    
     const now = new Date();
+    const cutoffDate = new Date();
     
-    const newEvent: TimelineEvent = {
-      id,
-      userId: data.userId,
-      seriesId: data.seriesId,
-      title: data.title,
-      description: data.description || null,
-      date: data.date || null,
-      characters: data.characters || [],
-      locations: data.locations || [],
-      bookId: data.bookId || null,
-      createdAt: now,
-    };
-    
-    this.timelineEvents.set(id, newEvent);
-    return newEvent;
-  }
-
-  async updateTimelineEvent(id: number, data: Partial<TimelineEvent>): Promise<TimelineEvent | undefined> {
-    const existing = this.timelineEvents.get(id);
-    if (!existing) return undefined;
-    
-    const updated = { ...existing, ...data };
-    this.timelineEvents.set(id, updated);
-    return updated;
-  }
-
-  async deleteTimelineEvent(id: number): Promise<boolean> {
-    return this.timelineEvents.delete(id);
-  }
-
-  // Writing session operations
-  async getWritingSession(id: number): Promise<WritingSession | undefined> {
-    return this.writingSessions.get(id);
-  }
-
-  async getWritingSessionsByUserId(userId: number): Promise<WritingSession[]> {
-    return Array.from(this.writingSessions.values())
-      .filter(session => session.userId === userId)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
-  }
-
-  async getWritingSessionsByBookId(bookId: number): Promise<WritingSession[]> {
-    return Array.from(this.writingSessions.values())
-      .filter(session => session.bookId === bookId)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
-  }
-
-  async getWritingSessionsBySeriesId(seriesId: number): Promise<WritingSession[]> {
-    return Array.from(this.writingSessions.values())
-      .filter(session => session.seriesId === seriesId)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
-  }
-
-  async createWritingSession(data: InsertWritingSession): Promise<WritingSession> {
-    const id = this.writingSessionIdCounter++;
-    const now = new Date();
-    
-    const newSession: WritingSession = {
-      id,
-      userId: data.userId,
-      bookId: data.bookId || null,
-      seriesId: data.seriesId || null,
-      wordCount: data.wordCount,
-      duration: data.duration || null,
-      date: now,
-    };
-    
-    this.writingSessions.set(id, newSession);
-    
-    // Update book word count if bookId is provided
-    if (data.bookId) {
-      const book = await this.getBook(data.bookId);
-      if (book) {
-        const updatedWordCount = (book.wordCount ?? 0) + data.wordCount;
-        // Calculate progress based on word count (assuming 80,000 words is 100%)
-        const targetWordCount = 80000;
-        const progress = Math.min(Math.floor((updatedWordCount / targetWordCount) * 100), 100);
-        
-        await this.updateBook(book.id, { 
-          wordCount: updatedWordCount,
-          progress
-        });
-      }
+    switch (period) {
+      case 'day':
+        cutoffDate.setHours(0, 0, 0, 0);
+        break;
+      case 'week':
+        cutoffDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        cutoffDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'year':
+        cutoffDate.setFullYear(now.getFullYear() - 1);
+        break;
     }
     
-    // Check and update streak achievement
-    await this.updateWritingStreak(data.userId);
-    
-    return newSession;
+    return stats.filter(stat => new Date(stat.date) >= cutoffDate);
   }
 
-  // Achievement operations
-  async getAchievementsByUserId(userId: number): Promise<Achievement[]> {
-    return Array.from(this.achievements.values())
-      .filter(achievement => achievement.userId === userId)
-      .sort((a, b) => b.unlockedAt.getTime() - a.unlockedAt.getTime());
-  }
-
-  async createAchievement(data: InsertAchievement): Promise<Achievement> {
-    const id = this.achievementIdCounter++;
-    const now = new Date();
-    
-    const newAchievement: Achievement = {
-      id,
-      userId: data.userId,
-      type: data.type,
-      value: data.value,
-      unlockedAt: now,
+  async createWritingStat(insertStat: InsertWritingStat): Promise<WritingStat> {
+    const id = this.currentIds.writingStat++;
+    const stat: WritingStat = {
+      ...insertStat,
+      id
     };
+    this.writingStats.set(id, stat);
     
-    this.achievements.set(id, newAchievement);
-    return newAchievement;
+    // Check for achievements after adding stats
+    await this.checkAndAwardAchievements(insertStat.userId);
+    
+    return stat;
   }
 
-  // Helper to update writing streak
-  private async updateWritingStreak(userId: number): Promise<void> {
-    const sessions = await this.getWritingSessionsByUserId(userId);
-    if (sessions.length === 0) return;
+  // Achievement methods
+  async getAchievements(): Promise<Achievement[]> {
+    return Array.from(this.achievements.values());
+  }
+
+  async getAchievement(id: number): Promise<Achievement | undefined> {
+    return this.achievements.get(id);
+  }
+
+  async createAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
+    const id = this.currentIds.achievement++;
+    const timestamp = new Date();
+    const achievement: Achievement = {
+      ...insertAchievement,
+      id,
+      createdAt: timestamp,
+    };
+    this.achievements.set(id, achievement);
+    return achievement;
+  }
+
+  // User Achievement methods
+  async getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]> {
+    const userAchievements = Array.from(this.userAchievements.values())
+      .filter(ua => ua.userId === userId);
+      
+    // Join with achievement data
+    return userAchievements.map(ua => {
+      const achievement = this.achievements.get(ua.achievementId);
+      if (!achievement) {
+        throw new Error(`Achievement not found: ${ua.achievementId}`);
+      }
+      return {
+        ...ua,
+        achievement
+      };
+    });
+  }
+
+  async createUserAchievement(insertUserAchievement: InsertUserAchievement): Promise<UserAchievement> {
+    // Check if user already has this achievement
+    const existing = Array.from(this.userAchievements.values()).find(
+      ua => ua.userId === insertUserAchievement.userId && ua.achievementId === insertUserAchievement.achievementId
+    );
     
-    // Sort sessions by date
-    sessions.sort((a, b) => a.date.getTime() - b.date.getTime());
+    if (existing) {
+      return existing;
+    }
     
-    // Calculate streak
+    const id = this.currentIds.userAchievement++;
+    const timestamp = new Date();
+    const userAchievement: UserAchievement = {
+      ...insertUserAchievement,
+      id,
+      earnedAt: timestamp
+    };
+    this.userAchievements.set(id, userAchievement);
+    return userAchievement;
+  }
+
+  async checkAndAwardAchievements(userId: number): Promise<UserAchievement[]> {
+    const newAchievements: UserAchievement[] = [];
+    const achievements = await this.getAchievements();
+    
+    // Get current user stats
+    const writingStats = await this.getWritingStatsByUser(userId);
+    const characters = (await this.getAllSeriesByUser(userId))
+      .flatMap(async series => await this.getCharactersBySeries(series.id));
+    const locations = (await this.getAllSeriesByUser(userId))
+      .flatMap(async series => await this.getLocationsBySeries(series.id));
+    const chapters = (await this.getAllSeriesByUser(userId))
+      .flatMap(async series => {
+        const books = await this.getBooksBySeries(series.id);
+        return books.flatMap(async book => await this.getChaptersByBook(book.id));
+      });
+    
+    // Total words written
+    const totalWords = writingStats.reduce((sum, stat) => sum + stat.wordsWritten, 0);
+    
+    // Check for streak (simplified - just check consecutive days)
+    const dates = writingStats
+      .map(stat => new Date(stat.date).toISOString().split('T')[0])
+      .sort();
+    
     let currentStreak = 1;
     let maxStreak = 1;
     
-    for (let i = 1; i < sessions.length; i++) {
-      const prevDate = new Date(sessions[i-1].date);
-      const currDate = new Date(sessions[i].date);
+    for (let i = 1; i < dates.length; i++) {
+      const prevDate = new Date(dates[i-1]);
+      const currDate = new Date(dates[i]);
       
-      // Set hours to 0 to compare just the dates
-      prevDate.setHours(0, 0, 0, 0);
-      currDate.setHours(0, 0, 0, 0);
-      
-      // Calculate difference in days
+      // Check if dates are consecutive
       const diffTime = Math.abs(currDate.getTime() - prevDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
@@ -563,95 +637,44 @@ export class MemStorage implements IStorage {
       }
     }
     
-    // Check if streak achievement exists
-    const streakAchievements = (await this.getAchievementsByUserId(userId))
-      .filter(a => a.type === 'streak');
-    
-    const highestStreakAchievement = streakAchievements.reduce(
-      (max, achievement) => Math.max(max, achievement.value), 
-      0
-    );
-    
-    // Check for streak milestones (7, 30, 60, 90, 180, 365 days)
-    const streakMilestones = [7, 30, 60, 90, 180, 365];
-    
-    for (const milestone of streakMilestones) {
-      if (currentStreak >= milestone && highestStreakAchievement < milestone) {
-        await this.createAchievement({
+    // Award achievements based on criteria
+    for (const achievement of achievements) {
+      // Skip if user already has this achievement
+      const alreadyAwarded = (await this.getUserAchievements(userId))
+        .some(ua => ua.achievementId === achievement.id);
+      
+      if (alreadyAwarded) continue;
+      
+      let isEarned = false;
+      
+      switch (achievement.type) {
+        case 'streak':
+          isEarned = maxStreak >= achievement.requiredValue;
+          break;
+        case 'words':
+          isEarned = totalWords >= achievement.requiredValue;
+          break;
+        case 'characters':
+          isEarned = (await Promise.all(characters)).flat().length >= achievement.requiredValue;
+          break;
+        case 'chapters':
+          isEarned = (await Promise.all(chapters)).flat().length >= achievement.requiredValue;
+          break;
+        case 'locations':
+          isEarned = (await Promise.all(locations)).flat().length >= achievement.requiredValue;
+          break;
+      }
+      
+      if (isEarned) {
+        const newAchievement = await this.createUserAchievement({
           userId,
-          type: 'streak',
-          value: milestone
+          achievementId: achievement.id
         });
-      }
-    }
-  }
-
-  // Stats operations
-  async getUserStats(userId: number): Promise<{
-    totalWordCount: number;
-    charactersCreated: number;
-    achievementsCount: number;
-    currentStreak: number;
-  }> {
-    // Calculate total word count from all writing sessions
-    const sessions = await this.getWritingSessionsByUserId(userId);
-    const totalWordCount = sessions.reduce((sum, session) => sum + session.wordCount, 0);
-    
-    // Count characters created
-    const characters = Array.from(this.characters.values())
-      .filter(character => character.userId === userId);
-    const charactersCreated = characters.length;
-    
-    // Count achievements
-    const achievements = await this.getAchievementsByUserId(userId);
-    const achievementsCount = achievements.length;
-    
-    // Calculate current streak
-    let currentStreak = 0;
-    if (sessions.length > 0) {
-      // Sort sessions by date
-      sessions.sort((a, b) => b.date.getTime() - a.date.getTime());
-      
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const latestSession = new Date(sessions[0].date);
-      latestSession.setHours(0, 0, 0, 0);
-      
-      // Check if latest session is from today or yesterday
-      const diffTime = Math.abs(today.getTime() - latestSession.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays <= 1) {
-        // User has written today or yesterday, streak is active
-        // Count backwards to find streak length
-        currentStreak = 1;
-        let previousDate = latestSession;
-        
-        for (let i = 1; i < sessions.length; i++) {
-          const sessionDate = new Date(sessions[i].date);
-          sessionDate.setHours(0, 0, 0, 0);
-          
-          const dayDiff = Math.floor(
-            (previousDate.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24)
-          );
-          
-          if (dayDiff === 1) {
-            currentStreak++;
-            previousDate = sessionDate;
-          } else {
-            break;
-          }
-        }
+        newAchievements.push(newAchievement);
       }
     }
     
-    return {
-      totalWordCount,
-      charactersCreated,
-      achievementsCount,
-      currentStreak
-    };
+    return newAchievements;
   }
 }
 

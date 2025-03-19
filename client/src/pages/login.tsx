@@ -1,30 +1,29 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { z } from "zod";
+import { useAuth } from "@/contexts/auth-context";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
-
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Link } from "wouter";
 
+// Login form schema
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const [, setLocation] = useLocation();
-  const { refreshUser } = useAuth();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [, navigate] = useLocation();
+  const { login, isLoading } = useAuth();
+  const [formError, setFormError] = useState<string | null>(null);
 
+  // Initialize form
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -33,87 +32,97 @@ export default function Login() {
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
+  // Form submission handler
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      await apiRequest("POST", "/api/login", data);
-      await refreshUser();
-      setLocation("/");
+      setFormError(null);
+      await login(values.username, values.password);
+      navigate("/");
     } catch (error) {
-      console.error("Login error:", error);
-      toast({
-        title: "Login Failed",
-        description: "Invalid username or password.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      if (error instanceof Error) {
+        setFormError(error.message);
+      } else {
+        setFormError("An unexpected error occurred");
+      }
     }
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-neutral-50 p-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-6">
-          <div className="flex justify-center mb-2">
-            <svg className="w-10 h-10 text-primary" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-            </svg>
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white mr-2">
+              <i className="ri-quill-pen-line text-xl"></i>
+            </div>
+            <h1 className="font-serif font-bold text-3xl text-neutral-800">Saga Scribe</h1>
           </div>
-          <h1 className="text-2xl font-heading font-bold text-neutral-900">Saga Scribe</h1>
-          <p className="text-neutral-600 mt-1">The Ultimate Series Author's Companion</p>
+          <p className="mt-2 text-neutral-600">The Ultimate Series Author's Companion</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Log In</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
+            <CardTitle>Login to Your Account</CardTitle>
+            <CardDescription>Continue your writing journey</CardDescription>
           </CardHeader>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  {...form.register("username")}
-                  placeholder="Enter your username"
-                />
-                {form.formState.errors.username && (
-                  <p className="text-sm text-red-500">{form.formState.errors.username.message}</p>
-                )}
+          <CardContent>
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+                {formError}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  {...form.register("password")}
-                  placeholder="Enter your password"
+            )}
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter your username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {form.formState.errors.password && (
-                  <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
-                )}
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Log In"}
-              </Button>
-              <p className="text-sm text-center text-neutral-600">
-                Don't have an account?{" "}
-                <a 
-                  href="/register" 
-                  className="text-primary hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setLocation("/register");
-                  }}
-                >
-                  Register
-                </a>
-              </p>
-            </CardFooter>
-          </form>
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter your password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" className="w-full bg-primary hover:bg-primary-dark" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <span className="mr-2">Logging in</span>
+                      <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                    </>
+                  ) : (
+                    "Login"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-neutral-600">
+              Don't have an account?{" "}
+              <Link href="/register" className="text-primary hover:underline">
+                Register
+              </Link>
+            </p>
+          </CardFooter>
         </Card>
       </div>
     </div>

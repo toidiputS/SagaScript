@@ -1,11 +1,14 @@
-import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 import { useSeries } from "@/hooks/use-series";
 
-export default function Sidebar() {
+interface MobileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const [location] = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
   const { currentSeries } = useSeries();
 
@@ -19,33 +22,37 @@ export default function Sidebar() {
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
   ];
 
+  if (!isOpen) return null;
+
   return (
-    <aside className="hidden md:flex md:flex-shrink-0">
-      <div className={`flex flex-col ${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-neutral-200 transition-width duration-200`}>
-        {/* Sidebar Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-200">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white mr-2">
-              <i className="ri-quill-pen-line"></i>
-            </div>
-            {isSidebarOpen && <span className="font-serif font-bold text-lg">Saga Scribe</span>}
-          </div>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-1 rounded-md text-neutral-500 hover:text-neutral-700"
+    <>
+      {/* Backdrop */}
+      <div 
+        className="md:hidden fixed inset-0 z-20 bg-neutral-800 bg-opacity-75" 
+        onClick={onClose}
+      />
+
+      {/* Mobile Sidebar */}
+      <div className="md:hidden fixed inset-y-0 left-0 z-30 w-72 flex flex-col bg-white shadow-xl transform transition duration-300">
+        <div className="p-4 border-b border-neutral-200 flex items-center justify-between">
+          <span className="font-serif font-bold text-lg">Saga Scribe</span>
+          <button 
+            onClick={onClose} 
+            className="p-2 rounded-md text-neutral-500 hover:text-neutral-700"
           >
-            <i className={`ri-arrow-${isSidebarOpen ? 'left' : 'right'}-s-line text-xl`}></i>
+            <i className="ri-close-line text-xl"></i>
           </button>
         </div>
 
-        {/* Main Sidebar Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+        {/* Mobile Navigation */}
+        <div className="flex-1 overflow-y-auto p-4">
           {/* Navigation Links */}
-          <div className="flex flex-col space-y-1">
+          <div className="flex flex-col space-y-1 mb-6">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 href={link.path}
+                onClick={onClose}
                 className={`flex items-center p-2 rounded-md ${
                   location === link.path
                     ? "bg-primary/10 text-primary"
@@ -53,13 +60,13 @@ export default function Sidebar() {
                 }`}
               >
                 <i className={`${link.icon} mr-3 text-lg`}></i>
-                {isSidebarOpen && <span>{link.name}</span>}
+                <span>{link.name}</span>
               </Link>
             ))}
           </div>
 
           {/* Current Series Section */}
-          {isSidebarOpen && currentSeries && (
+          {currentSeries && (
             <div className="mt-6 pt-6 border-t border-neutral-200">
               <h3 className="px-2 text-xs font-medium text-neutral-500 uppercase tracking-wider mb-3">
                 Current Series
@@ -101,42 +108,35 @@ export default function Sidebar() {
               </div>
             </div>
           )}
-        </nav>
 
-        {/* User Section */}
-        <div className="p-4 border-t border-neutral-200">
-          {user && isSidebarOpen ? (
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
-                <span className="font-medium">
-                  {user.displayName.split(" ").map(word => word[0]).join("").toUpperCase()}
-                </span>
+          {/* User Section */}
+          {user && (
+            <div className="mt-6 pt-6 border-t border-neutral-200">
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+                  <span className="font-medium">
+                    {user.displayName.split(" ").map(word => word[0]).join("").toUpperCase()}
+                  </span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-neutral-700">{user.displayName}</p>
+                  <p className="text-xs text-neutral-500">{user.plan} Plan</p>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-neutral-700">{user.displayName}</p>
-                <p className="text-xs text-neutral-500">{user.plan} Plan</p>
-              </div>
-              <div className="ml-auto">
-                <button
-                  onClick={logout}
-                  className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-500"
-                >
-                  <i className="ri-logout-box-line"></i>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center">
               <button
-                onClick={logout}
-                className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-500"
+                onClick={() => {
+                  logout();
+                  onClose();
+                }}
+                className="mt-4 w-full py-2 px-4 border border-neutral-300 rounded-md text-neutral-700 hover:bg-neutral-100 flex items-center justify-center"
               >
-                <i className="ri-logout-box-line"></i>
+                <i className="ri-logout-box-line mr-2"></i>
+                Sign Out
               </button>
             </div>
           )}
         </div>
       </div>
-    </aside>
+    </>
   );
 }
