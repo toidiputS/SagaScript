@@ -13,7 +13,7 @@ export default function ProgressRing({
   size = 36,
   strokeWidth = 3,
   strokeColor = "var(--primary)",
-  bgStrokeColor = "#DFE6E9"
+  bgStrokeColor = "var(--muted)"
 }: ProgressRingProps) {
   const normalizedValue = Math.min(Math.max(value, 0), 100);
   const radius = (size - strokeWidth) / 2;

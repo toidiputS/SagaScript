@@ -264,18 +264,18 @@ export default function AchievementsPage() {
                           <CardTitle className="ml-3">{achievement.name}</CardTitle>
                         </div>
                         {earned && (
-                          <div className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                          <div className="bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-300 spooky:bg-green-950/70 spooky:text-green-300 text-xs font-medium px-2 py-1 rounded-full">
                             Earned
                           </div>
                         )}
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-neutral-700 mb-2">{achievement.description}</p>
+                      <p className="text-sm text-foreground mb-2">{achievement.description}</p>
                       {earned ? (
-                        <p className="text-xs text-neutral-500">Earned on {earnedDate}</p>
+                        <p className="text-xs text-muted-foreground">Earned on {earnedDate}</p>
                       ) : (
-                        <p className="text-xs text-neutral-500">
+                        <p className="text-xs text-muted-foreground">
                           Target: {achievement.requiredValue} {achievement.type}
                         </p>
                       )}
@@ -285,12 +285,12 @@ export default function AchievementsPage() {
               })}
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-              <div className="text-neutral-500 mb-4">
+            <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+              <div className="text-muted-foreground mb-4">
                 <i className="ri-medal-line text-4xl"></i>
               </div>
-              <h3 className="text-lg font-medium mb-2">No Achievements Available</h3>
-              <p className="text-neutral-600 mb-4">
+              <h3 className="text-lg font-medium mb-2 text-foreground">No Achievements Available</h3>
+              <p className="text-muted-foreground mb-4">
                 Achievements are being created. Check back soon!
               </p>
             </div>

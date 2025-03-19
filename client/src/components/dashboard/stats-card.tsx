@@ -22,14 +22,14 @@ export default function StatsCard({
   streakDays
 }: StatsCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-5">
+    <div className="bg-card rounded-lg shadow-sm border border-border p-5">
       <div className="flex items-center">
         <div className={`p-3 ${iconBg} rounded-lg`}>
           <i className={`${icon} text-xl ${iconColor}`}></i>
         </div>
         <div className="ml-4">
-          <p className="text-sm text-neutral-600">{title}</p>
-          <p className="text-2xl font-bold text-neutral-800">{value}</p>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
         </div>
       </div>
       
@@ -39,7 +39,7 @@ export default function StatsCard({
             <i className={`${trend.type === 'increase' ? 'ri-arrow-up-line' : 'ri-arrow-down-line'} mr-1`}></i>
             {trend.value}%
           </span>
-          <span className="ml-2 text-neutral-500">{trend.text}</span>
+          <span className="ml-2 text-muted-foreground">{trend.text}</span>
         </div>
       )}
       
@@ -48,7 +48,7 @@ export default function StatsCard({
           {Array.from({ length: 7 }).map((_, i) => (
             <div 
               key={i} 
-              className={`h-2 rounded-full ${i < streakDays ? 'bg-secondary' : 'bg-neutral-200'}`}
+              className={`h-2 rounded-full ${i < streakDays ? 'bg-secondary' : 'bg-muted dark:bg-muted/50 spooky:bg-muted/30'}`}
             ></div>
           ))}
         </div>

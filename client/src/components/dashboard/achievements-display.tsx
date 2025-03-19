@@ -26,44 +26,44 @@ export default function AchievementsDisplay({ achievements }: AchievementsDispla
   // Color mappings based on achievement types
   const typeColorMap = {
     streak: {
-      bgClass: "bg-yellow-50",
+      bgClass: "bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-900 spooky:bg-yellow-950/40 spooky:border-yellow-900/70",
       borderClass: "border-yellow-100",
-      bgIconClass: "bg-yellow-100",
-      iconColorClass: "text-yellow-500"
+      bgIconClass: "bg-yellow-100 dark:bg-yellow-900 spooky:bg-yellow-900/50",
+      iconColorClass: "text-yellow-500 dark:text-yellow-400 spooky:text-yellow-400"
     },
     chapters: {
-      bgClass: "bg-blue-50",
+      bgClass: "bg-blue-50 dark:bg-blue-950 dark:border-blue-900 spooky:bg-blue-950/40 spooky:border-blue-900/70",
       borderClass: "border-blue-100",
-      bgIconClass: "bg-blue-100",
-      iconColorClass: "text-blue-500"
+      bgIconClass: "bg-blue-100 dark:bg-blue-900 spooky:bg-blue-900/50",
+      iconColorClass: "text-blue-500 dark:text-blue-400 spooky:text-blue-400"
     },
     characters: {
-      bgClass: "bg-green-50",
+      bgClass: "bg-green-50 dark:bg-green-950 dark:border-green-900 spooky:bg-green-950/40 spooky:border-green-900/70",
       borderClass: "border-green-100",
-      bgIconClass: "bg-green-100",
-      iconColorClass: "text-green-500"
+      bgIconClass: "bg-green-100 dark:bg-green-900 spooky:bg-green-900/50",
+      iconColorClass: "text-green-500 dark:text-green-400 spooky:text-green-400"
     },
     locations: {
-      bgClass: "bg-purple-50",
+      bgClass: "bg-purple-50 dark:bg-purple-950 dark:border-purple-900 spooky:bg-purple-950/40 spooky:border-purple-900/70",
       borderClass: "border-purple-100",
-      bgIconClass: "bg-purple-100",
-      iconColorClass: "text-purple-500"
+      bgIconClass: "bg-purple-100 dark:bg-purple-900 spooky:bg-purple-900/50",
+      iconColorClass: "text-purple-500 dark:text-purple-400 spooky:text-purple-400"
     },
     words: {
-      bgClass: "bg-red-50",
+      bgClass: "bg-red-50 dark:bg-red-950 dark:border-red-900 spooky:bg-red-950/40 spooky:border-red-900/70",
       borderClass: "border-red-100",
-      bgIconClass: "bg-red-100",
-      iconColorClass: "text-red-500"
+      bgIconClass: "bg-red-100 dark:bg-red-900 spooky:bg-red-900/50",
+      iconColorClass: "text-red-500 dark:text-red-400 spooky:text-red-400"
     }
   };
   
   // Get default styling if achievement type is not in map
   const getColorClasses = (type: string) => {
     return typeColorMap[type as keyof typeof typeColorMap] || {
-      bgClass: "bg-gray-50",
+      bgClass: "bg-gray-50 dark:bg-gray-900 dark:border-gray-800 spooky:bg-gray-900/40 spooky:border-gray-800/70",
       borderClass: "border-gray-100",
-      bgIconClass: "bg-gray-100",
-      iconColorClass: "text-gray-500"
+      bgIconClass: "bg-gray-100 dark:bg-gray-800 spooky:bg-gray-800/50",
+      iconColorClass: "text-gray-500 dark:text-gray-400 spooky:text-gray-400"
     };
   };
   
@@ -71,12 +71,12 @@ export default function AchievementsDisplay({ achievements }: AchievementsDispla
   if (!achievements || achievements.length === 0) {
     return (
       <Card>
-        <CardHeader className="border-b border-neutral-200 px-5 py-4">
-          <CardTitle className="font-serif font-bold text-lg text-neutral-800">Recent Achievements</CardTitle>
+        <CardHeader className="border-b border-border px-5 py-4">
+          <CardTitle className="font-serif font-bold text-lg text-foreground">Recent Achievements</CardTitle>
         </CardHeader>
         <CardContent className="p-5">
           <div className="text-center py-6">
-            <p className="text-neutral-500 mb-4">No achievements earned yet</p>
+            <p className="text-muted-foreground mb-4">No achievements earned yet</p>
             <Button variant="link" asChild>
               <Link href="/achievements">View Available Achievements</Link>
             </Button>
@@ -96,8 +96,8 @@ export default function AchievementsDisplay({ achievements }: AchievementsDispla
   
   return (
     <Card>
-      <CardHeader className="border-b border-neutral-200 px-5 py-4">
-        <CardTitle className="font-serif font-bold text-lg text-neutral-800">Recent Achievements</CardTitle>
+      <CardHeader className="border-b border-border px-5 py-4">
+        <CardTitle className="font-serif font-bold text-lg text-foreground">Recent Achievements</CardTitle>
       </CardHeader>
       <CardContent className="p-5">
         {recentAchievements.map((item, index) => {
@@ -113,12 +113,12 @@ export default function AchievementsDisplay({ achievements }: AchievementsDispla
                 <i className={`${item.achievement.icon} ${iconColorClass}`}></i>
               </div>
               <div className="ml-3">
-                <p className="font-medium text-neutral-800">{item.achievement.name}</p>
-                <p className="text-xs text-neutral-600">{item.achievement.description}</p>
+                <p className="font-medium text-foreground">{item.achievement.name}</p>
+                <p className="text-xs text-muted-foreground">{item.achievement.description}</p>
               </div>
               {isNew && (
                 <div className="ml-auto">
-                  <span className="text-xs text-yellow-600 font-medium">NEW</span>
+                  <span className="text-xs text-yellow-600 dark:text-yellow-400 spooky:text-yellow-400 font-medium">NEW</span>
                 </div>
               )}
             </div>

@@ -12,15 +12,15 @@ export default function StreakTracker({ streak }: StreakTrackerProps) {
   const streakDays = Array.from({ length: Math.min(streak, 14) }, (_, i) => i + 1);
   
   return (
-    <section className="mb-8 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-5">
+    <section className="mb-8 bg-gradient-to-r from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 spooky:from-primary/30 spooky:to-secondary/30 rounded-xl p-5">
       <div className="flex flex-col md:flex-row md:items-center">
         <div className="flex-1">
-          <h2 className="text-xl font-heading font-semibold text-neutral-800 mb-2">
+          <h2 className="text-xl font-heading font-semibold text-foreground mb-2">
             {streak > 0 
               ? `Impressive Writing Streak!` 
               : `Start Your Writing Streak Today!`}
           </h2>
-          <p className="text-neutral-600 mb-3">
+          <p className="text-muted-foreground mb-3">
             {streak > 0 
               ? `You've written for ${streak} ${streak === 1 ? 'day' : 'days'} in a row. Keep going to unlock the 'Dedicated Author' achievement!` 
               : `Write every day to build momentum and unlock achievements. Your progress is tracked automatically.`}
@@ -47,7 +47,7 @@ export default function StreakTracker({ streak }: StreakTrackerProps) {
                 ))}
                 
                 {streak > 3 && (
-                  <div className="text-neutral-500 flex items-center">...</div>
+                  <div className="text-muted-foreground flex items-center">...</div>
                 )}
                 
                 {streak > 3 && (
@@ -62,7 +62,7 @@ export default function StreakTracker({ streak }: StreakTrackerProps) {
                 {/* Next day (incomplete) */}
                 <div className="relative w-7 h-7">
                   <ProgressRing value={0} size={36} strokeWidth={3} />
-                  <span className="absolute inset-0 flex items-center justify-center text-xs font-mono text-neutral-400">
+                  <span className="absolute inset-0 flex items-center justify-center text-xs font-mono text-muted-foreground">
                     {streak + 1}
                   </span>
                 </div>
@@ -71,7 +71,7 @@ export default function StreakTracker({ streak }: StreakTrackerProps) {
               // No streak yet, show empty day 1
               <div className="relative w-7 h-7">
                 <ProgressRing value={0} size={36} strokeWidth={3} />
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-mono text-neutral-400">
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-mono text-muted-foreground">
                   1
                 </span>
               </div>
