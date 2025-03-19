@@ -230,3 +230,11 @@ export default function WorldPage() {
     </div>
   );
 }
+export default function World() {
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">World Building</h1>
+      <p>World building features coming soon...</p>
+    </div>
+  );
+}

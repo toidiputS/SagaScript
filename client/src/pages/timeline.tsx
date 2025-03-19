@@ -158,3 +158,11 @@ export default function TimelinePage() {
     </div>
   );
 }
+export default function Timeline() {
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Timeline</h1>
+      <p>Timeline feature coming soon...</p>
+    </div>
+  );
+}
