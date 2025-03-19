@@ -75,41 +75,41 @@ export default function AchievementsPage() {
   const getAchievementStyle = (type: string) => {
     const styles = {
       streak: {
-        bgClass: "bg-yellow-50",
+        bgClass: "bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-900 spooky:bg-yellow-950/40 spooky:border-yellow-900/70",
         borderClass: "border-yellow-100",
-        iconClass: "text-yellow-500",
+        iconClass: "text-yellow-500 dark:text-yellow-400 spooky:text-yellow-400",
         progressClass: "bg-yellow-500"
       },
       words: {
-        bgClass: "bg-blue-50",
+        bgClass: "bg-blue-50 dark:bg-blue-950 dark:border-blue-900 spooky:bg-blue-950/40 spooky:border-blue-900/70",
         borderClass: "border-blue-100",
-        iconClass: "text-blue-500",
+        iconClass: "text-blue-500 dark:text-blue-400 spooky:text-blue-400",
         progressClass: "bg-blue-500"
       },
       chapters: {
-        bgClass: "bg-green-50",
+        bgClass: "bg-green-50 dark:bg-green-950 dark:border-green-900 spooky:bg-green-950/40 spooky:border-green-900/70",
         borderClass: "border-green-100",
-        iconClass: "text-green-500",
+        iconClass: "text-green-500 dark:text-green-400 spooky:text-green-400",
         progressClass: "bg-green-500"
       },
       characters: {
-        bgClass: "bg-purple-50",
+        bgClass: "bg-purple-50 dark:bg-purple-950 dark:border-purple-900 spooky:bg-purple-950/40 spooky:border-purple-900/70",
         borderClass: "border-purple-100",
-        iconClass: "text-purple-500",
+        iconClass: "text-purple-500 dark:text-purple-400 spooky:text-purple-400",
         progressClass: "bg-purple-500"
       },
       locations: {
-        bgClass: "bg-red-50",
+        bgClass: "bg-red-50 dark:bg-red-950 dark:border-red-900 spooky:bg-red-950/40 spooky:border-red-900/70",
         borderClass: "border-red-100",
-        iconClass: "text-red-500",
+        iconClass: "text-red-500 dark:text-red-400 spooky:text-red-400",
         progressClass: "bg-red-500"
       }
     };
     
     return styles[type as keyof typeof styles] || {
-      bgClass: "bg-neutral-50",
+      bgClass: "bg-neutral-50 dark:bg-neutral-900 dark:border-neutral-800 spooky:bg-neutral-900/40 spooky:border-neutral-800/70",
       borderClass: "border-neutral-100",
-      iconClass: "text-neutral-500",
+      iconClass: "text-neutral-500 dark:text-neutral-400 spooky:text-neutral-400",
       progressClass: "bg-neutral-500"
     };
   };
@@ -134,8 +134,8 @@ export default function AchievementsPage() {
         {/* Achievements Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-neutral-800">Achievements</h1>
-            <p className="text-neutral-600 mt-1">Track your writing milestones and accomplishments</p>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Achievements</h1>
+            <p className="text-muted-foreground mt-1">Track your writing milestones and accomplishments</p>
           </div>
           <div className="mt-4 md:mt-0">
             <Button
@@ -195,7 +195,7 @@ export default function AchievementsPage() {
 
         {/* Achievement Categories */}
         <div className="mb-8">
-          <h2 className="text-xl font-serif font-bold text-neutral-800 mb-4">Achievement Categories</h2>
+          <h2 className="text-xl font-serif font-bold text-foreground mb-4">Achievement Categories</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {['streak', 'words', 'chapters', 'characters', 'locations'].map(type => {
@@ -237,7 +237,7 @@ export default function AchievementsPage() {
 
         {/* All Achievements */}
         <div>
-          <h2 className="text-xl font-serif font-bold text-neutral-800 mb-4">All Achievements</h2>
+          <h2 className="text-xl font-serif font-bold text-foreground mb-4">All Achievements</h2>
           
           {isLoadingAchievements || isLoadingUserAchievements ? (
             <div className="flex items-center justify-center py-12">
@@ -253,13 +253,13 @@ export default function AchievementsPage() {
                 return (
                   <Card 
                     key={achievement.id} 
-                    className={`${earned ? style.bgClass : 'bg-neutral-50'} border ${earned ? style.borderClass : 'border-neutral-200'}`}
+                    className={`${earned ? style.bgClass : 'bg-neutral-50 dark:bg-neutral-900 spooky:bg-neutral-900/40'} border ${earned ? style.borderClass : 'border-neutral-200 dark:border-neutral-800 spooky:border-neutral-800/70'}`}
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <div className={`w-10 h-10 flex items-center justify-center rounded-full ${earned ? style.bgClass : 'bg-neutral-100'} border ${earned ? style.borderClass : 'border-neutral-200'}`}>
-                            <i className={`${achievement.icon} text-xl ${earned ? style.iconClass : 'text-neutral-400'}`}></i>
+                          <div className={`w-10 h-10 flex items-center justify-center rounded-full ${earned ? style.bgClass : 'bg-neutral-100 dark:bg-neutral-800 spooky:bg-neutral-800/40'} border ${earned ? style.borderClass : 'border-neutral-200 dark:border-neutral-700 spooky:border-neutral-700/70'}`}>
+                            <i className={`${achievement.icon} text-xl ${earned ? style.iconClass : 'text-neutral-400 dark:text-neutral-500 spooky:text-neutral-500'}`}></i>
                           </div>
                           <CardTitle className="ml-3">{achievement.name}</CardTitle>
                         </div>

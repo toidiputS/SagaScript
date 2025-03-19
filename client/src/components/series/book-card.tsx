@@ -178,7 +178,7 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
       <CardContent>
         <div className="flex items-center justify-between mb-2">
           <Badge variant={book.status === "completed" ? "default" : "outline"}>
-            {book.status.charAt(0).toUpperCase() + book.status.slice(1).replace("_", " ")}
+            {book.status ? book.status.charAt(0).toUpperCase() + book.status.slice(1).replace("_", " ") : "In Progress"}
           </Badge>
           <span className="text-sm text-neutral-500">
             {book.wordCount.toLocaleString()} words

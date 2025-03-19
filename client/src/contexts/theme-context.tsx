@@ -40,12 +40,23 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Apply theme to document and save to localStorage when theme changes
   useEffect(() => {
     const root = window.document.documentElement;
+    const body = window.document.body;
     
     // Remove previous theme classes
     root.classList.remove('light-theme', 'dark-theme', 'spooky-theme');
+    body.classList.remove('dark', 'spooky');
     
-    // Add current theme class
-    root.classList.add(`${theme}-theme`);
+    // For dark and spooky themes, add class to body for global styling
+    if (theme === 'dark') {
+      body.classList.add('dark');
+    } else if (theme === 'spooky') {
+      body.classList.add('spooky');
+    }
+    
+    // Add current theme class to root for CSS variables
+    if (theme !== 'light') {
+      root.classList.add(`${theme}-theme`);
+    }
     
     // Save to localStorage
     localStorage.setItem('saga-theme', theme);

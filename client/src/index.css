@@ -39,7 +39,7 @@
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     
-    --card: 222.2 84% 4.9%;
+    --card: 217.2 32.6% 12%;
     --card-foreground: 210 40% 98%;
     
     --popover: 222.2 84% 4.9%;
@@ -52,47 +52,47 @@
     --secondary-foreground: 210 40% 98%;
     
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 75%;
     
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50%;
     --destructive-foreground: 210 40% 98%;
     
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 217.2 32.6% 22%;
+    --input: 217.2 32.6% 22%;
+    --ring: 224.3 76.3% 55%;
   }
   
   .spooky-theme {
-    --background: 280 20% 12%;
-    --foreground: 300 6% 90%;
+    --background: 280 25% 8%;
+    --foreground: 300 6% 95%;
     
-    --card: 280 16% 10%;
-    --card-foreground: 300 6% 90%;
+    --card: 280 20% 12%;
+    --card-foreground: 300 6% 95%;
     
-    --popover: 280 16% 8%;
-    --popover-foreground: 300 6% 90%;
+    --popover: 280 25% 9%;
+    --popover-foreground: 300 6% 95%;
     
-    --primary: 290 70% 50%;
-    --primary-foreground: 300 6% 95%;
+    --primary: 290 70% 55%;
+    --primary-foreground: 300 6% 100%;
     
     --secondary: 280 16% 20%;
-    --secondary-foreground: 300 6% 95%;
+    --secondary-foreground: 300 6% 100%;
     
-    --muted: 280 16% 18%;
-    --muted-foreground: 300 6% 70%;
+    --muted: 280 16% 25%;
+    --muted-foreground: 300 6% 80%;
     
-    --accent: 290 50% 30%;
-    --accent-foreground: 300 6% 95%;
+    --accent: 290 50% 25%;
+    --accent-foreground: 300 6% 100%;
     
-    --destructive: 350 80% 45%;
-    --destructive-foreground: 300 6% 95%;
+    --destructive: 350 80% 50%;
+    --destructive-foreground: 300 6% 100%;
     
-    --border: 280 16% 25%;
-    --input: 280 16% 25%;
-    --ring: 290 70% 50%;
+    --border: 280 16% 30%;
+    --input: 280 16% 30%;
+    --ring: 290 70% 60%;
   }
   
   * {
@@ -102,4 +102,28 @@
   body {
     @apply font-sans antialiased bg-background text-foreground transition-colors duration-300;
   }
+}
+
+/* Ensure high contrast for badges and other elements */
+.dark .badge,
+.spooky .badge {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Improve title readability */
+.dark .site-title,
+.spooky .site-title {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Improve achievement category contrast */
+.dark .achievement-category,
+.spooky .achievement-category {
+  color: hsl(var(--foreground));
+  background-color: hsla(var(--card), 0.6);
+  border: 1px solid hsl(var(--border));
 }
