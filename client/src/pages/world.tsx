@@ -24,8 +24,7 @@ export default function WorldPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddLocationDialogOpen, setIsAddLocationDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("locations");
-  
-  // Use world hook with current series ID
+
   const { 
     locations, 
     isLoadingLocations, 
@@ -33,39 +32,17 @@ export default function WorldPage() {
     isAddingLocation
   } = useWorld(currentSeries?.id);
 
-  // Filter locations based on search query
   const filteredLocations = locations?.filter(location => 
     location.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle series selection change
   const handleSeriesChange = (seriesId: string) => {
     changeCurrentSeries(parseInt(seriesId));
-  };
-
-  // Handle location creation
-  const handleAddLocation = (locationData: Omit<Location, "id" | "createdAt" | "updatedAt">) => {
-    if (!currentSeries) {
-      toast({
-        title: "No series selected",
-        description: "Please select a series first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    addLocation({
-      ...locationData,
-      seriesId: currentSeries.id,
-    });
-    
-    setIsAddLocationDialogOpen(false);
   };
 
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        {/* World Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-serif font-bold text-neutral-800">World Building</h1>
@@ -89,7 +66,7 @@ export default function WorldPage() {
                 </SelectContent>
               </Select>
             )}
-            
+
             <Dialog 
               open={isAddLocationDialogOpen} 
               onOpenChange={setIsAddLocationDialogOpen}
@@ -97,144 +74,80 @@ export default function WorldPage() {
               <DialogTrigger asChild>
                 <Button className="bg-primary hover:bg-primary-dark text-white">
                   <i className="ri-add-line mr-2"></i>
-                  <span>New Element</span>
+                  <span>Add Location</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create New Location</DialogTitle>
+                  <DialogTitle>Add New Location</DialogTitle>
                 </DialogHeader>
                 <LocationForm 
-                  onSubmit={handleAddLocation} 
-                  isSubmitting={isAddingLocation}
+                  onSubmit={async (data) => {
+                    if (!currentSeries) return;
+                    try {
+                      await addLocation(data);
+                      setIsAddLocationDialogOpen(false);
+                      toast({
+                        title: "Success",
+                        description: "Location added successfully",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to add location",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  isLoading={isAddingLocation}
                 />
               </DialogContent>
             </Dialog>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-neutral-200 mb-6">
-          <Tabs defaultValue="locations" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex overflow-x-auto pb-1 hide-scrollbar">
-              <TabsTrigger value="locations" className="px-4 py-2 whitespace-nowrap">Locations</TabsTrigger>
-              <TabsTrigger value="cultures" className="px-4 py-2 whitespace-nowrap">Cultures</TabsTrigger>
-              <TabsTrigger value="magic" className="px-4 py-2 whitespace-nowrap">Magic Systems</TabsTrigger>
-              <TabsTrigger value="flora" className="px-4 py-2 whitespace-nowrap">Flora & Fauna</TabsTrigger>
-              <TabsTrigger value="technology" className="px-4 py-2 whitespace-nowrap">Technology</TabsTrigger>
-              <TabsTrigger value="politics" className="px-4 py-2 whitespace-nowrap">Politics</TabsTrigger>
+        <div className="space-y-6">
+          <Input
+            type="search"
+            placeholder="Search locations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
+
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="locations">List View</TabsTrigger>
+              <TabsTrigger value="map">Map View</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="locations" className="mt-6">
+              {isLoadingLocations ? (
+                <div>Loading locations...</div>
+              ) : filteredLocations && filteredLocations.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredLocations.map((location) => (
+                    <LocationCard key={location.id} location={location} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-neutral-600">No locations found</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="map" className="mt-6">
+              {currentSeries && locations && (
+                <WorldMap 
+                  locations={locations} 
+                  seriesId={currentSeries.id} 
+                />
+              )}
+            </TabsContent>
           </Tabs>
         </div>
-
-        {/* World Map - only show for locations tab */}
-        {activeTab === "locations" && currentSeries && (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden mb-8">
-            <div className="border-b border-neutral-200 px-5 py-4 flex justify-between items-center">
-              <h2 className="font-serif font-bold text-lg text-neutral-800">World Map</h2>
-              <div className="flex space-x-2">
-                <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
-                  <i className="ri-edit-line"></i>
-                </button>
-                <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
-                  <i className="ri-fullscreen-line"></i>
-                </button>
-              </div>
-            </div>
-            <div className="p-0">
-              <WorldMap 
-                locations={locations || []} 
-                seriesId={currentSeries.id} 
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Search bar - only show for locations */}
-        {activeTab === "locations" && (
-          <div className="mb-6">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search locations..."
-                className="pl-10 pr-4 py-2 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <div className="absolute left-3 top-2.5 text-neutral-400">
-                <i className="ri-search-line"></i>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Locations Grid - only show for locations tab */}
-        {activeTab === "locations" && (
-          <>
-            {!currentSeries ? (
-              <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-                <div className="text-neutral-500 mb-4">
-                  <i className="ri-map-pin-line text-4xl"></i>
-                </div>
-                <h3 className="text-lg font-medium mb-2">No Series Selected</h3>
-                <p className="text-neutral-600 mb-4">Please select a series to manage its locations</p>
-              </div>
-            ) : isLoadingLocations ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            ) : filteredLocations && filteredLocations.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {filteredLocations.map((location) => (
-                  <LocationCard 
-                    key={location.id} 
-                    location={location} 
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-                <div className="text-neutral-500 mb-4">
-                  <i className="ri-map-pin-line text-4xl"></i>
-                </div>
-                <h3 className="text-lg font-medium mb-2">No Locations Found</h3>
-                <p className="text-neutral-600 mb-4">
-                  {searchQuery 
-                    ? "No locations match your search criteria" 
-                    : "No locations in this series yet"}
-                </p>
-                <Button 
-                  onClick={() => setIsAddLocationDialogOpen(true)}
-                  className="bg-primary hover:bg-primary-dark text-white"
-                >
-                  <i className="ri-add-line mr-2"></i> Create Location
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Other tabs - placeholder content */}
-        {activeTab !== "locations" && (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="text-neutral-500 mb-4">
-              <i className="ri-tools-line text-4xl"></i>
-            </div>
-            <h3 className="text-lg font-medium mb-2">Coming Soon</h3>
-            <p className="text-neutral-600 mb-4">
-              This feature is currently under development. Please check back later!
-            </p>
-          </div>
-        )}
       </div>
-    </div>
-  );
-}
-export default function World() {
-  return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">World Building</h1>
-      <p>World building features coming soon...</p>
     </div>
   );
 }
