@@ -139,6 +139,11 @@ export default function SeriesManagement() {
   // Fetch books for selected series
   const { data: books, isLoading: isLoadingBooks } = useQuery({
     queryKey: ['/api/series', selectedSeries, 'books'],
+    queryFn: async () => {
+      if (!selectedSeries) return [];
+      const res = await apiRequest('GET', `/api/series/${selectedSeries}/books`);
+      return res.json();
+    },
     enabled: !!selectedSeries,
   });
 

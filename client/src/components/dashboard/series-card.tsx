@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
 
 type SeriesCardProps = {
   series: any;
@@ -13,6 +14,11 @@ export default function SeriesCard({ series }: SeriesCardProps) {
   // Fetch books for this series
   const { data: books, isLoading: isLoadingBooks } = useQuery({
     queryKey: ['/api/series', selectedSeries, 'books'],
+    queryFn: async () => {
+      if (!selectedSeries) return [];
+      const res = await apiRequest('GET', `/api/series/${selectedSeries}/books`);
+      return res.json();
+    },
     enabled: !!selectedSeries,
   });
 
