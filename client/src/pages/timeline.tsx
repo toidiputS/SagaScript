@@ -53,7 +53,7 @@ export default function TimelinePage() {
                 </SelectContent>
               </Select>
             )}
-            
+
             <Button className="bg-primary hover:bg-primary-dark text-white">
               <i className="ri-add-line mr-2"></i>
               <span>Add Event</span>
@@ -92,7 +92,7 @@ export default function TimelinePage() {
 
             {/* Timeline events */}
             <div className="relative z-10 space-y-8">
-              {books.map((book, bookIndex) => (
+              {books.map((book) => (
                 <div key={book.id} className="relative">
                   <div className="flex">
                     <div className="w-[150px] pr-8 pt-2 font-medium text-neutral-700 text-right">
@@ -113,26 +113,6 @@ export default function TimelinePage() {
                           </div>
                         </CardContent>
                       </Card>
-
-                      {/* Placeholder for chapter events */}
-                      <div className="pl-6 space-y-4 mb-4">
-                        {/* We would fetch chapters here in a real implementation */}
-                        {[1, 2, 3].map((chapterNum) => (
-                          <div key={chapterNum} className="relative">
-                            <div className="absolute -left-3 w-2 h-2 rounded-full bg-neutral-400 mt-1.5"></div>
-                            <div className="text-sm font-medium text-neutral-700 mb-1">
-                              Chapter {chapterNum}: {chapterNum === 1 ? "Introduction" : chapterNum === 2 ? "Rising Action" : "Climax"}
-                            </div>
-                            <div className="text-xs text-neutral-600">
-                              {chapterNum === 1 
-                                ? "The main characters are introduced and the setting is established." 
-                                : chapterNum === 2 
-                                  ? "Conflicts begin to emerge as characters pursue their goals."
-                                  : "The main conflict reaches its peak as characters are forced to make difficult choices."}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -155,14 +135,6 @@ export default function TimelinePage() {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-export default function Timeline() {
-  return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Timeline</h1>
-      <p>Timeline feature coming soon...</p>
     </div>
   );
 }
