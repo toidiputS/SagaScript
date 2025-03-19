@@ -102,6 +102,7 @@ function App() {
         <ThemeProvider>
           <Router />
           <Toaster />
+          <FloatingNotes />
         </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
