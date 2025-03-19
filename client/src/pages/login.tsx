@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link } from "wouter";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 // Login form schema
 const loginSchema = z.object({
@@ -48,16 +49,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white mr-2">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground mr-2">
               <i className="ri-quill-pen-line text-xl"></i>
             </div>
-            <h1 className="font-serif font-bold text-3xl text-neutral-800">Saga Scribe</h1>
+            <h1 className="font-serif font-bold text-3xl text-foreground">Saga Scribe</h1>
           </div>
-          <p className="mt-2 text-neutral-600">The Ultimate Series Author's Companion</p>
+          <p className="mt-2 text-muted-foreground">The Ultimate Series Author's Companion</p>
         </div>
 
         <Card>
@@ -67,7 +72,7 @@ export default function Login() {
           </CardHeader>
           <CardContent>
             {formError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md text-sm">
                 {formError}
               </div>
             )}
@@ -102,11 +107,11 @@ export default function Login() {
                   )}
                 />
 
-                <Button type="submit" className="w-full bg-primary hover:bg-primary-dark" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <span className="mr-2">Logging in</span>
-                      <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                      <div className="h-4 w-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin"></div>
                     </>
                   ) : (
                     "Login"
@@ -116,7 +121,7 @@ export default function Login() {
             </Form>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link href="/register" className="text-primary hover:underline">
                 Register
