@@ -2,6 +2,7 @@ import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { TierControls } from "./components/admin/tier-controls"; // Added import
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Series from "@/pages/series";
@@ -103,6 +104,7 @@ function App() {
         <ThemeProvider>
           <Router />
           <Toaster />
+          <TierControls /> {/* Added TierControls */}
           <FloatingNotes />
         </ThemeProvider>
       </AuthProvider>

@@ -8,6 +8,7 @@ type User = {
   displayName: string | null;
   avatar: string | null;
   tier: string;
+  isAdmin: boolean;
 };
 
 type AuthContextType = {
