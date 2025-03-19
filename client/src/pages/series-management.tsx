@@ -118,7 +118,7 @@ export default function SeriesManagement() {
   // Create book mutation
   const createBookMutation = useMutation({
     mutationFn: ({ seriesId, data }: { seriesId: number; data: BookFormValues }) =>
-      apiRequest("POST", `/api/series/${seriesId}/books`, data),
+      apiRequest("POST", `/api/books`, { ...data, seriesId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/series', selectedSeries, 'books'] });
       toast({
