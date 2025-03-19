@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { ThemeToggle } from "../../components/ui/theme-toggle";
-import { Link } from "@/components/ui/link";
+import { Link } from "../../components/ui/link";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
