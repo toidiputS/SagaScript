@@ -94,6 +94,14 @@ export default function SeriesPage() {
         title: "Book created",
         description: "Your new book has been created successfully",
       });
+    },
+    onError: (error: any) => {
+      console.error("Error creating book:", error);
+      toast({
+        title: "Error creating book",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
     }
   });
 

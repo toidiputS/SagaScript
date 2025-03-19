@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ChapterForm from "./chapter-form";
@@ -42,7 +42,7 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
   const [editedBook, setEditedBook] = useState(book);
 
   // Fetch chapters for this book
-  const { data: chapters } = useQuery({
+  const { data: chapters = [] } = useQuery<Chapter[]>({
     queryKey: ['/api/books', book.id, 'chapters'],
     queryFn: async () => {
       const res = await apiRequest('GET', `/api/books/${book.id}/chapters`);
@@ -63,6 +63,14 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
         title: "Book updated",
         description: "The book has been updated successfully",
       });
+    },
+    onError: (error: any) => {
+      console.error("Error updating book:", error);
+      toast({
+        title: "Error updating book",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
     }
   });
 
@@ -76,6 +84,14 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
       toast({
         title: "Book deleted",
         description: "The book has been deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Error deleting book:", error);
+      toast({
+        title: "Error deleting book",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
       });
     }
   });
@@ -97,7 +113,7 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
   };
 
   // Calculate completion percentage
-  const completionPercentage = chapters && chapters.length > 0
+  const completionPercentage = chapters.length > 0
     ? Math.round((chapters.filter(c => c.status === "completed").length / chapters.length) * 100)
     : 0;
 
@@ -181,12 +197,12 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
           <div className="flex justify-between items-center">
             <h4 className="text-sm font-medium text-neutral-700">Chapters</h4>
             <span className="text-xs text-neutral-500">
-              {chapters?.length || 0} total
+              {chapters.length} total
             </span>
           </div>
 
           <div className="mt-2 space-y-1 max-h-28 overflow-y-auto pr-1">
-            {chapters && chapters.length > 0 ? (
+            {chapters.length > 0 ? (
               chapters.map((chapter) => (
                 <div key={chapter.id} className="flex justify-between items-center text-sm">
                   <span className="truncate max-w-[70%]">{chapter.title}</span>
