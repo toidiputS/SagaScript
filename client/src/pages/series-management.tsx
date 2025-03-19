@@ -48,7 +48,7 @@ export default function SeriesManagement() {
   const [editingSeries, setEditingSeries] = useState<any>(null);
 
   // Fetch all series
-  const { data: series, isLoading } = useQuery({
+  const { data: series = [], isLoading } = useQuery<any[]>({
     queryKey: ['/api/series'],
   });
 
@@ -137,7 +137,7 @@ export default function SeriesManagement() {
   });
 
   // Fetch books for selected series
-  const { data: books, isLoading: isLoadingBooks } = useQuery({
+  const { data: books = [], isLoading: isLoadingBooks } = useQuery<any[]>({
     queryKey: ['/api/series', selectedSeries, 'books'],
     queryFn: async () => {
       if (!selectedSeries) return [];
@@ -496,7 +496,7 @@ export default function SeriesManagement() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {isLoading ? (
               <p>Loading series...</p>
-            ) : series && series.length > 0 ? (
+            ) : series.length > 0 ? (
               series.map((seriesItem: any) => (
                 <Card 
                   key={seriesItem.id} 
@@ -577,7 +577,7 @@ export default function SeriesManagement() {
                       <p className="text-center py-4 text-sm text-neutral-500">Loading books...</p>
                     ) : (
                       <div className="space-y-3">
-                        {books && books.length > 0 ? (
+                        {books.length > 0 ? (
                           books.map((book: any) => (
                             <div key={book.id} className="bg-neutral-50 rounded-lg p-4 border border-neutral-200 hover:border-primary/50 transition-colors">
                               <div className="flex justify-between items-start">

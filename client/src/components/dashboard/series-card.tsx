@@ -12,7 +12,7 @@ export default function SeriesCard({ series }: SeriesCardProps) {
   const [selectedSeries, setSelectedSeries] = useState<number | null>(series?.id || null);
   
   // Fetch books for this series
-  const { data: books, isLoading: isLoadingBooks } = useQuery({
+  const { data: books = [], isLoading: isLoadingBooks } = useQuery<any[]>({
     queryKey: ['/api/series', selectedSeries, 'books'],
     queryFn: async () => {
       if (!selectedSeries) return [];
@@ -48,7 +48,7 @@ export default function SeriesCard({ series }: SeriesCardProps) {
             <div className="flex justify-center items-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
-          ) : books && books.length > 0 ? (
+          ) : books.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {books.map((book: any) => (
                 <div key={book.id} className="bg-neutral-50 rounded-lg p-4 border border-neutral-200 hover:border-primary/50 transition-colors">
