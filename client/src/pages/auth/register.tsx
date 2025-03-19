@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link } from "@/components/ui/link";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeToggle } from "../../components/ui/theme-toggle";
 
 const registerSchema = z.object({
   displayName: z.string().min(2, "Display name must be at least 2 characters"),
@@ -25,7 +25,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const [, navigate] = useLocation();
-  const { register, isLoading } = useAuth();
+  const { register: registerUser, isLoading } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm<RegisterFormValues>({
@@ -41,7 +41,7 @@ export default function Register() {
   const onSubmit = async (values: RegisterFormValues) => {
     try {
       setFormError(null);
-      await register(values.username, values.password, values.displayName);
+      await registerUser(values.username, values.password, values.displayName);
       navigate("/");
     } catch (error) {
       if (error instanceof Error) {
