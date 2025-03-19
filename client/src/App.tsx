@@ -15,6 +15,8 @@ import Sidebar from "@/components/layout/sidebar";
 import MobileMenu from "@/components/layout/mobile-menu";
 import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
+import { ThemeProvider } from "@/contexts/theme-context";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const [location, setLocation] = useLocation();
@@ -97,8 +99,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
-        <Toaster />
+        <ThemeProvider>
+          <Router />
+          <Toaster />
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

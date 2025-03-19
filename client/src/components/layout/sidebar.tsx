@@ -2,12 +2,15 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 import { useSeries } from "@/hooks/use-series";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useTheme } from "@/contexts/theme-context";
 
 export default function Sidebar() {
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
   const { currentSeries } = useSeries();
+  const { theme } = useTheme();
 
   // Navigation links
   const navLinks = [
@@ -21,21 +24,24 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden md:flex md:flex-shrink-0">
-      <div className={`flex flex-col ${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-neutral-200 transition-width duration-200`}>
+      <div className={`flex flex-col ${isSidebarOpen ? 'w-64' : 'w-20'} bg-background border-r border-border transition-width duration-200`}>
         {/* Sidebar Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-200">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-border">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white mr-2">
+            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground mr-2">
               <i className="ri-quill-pen-line"></i>
             </div>
-            {isSidebarOpen && <span className="font-serif font-bold text-lg">Saga Scribe</span>}
+            {isSidebarOpen && <span className="font-serif font-bold text-lg text-foreground">Saga Scribe</span>}
           </div>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-1 rounded-md text-neutral-500 hover:text-neutral-700"
-          >
-            <i className={`ri-arrow-${isSidebarOpen ? 'left' : 'right'}-s-line text-xl`}></i>
-          </button>
+          <div className="flex items-center space-x-1">
+            {isSidebarOpen && <ThemeToggle />}
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-1 rounded-md text-muted-foreground hover:text-foreground"
+            >
+              <i className={`ri-arrow-${isSidebarOpen ? 'left' : 'right'}-s-line text-xl`}></i>
+            </button>
+          </div>
         </div>
 
         {/* Main Sidebar Navigation */}
@@ -49,7 +55,7 @@ export default function Sidebar() {
                 className={`flex items-center p-2 rounded-md ${
                   location === link.path
                     ? "bg-primary/10 text-primary"
-                    : "text-neutral-700 hover:bg-neutral-100"
+                    : "text-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 <i className={`${link.icon} mr-3 text-lg`}></i>
@@ -60,21 +66,21 @@ export default function Sidebar() {
 
           {/* Current Series Section */}
           {isSidebarOpen && currentSeries && (
-            <div className="mt-6 pt-6 border-t border-neutral-200">
-              <h3 className="px-2 text-xs font-medium text-neutral-500 uppercase tracking-wider mb-3">
+            <div className="mt-6 pt-6 border-t border-border">
+              <h3 className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                 Current Series
               </h3>
-              <div className="bg-neutral-100 rounded-md p-3">
-                <div className="font-medium text-neutral-800">{currentSeries.title}</div>
+              <div className="bg-card rounded-md p-3">
+                <div className="font-medium text-card-foreground">{currentSeries.title}</div>
                 <div className="flex items-center justify-between mt-2">
-                  <div className="text-xs text-neutral-500">
+                  <div className="text-xs text-muted-foreground">
                     Book {currentSeries.currentBook} of {currentSeries.totalBooks}
                   </div>
-                  <div className="text-xs text-neutral-500">
+                  <div className="text-xs text-muted-foreground">
                     {Math.round((currentSeries.currentBook / currentSeries.totalBooks) * 100)}% Complete
                   </div>
                 </div>
-                <div className="w-full bg-neutral-200 rounded-full h-1.5 mt-2">
+                <div className="w-full bg-muted rounded-full h-1.5 mt-2">
                   <div
                     className="bg-primary h-1.5 rounded-full"
                     style={{
@@ -85,16 +91,16 @@ export default function Sidebar() {
               </div>
 
               {/* Recent Activity */}
-              <h3 className="px-2 text-xs font-medium text-neutral-500 uppercase tracking-wider mt-6 mb-3">
+              <h3 className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mt-6 mb-3">
                 Recent Activity
               </h3>
               <div className="space-y-3">
                 {currentSeries.recentActivities?.map((activity, index) => (
-                  <div key={index} className="text-xs text-neutral-600 flex items-start">
+                  <div key={index} className="text-xs text-foreground flex items-start">
                     <i className={`${activity.icon} ${activity.iconColor} mt-0.5 mr-2`}></i>
                     <div>
                       <p>{activity.description}</p>
-                      <p className="text-neutral-400 mt-1">{activity.time}</p>
+                      <p className="text-muted-foreground mt-1">{activity.time}</p>
                     </div>
                   </div>
                 ))}
@@ -104,32 +110,34 @@ export default function Sidebar() {
         </nav>
 
         {/* User Section */}
-        <div className="p-4 border-t border-neutral-200">
+        <div className="p-4 border-t border-border">
           {user && isSidebarOpen ? (
             <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                 <span className="font-medium">
                   {user.displayName.split(" ").map(word => word[0]).join("").toUpperCase()}
                 </span>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-neutral-700">{user.displayName}</p>
-                <p className="text-xs text-neutral-500">{user.plan} Plan</p>
+                <p className="text-sm font-medium text-foreground">{user.displayName}</p>
+                <p className="text-xs text-muted-foreground">{user.plan} Plan</p>
               </div>
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center">
+                {!isSidebarOpen && <ThemeToggle />}
                 <button
                   onClick={logout}
-                  className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-500"
+                  className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
                 >
                   <i className="ri-logout-box-line"></i>
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex justify-center">
+            <div className="flex justify-center space-x-2">
+              <ThemeToggle />
               <button
                 onClick={logout}
-                className="p-1.5 rounded-full hover:bg-neutral-100 text-neutral-500"
+                className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
               >
                 <i className="ri-logout-box-line"></i>
               </button>
