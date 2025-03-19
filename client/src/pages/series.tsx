@@ -43,7 +43,7 @@ export default function SeriesPage() {
   });
 
   // Fetch books for current series
-  const { data: books, isLoading: isLoadingBooks } = useQuery({
+  const { data: books = [], isLoading: isLoadingBooks } = useQuery<Book[]>({
     queryKey: ['/api/series', currentSeries?.id, 'books'],
     queryFn: async () => {
       if (!currentSeries) return [];
@@ -66,6 +66,14 @@ export default function SeriesPage() {
       toast({
         title: "Series created",
         description: "Your new series has been created successfully",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Error creating series:", error);
+      toast({
+        title: "Error creating series",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
       });
     }
   });
@@ -129,7 +137,7 @@ export default function SeriesPage() {
       return;
     }
 
-    const position = books ? books.length + 1 : 1;
+    const position = books.length + 1;
 
     createBookMutation.mutate({
       seriesId: currentSeries.id,
@@ -207,7 +215,7 @@ export default function SeriesPage() {
         </div>
 
         {/* Series Selection */}
-        {allSeries && allSeries.length > 0 ? (
+        {allSeries.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {allSeries.map((series: Series) => (
               <Card 
@@ -320,7 +328,7 @@ export default function SeriesPage() {
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            ) : books && books.length > 0 ? (
+            ) : books.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {books.map((book) => (
                   <BookCard key={book.id} book={book} seriesId={currentSeries.id} />

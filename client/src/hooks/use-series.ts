@@ -21,7 +21,7 @@ export function useSeries() {
   const [currentSeries, setCurrentSeries] = useState<SeriesWithActivities | null>(null);
 
   // Fetch all user series
-  const { data: allSeries } = useQuery({
+  const { data: allSeries = [] } = useQuery<Series[]>({
     queryKey: ['/api/series'],
     queryFn: async () => {
       const res = await apiRequest('GET', '/api/series');
@@ -32,7 +32,7 @@ export function useSeries() {
 
   // Set the first series as current if none is selected
   useEffect(() => {
-    if (allSeries && allSeries.length > 0 && !currentSeries) {
+    if (allSeries.length > 0 && !currentSeries) {
       // Add mock recent activities for demonstration
       const seriesWithActivities: SeriesWithActivities = {
         ...allSeries[0],
@@ -81,8 +81,6 @@ export function useSeries() {
 
   // Change the current series
   const changeCurrentSeries = (seriesId: number) => {
-    if (!allSeries) return;
-    
     const selectedSeries = allSeries.find(series => series.id === seriesId);
     if (selectedSeries) {
       // Add mock recent activities for demonstration
