@@ -17,35 +17,36 @@ import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import FloatingNotes from "./components/widget/floating-notes"; // Added import
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const [location, setLocation] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       setLocation("/login");
     }
   }, [isAuthenticated, isLoading, setLocation]);
-  
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  
+
   if (!isAuthenticated) {
     return null;
   }
-  
+
   return <Component />;
 }
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  
+
   // Check if the current route is auth-related
   const isAuthRoute = ['/login', '/register'].includes(location);
-  
+
   return (
     <div className="h-screen flex overflow-hidden">
       {!isAuthRoute && (
@@ -72,13 +73,13 @@ function Router() {
           </div>
         </>
       )}
-      
+
       <main className={`flex-1 overflow-y-auto bg-neutral-50 ${!isAuthRoute ? 'pt-16 md:pt-0' : ''}`}>
         <Switch>
           {/* Auth routes */}
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
-          
+
           {/* Protected routes */}
           <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
           <Route path="/series" component={() => <ProtectedRoute component={Series} />} />
@@ -86,7 +87,7 @@ function Router() {
           <Route path="/world" component={() => <ProtectedRoute component={World} />} />
           <Route path="/timeline" component={() => <ProtectedRoute component={Timeline} />} />
           <Route path="/achievements" component={() => <ProtectedRoute component={Achievements} />} />
-          
+
           {/* Fallback to 404 */}
           <Route component={NotFound} />
         </Switch>
