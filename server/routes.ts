@@ -1048,6 +1048,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Stripe payment route for one-time payments
+  app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe is not configured" });
+      }
+      
+      const { amount, items } = req.body;
+      
+      if (!amount || !items) {
+        return res.status(400).json({ message: "Amount and items are required" });
+      }
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          userId: req.session.userId!.toString(),
+          items: JSON.stringify(items)
+        }
+      });
+      
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
   // Webhook endpoint to handle Stripe events
   app.post("/api/webhooks/stripe", async (req, res) => {
     if (!checkStripe(res)) {
