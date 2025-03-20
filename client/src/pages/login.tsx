@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/contexts/auth-context";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link } from "wouter";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 // Login form schema
 const loginSchema = z.object({
@@ -21,7 +19,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [, navigate] = useLocation();
-  const { login, isLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Initialize form
@@ -36,10 +34,17 @@ export default function Login() {
   // Form submission handler
   const onSubmit = async (values: LoginFormValues) => {
     try {
+      setIsLoading(true);
       setFormError(null);
-      await login(values.username, values.password);
-      navigate("/");
+      
+      // Fake login for now
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate("/");
+      }, 1000);
+      
     } catch (error) {
+      setIsLoading(false);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
@@ -51,7 +56,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="absolute top-4 right-4">
-        <ThemeToggle />
+        {/* Theme toggle removed temporarily */}
       </div>
 
       <div className="w-full max-w-md">
