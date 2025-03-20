@@ -5,8 +5,22 @@ import { useLocation } from "wouter";
 import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "../../components/ui/theme-toggle";
 import { Link } from "../../components/ui/link";
@@ -56,14 +70,20 @@ export default function Login() {
             <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground mr-2">
               <i className="ri-quill-pen-line text-xl"></i>
             </div>
-            <h1 className="font-serif font-bold text-3xl text-foreground">Saga Scribe</h1>
+            <h1 className="font-serif font-bold text-3xl text-foreground">
+              Saga Scribe
+            </h1>
           </div>
-          <p className="mt-2 text-muted-foreground">The Ultimate Series Author's Companion</p>
+          <p className="mt-2 text-muted-foreground">
+            The Ultimate Series Author's Companion
+          </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-foreground">Login to Your Account</CardTitle>
+            <CardTitle className="text-foreground">
+              Login to Your Account
+            </CardTitle>
             <CardDescription>Continue your writing journey</CardDescription>
           </CardHeader>
           <CardContent>
@@ -73,7 +93,10 @@ export default function Login() {
               </div>
             )}
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="username"
@@ -95,7 +118,11 @@ export default function Login() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter password" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="Enter password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
