@@ -181,7 +181,7 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
             {book.status ? book.status.charAt(0).toUpperCase() + book.status.slice(1).replace("_", " ") : "In Progress"}
           </Badge>
           <span className="text-sm text-neutral-500">
-            {book.wordCount.toLocaleString()} words
+            {(book.wordCount || 0).toLocaleString()} words
           </span>
         </div>
 
