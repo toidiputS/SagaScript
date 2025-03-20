@@ -171,6 +171,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({ message: "Logged out successfully" });
     });
   });
+  
+  // Add the /api/logout endpoint to match client expectations
+  app.post("/api/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Error during logout" });
+      }
+      res.status(200).json({ message: "Logged out successfully" });
+    });
+  });
 
   app.get("/api/auth/me", async (req, res) => {
     try {
@@ -196,6 +206,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user", async (req, res) => {
     try {
       if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove password from response
+      const { password, ...userWithoutPassword } = user;
+      
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user data" });
+    }
+  });
+  
+  // Add the /api/me endpoint for backward compatibility
+  app.get("/api/me", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        // The key issue: Make sure this returns 401 NOT 200 for unauthenticated requests
         return res.status(401).json({ message: "Not authenticated" });
       }
       
