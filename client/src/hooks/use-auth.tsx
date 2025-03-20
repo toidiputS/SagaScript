@@ -12,6 +12,7 @@ type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
+  refreshUser: () => Promise<SelectUser | undefined | null>;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
@@ -26,8 +27,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
+    refetch: refreshUser,
   } = useQuery<SelectUser | undefined, Error>({
-    queryKey: ["/api/auth/me"],
+    queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
@@ -114,5 +116,10 @@ export function useAuth() {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context;
+  
+  // Add isAuthenticated for backward compatibility
+  return {
+    ...context,
+    isAuthenticated: !!context.user
+  };
 }
