@@ -18,7 +18,11 @@ import {
   type Achievement,
   type InsertAchievement,
   type UserAchievement,
-  type InsertUserAchievement
+  type InsertUserAchievement,
+  type SubscriptionPlan,
+  type InsertSubscriptionPlan,
+  type Subscription,
+  type InsertSubscription
 } from "@shared/schema";
 
 export interface IStorage {
@@ -85,6 +89,20 @@ export interface IStorage {
   getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]>;
   createUserAchievement(userAchievement: InsertUserAchievement): Promise<UserAchievement>;
   checkAndAwardAchievements(userId: number): Promise<UserAchievement[]>;
+  
+  // Subscription Plan methods
+  getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
+  createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
+  updateSubscriptionPlan(id: number, plan: Partial<SubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
+  
+  // User Subscription methods
+  getUserSubscription(userId: number): Promise<Subscription | undefined>;
+  createUserSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  updateUserSubscription(id: number, subscription: Partial<Subscription>): Promise<Subscription | undefined>;
+  cancelUserSubscription(id: number): Promise<Subscription | undefined>;
+  updateUserPlan(userId: number, planName: string): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -98,6 +116,8 @@ export class MemStorage implements IStorage {
   private writingStats: Map<number, WritingStat>;
   private achievements: Map<number, Achievement>;
   private userAchievements: Map<number, UserAchievement>;
+  private subscriptionPlans: Map<number, SubscriptionPlan>;
+  private subscriptions: Map<number, Subscription>;
   
   private currentIds: {
     user: number;
