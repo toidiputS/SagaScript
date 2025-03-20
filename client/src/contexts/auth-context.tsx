@@ -17,6 +17,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -108,6 +109,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(false);
     }
   };
+  
+  const refreshUser = async (): Promise<User | null> => {
+    try {
+      const response = await apiRequest("GET", "/api/auth/me");
+      const userData = await response.json();
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      setUser(null);
+      return null;
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -118,6 +131,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         login: handleLogin,
         register: handleRegister,
         logout: handleLogout,
+        refreshUser,
       }}
     >
       {children}

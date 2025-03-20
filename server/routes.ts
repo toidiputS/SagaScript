@@ -878,5 +878,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subscription Plan routes
+  app.get("/api/subscription-plans", async (req, res) => {
+    try {
+      const plans = await storage.getSubscriptionPlans();
+      res.status(200).json(plans);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subscription plans" });
+    }
+  });
+
+  // User subscription management
+  app.get("/api/subscriptions/current", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const subscription = await storage.getUserSubscription(userId);
+      
+      if (!subscription) {
+        return res.status(404).json({ message: "No active subscription found" });
+      }
+      
+      // Get plan details
+      const plan = await storage.getSubscriptionPlan(subscription.planId);
+      
+      res.status(200).json({
+        subscription,
+        plan
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subscription" });
+    }
+  });
+
+  app.post("/api/subscriptions", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { planName } = req.body;
+      
+      if (!planName) {
+        return res.status(400).json({ message: "Plan name is required" });
+      }
+      
+      // Find the plan by name
+      const plans = await storage.getSubscriptionPlans();
+      const plan = plans.find(p => p.name === planName);
+      
+      if (!plan) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      // In a real app, you would process payment here
+      
+      // Create or update subscription
+      const now = new Date();
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 1); // 1 month from now
+      
+      const subscription = await storage.createUserSubscription({
+        userId,
+        planId: plan.id,
+        status: "active",
+        currentPeriodStart: now,
+        currentPeriodEnd: endDate,
+        cancelAtPeriodEnd: false,
+      });
+      
+      // Update user's plan
+      await storage.updateUserPlan(userId, plan.name);
+      
+      res.status(200).json({ subscription, plan });
+    } catch (error) {
+      res.status(500).json({ message: "Error updating subscription" });
+    }
+  });
+
+  app.post("/api/subscriptions/cancel", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const subscription = await storage.getUserSubscription(userId);
+      
+      if (!subscription) {
+        return res.status(404).json({ message: "No active subscription found" });
+      }
+      
+      // Cancel subscription at period end
+      const updated = await storage.cancelUserSubscription(subscription.id);
+      
+      res.status(200).json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Error canceling subscription" });
+    }
+  });
+
   return httpServer;
 }

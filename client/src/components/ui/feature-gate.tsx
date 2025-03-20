@@ -14,7 +14,7 @@ import {
 import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 
 interface FeatureGateProps {
   /**
@@ -69,7 +69,7 @@ export function FeatureGate({
 }: FeatureGateProps) {
   const { userTier, canAccess, hasReachedLimit, isTierAtLeast } = useFeatureAccess();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const [_, setLocation] = useLocation();
   
   // Check if user has access to the feature
   const hasAccess = canAccess(feature) && isTierAtLeast(requiredTier);
@@ -82,7 +82,7 @@ export function FeatureGate({
   
   // Show upgrade information
   const handleUpgradeClick = () => {
-    navigate('/subscription');
+    setLocation('/subscription');
   };
   
   // Default message
@@ -138,7 +138,7 @@ export function FeatureGate({
               description: upgradeMessage,
               variant: "default"
             });
-            navigate('/subscription');
+            setLocation('/subscription');
           }}
         >
           Upgrade
@@ -163,6 +163,7 @@ export function FeatureLimitIndicator({
   children?: React.ReactNode;
 }) {
   const { userTier, getLimit } = useFeatureAccess();
+  const [_, setLocation] = useLocation();
   const limit = getLimit(feature);
   
   if (typeof limit !== 'number' || limit < 0) {
@@ -180,7 +181,7 @@ export function FeatureLimitIndicator({
           variant="link" 
           size="sm" 
           className="text-xs ml-2"
-          onClick={() => window.location.href = '/subscription'}
+          onClick={() => setLocation('/subscription')}
         >
           Upgrade for more
         </Button>
