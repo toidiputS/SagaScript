@@ -1,24 +1,20 @@
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './contexts/auth-context';
-import { ThemeProvider } from './contexts/theme-context';
-import { Switch, Route } from 'wouter';
-import Register from './pages/auth/register';
-import Login from './pages/auth/login';
-
-const queryClient = new QueryClient();
+import { QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/contexts/theme-context";
+import { queryClient } from "@/lib/queryClient";
+import { Toaster } from "@/components/ui/toaster";
+import Router from "@/Router";
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <Switch>
-            <Route path="/register" component={Register} />
-            <Route path="/login" component={Login} />
-          </Switch>
-        </AuthProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <Router />
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
