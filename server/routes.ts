@@ -1,6 +1,15 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import Stripe from "stripe";
 import { storage } from "./storage";
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe integration will be disabled.');
+}
+
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY) 
+  : null;
 import { 
   insertUserSchema, 
   insertSeriesSchema,
@@ -878,6 +887,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to check if Stripe is available
+  const checkStripe = (res: Response) => {
+    if (!stripe) {
+      res.status(503).json({ 
+        message: "Payment processing is unavailable. Please try again later.",
+        reason: "Missing Stripe configuration"
+      });
+      return false;
+    }
+    return true;
+  };
+
   // Subscription Plan routes
   app.get("/api/subscription-plans", async (req, res) => {
     try {
@@ -927,27 +948,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Subscription plan not found" });
       }
       
-      // In a real app, you would process payment here
+      // Check if Stripe integration is available
+      if (!checkStripe(res)) {
+        return;
+      }
       
-      // Create or update subscription
-      const now = new Date();
-      const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() + 1); // 1 month from now
+      // Get user info for creating Stripe customer
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       
-      const subscription = await storage.createUserSubscription({
-        userId,
-        planId: plan.id,
-        status: "active",
-        currentPeriodStart: now,
-        currentPeriodEnd: endDate,
-        cancelAtPeriodEnd: false,
-      });
-      
-      // Update user's plan
-      await storage.updateUserPlan(userId, plan.name);
-      
-      res.status(200).json({ subscription, plan });
+      // Create a Stripe checkout session
+      try {
+        // Set price based on the plan
+        const priceInCents = Math.round(plan.price * 100); // Convert to cents
+        
+        // Create a checkout session
+        const session = await stripe!.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: [
+            {
+              price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: `Saga Scribe ${plan.name.charAt(0).toUpperCase() + plan.name.slice(1)} Subscription`,
+                  description: plan.description,
+                },
+                unit_amount: priceInCents,
+                recurring: {
+                  interval: plan.billingInterval === 'monthly' ? 'month' : 'year',
+                },
+              },
+              quantity: 1,
+            },
+          ],
+          mode: 'subscription',
+          success_url: `${req.headers.origin}/dashboard?subscription=success`,
+          cancel_url: `${req.headers.origin}/subscription?canceled=true`,
+          customer_email: user.email || undefined,
+          metadata: {
+            userId: userId.toString(),
+            planId: plan.id.toString(),
+            planName: plan.name,
+          },
+        });
+        
+        // Return the checkout session ID
+        res.status(200).json({ 
+          sessionId: session.id,
+          url: session.url
+        });
+        
+      } catch (stripeError: any) {
+        console.error('Stripe error:', stripeError);
+        return res.status(400).json({ 
+          message: "Error creating checkout session", 
+          error: stripeError.message 
+        });
+      }
     } catch (error) {
+      console.error("Error updating subscription:", error);
       res.status(500).json({ message: "Error updating subscription" });
     }
   });

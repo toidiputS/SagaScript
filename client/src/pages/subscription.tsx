@@ -79,10 +79,7 @@ export default function SubscriptionPage() {
   // Subscription upgrade logic
   const subscriptionMutation = useMutation({
     mutationFn: async (tier: SubscriptionTier) => {
-      return await apiRequest('/api/subscriptions', {
-        method: 'POST',
-        body: JSON.stringify({ planName: tier })
-      });
+      return await apiRequest('POST', '/api/subscriptions', { planName: tier });
     },
     onSuccess: async () => {
       // Refresh user data to get updated plan
