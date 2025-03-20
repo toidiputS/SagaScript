@@ -37,19 +37,25 @@ export default function Login() {
       setIsLoading(true);
       setFormError(null);
       
-      // Simulate authentication
-      setTimeout(() => {
-        // Mock successful login
-        localStorage.setItem("user", JSON.stringify({
-          id: 1,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           username: values.username,
-          displayName: values.username,
-          plan: 'free'
-        }));
-        
-        setIsLoading(false);
-        navigate("/");
-      }, 1000);
+          password: values.password,
+        }),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+      
+      setIsLoading(false);
+      navigate("/");
       
     } catch (error) {
       setIsLoading(false);
