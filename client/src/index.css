@@ -127,3 +127,42 @@
   background-color: hsla(var(--card), 0.6);
   border: 1px solid hsl(var(--border));
 }
+
+/* Ensure better contrast for section titles in dark mode */
+.dark h1, .dark h2, .dark h3, 
+.spooky h1, .spooky h2, .spooky h3 {
+  color: hsl(var(--foreground));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Fix contrast for card headings and content in dark mode */
+.dark .card-title, 
+.spooky .card-title,
+.dark [data-section-title],
+.spooky [data-section-title] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Improve contrast for all card content in dark themes */
+.dark .card, 
+.spooky .card,
+.dark [data-card], 
+.spooky [data-card] {
+  color: hsl(var(--foreground));
+}
+
+/* Ensure high contrast for Writer's Companion section */
+.dark [data-section="writers-companion"] h2,
+.spooky [data-section="writers-companion"] h2 {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+/* Fix contrast for insights and suggestions in dark mode */
+.dark [data-component="insight"],
+.spooky [data-component="insight"],
+.dark [data-component="suggestion"],
+.spooky [data-component="suggestion"] {
+  color: hsl(var(--foreground));
+  background-color: hsla(var(--card), 0.8);
+}

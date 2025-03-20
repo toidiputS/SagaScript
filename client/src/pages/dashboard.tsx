@@ -1,7 +1,7 @@
 import StatsCard from "@/components/dashboard/stats-card";
 import SeriesProgress from "@/components/dashboard/series-progress";
 import ChapterList from "@/components/dashboard/chapter-list";
-import WriterCompanion from "@/components/dashboard/writer-companion";
+import AISuggestions from "@/components/dashboard/ai-suggestions";
 import AchievementsDisplay from "@/components/dashboard/achievements-display";
 import BadgeProgression from "@/components/dashboard/badge-progression";
 import BadgeShowcase from "@/components/dashboard/badge-showcase";
@@ -154,7 +154,7 @@ export default function Dashboard() {
           {/* AI Companion & Achievements */}
           <div className="lg:col-span-1 space-y-6">
             {/* AI Companion */}
-            <WriterCompanion />
+            <AISuggestions />
 
             {/* Badge Progression */}
             <BadgeProgression 
