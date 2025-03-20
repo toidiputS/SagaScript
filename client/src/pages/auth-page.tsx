@@ -193,7 +193,11 @@ function LoginForm() {
 
   // Submit handler
   const onSubmit = (values: LoginFormValues) => {
-    loginMutation?.mutate(values);
+    if (loginMutation) {
+      loginMutation.mutate(values);
+    } else {
+      console.error("Login mutation is not available");
+    }
   };
 
   return (
@@ -231,7 +235,21 @@ function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button className="w-full" type="submit" disabled={isPending}>
+            <Button 
+              className="w-full" 
+              type="submit" 
+              disabled={isPending}
+              onClick={() => {
+                if (form.formState.isValid) {
+                  const values = form.getValues();
+                  if (loginMutation) {
+                    loginMutation.mutate(values);
+                  }
+                } else {
+                  form.trigger();
+                }
+              }}
+            >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -267,7 +285,11 @@ function RegisterForm() {
   const onSubmit = (values: RegisterFormValues) => {
     // Remove confirmPassword from the data sent to the API
     const { confirmPassword, ...registerData } = values;
-    registerMutation?.mutate(registerData);
+    if (registerMutation) {
+      registerMutation.mutate(registerData);
+    } else {
+      console.error("Register mutation is not available");
+    }
   };
 
   return (
@@ -331,7 +353,22 @@ function RegisterForm() {
                 </FormItem>
               )}
             />
-            <Button className="w-full" type="submit" disabled={isPending}>
+            <Button 
+              className="w-full" 
+              type="submit" 
+              disabled={isPending}
+              onClick={() => {
+                if (form.formState.isValid) {
+                  const values = form.getValues();
+                  const { confirmPassword, ...registerData } = values;
+                  if (registerMutation) {
+                    registerMutation.mutate(registerData);
+                  }
+                } else {
+                  form.trigger();
+                }
+              }}
+            >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
