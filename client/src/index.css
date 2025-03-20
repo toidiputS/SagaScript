@@ -104,65 +104,94 @@
   }
 }
 
-/* Ensure high contrast for badges and other elements */
-.dark .badge,
-.spooky .badge {
-  color: hsl(var(--foreground));
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
+/* Global contrast fixes for all themes */
+.dark-theme, .dark, .dark-mode, [data-theme="dark"],
+.spooky-theme, .spooky, .spooky-mode, [data-theme="spooky"] {
+  --card-bg-dark: 217.2 32.6% 17.5%;
+  --card-text-dark: 210 40% 98%;
+  --stats-card-bg: 217.2 32.6% 17.5%;
+  --stats-card-text: 210 40% 98%;
 }
 
-/* Improve title readability */
-.dark .site-title,
-.spooky .site-title {
-  color: hsl(var(--foreground));
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+/* Fix contrast for badges */
+.badge, [data-badge] {
+  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
 }
 
-/* Improve achievement category contrast */
-.dark .achievement-category,
-.spooky .achievement-category {
-  color: hsl(var(--foreground));
-  background-color: hsla(var(--card), 0.6);
-  border: 1px solid hsl(var(--border));
-}
-
-/* Ensure better contrast for section titles in dark mode */
-.dark h1, .dark h2, .dark h3, 
-.spooky h1, .spooky h2, .spooky h3 {
-  color: hsl(var(--foreground));
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Fix contrast for card headings and content in dark mode */
-.dark .card-title, 
-.spooky .card-title,
-.dark [data-section-title],
-.spooky [data-section-title] {
+/* Fix contrast for all headings */
+h1, h2, h3, h4, h5, h6, 
+.heading, .title, .header {
   color: hsl(var(--foreground)) !important;
 }
 
-/* Improve contrast for all card content in dark themes */
-.dark .card, 
-.spooky .card,
-.dark [data-card], 
-.spooky [data-card] {
-  color: hsl(var(--foreground));
+/* Fix contrast for dark themed cards */
+.dark .bg-white, 
+.spooky .bg-white, 
+.dark-theme .bg-white,
+.spooky-theme .bg-white {
+  background-color: hsl(var(--card-bg-dark)) !important;
 }
 
-/* Ensure high contrast for Writer's Companion section */
-.dark [data-section="writers-companion"] h2,
-.spooky [data-section="writers-companion"] h2 {
-  color: hsl(var(--foreground));
-  font-weight: 600;
+.dark .bg-gray-800, 
+.spooky .bg-gray-800,
+.dark .bg-gray-800\/90,
+.spooky .bg-gray-800\/90 {
+  color: hsl(var(--card-text-dark)) !important;
 }
 
-/* Fix contrast for insights and suggestions in dark mode */
-.dark [data-component="insight"],
-.spooky [data-component="insight"],
-.dark [data-component="suggestion"],
-.spooky [data-component="suggestion"] {
-  color: hsl(var(--foreground));
-  background-color: hsla(var(--card), 0.8);
+/* Fix dashboard card text */
+.dark .text-foreground,
+.spooky .text-foreground,
+.dark .text-muted-foreground,
+.spooky .text-muted-foreground {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* High contrast for stats cards */
+.dark [title="Words Today"],
+.dark [title="Current Streak"],
+.spooky [title="Words Today"], 
+.spooky [title="Current Streak"] {
+  background-color: hsl(var(--stats-card-bg)) !important;
+  color: hsl(var(--stats-card-text)) !important;
+  border: 1px solid hsl(var(--border));
+}
+
+/* Ensure specific elements have proper contrast */
+.dark .bg-white,
+.spooky .bg-white {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix contrast for sidebar/navigation links */
+.dark a, .spooky a,
+.dark button, .spooky button,
+.dark .text-neutral-500, .spooky .text-neutral-500 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Improve contrast for all color variants */
+.text-neutral-500 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix text on secondary backgrounds */
+.dark .bg-neutral-100,
+.dark .bg-neutral-50,
+.spooky .bg-neutral-100,
+.spooky .bg-neutral-50 {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* Improve hover states for dark themes */
+.dark .hover\:bg-neutral-100:hover,
+.spooky .hover\:bg-neutral-100:hover,
+.dark .hover\:bg-gray-700:hover,
+.spooky .hover\:bg-gray-700:hover,
+.dark .hover\:bg-gray-700\/80:hover,
+.spooky .hover\:bg-gray-700\/80:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
 }
