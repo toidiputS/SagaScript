@@ -106,6 +106,16 @@ export interface IStorage {
   updateUserSubscription(id: number, subscription: Partial<Subscription>): Promise<Subscription | undefined>;
   cancelUserSubscription(id: number): Promise<Subscription | undefined>;
   updateUserPlan(userId: number, planName: string): Promise<User | undefined>;
+  
+  // Timeline Event methods
+  getTimelineEvent(id: number): Promise<TimelineEvent | undefined>;
+  getTimelineEventsBySeries(seriesId: number): Promise<TimelineEvent[]>;
+  getTimelineEventsByBook(bookId: number): Promise<TimelineEvent[]>;
+  getTimelineEventsByCharacter(characterId: number): Promise<TimelineEvent[]>;
+  createTimelineEvent(event: InsertTimelineEvent): Promise<TimelineEvent>;
+  updateTimelineEvent(id: number, event: Partial<TimelineEvent>): Promise<TimelineEvent | undefined>;
+  deleteTimelineEvent(id: number): Promise<boolean>;
+  updateTimelineEventPositions(events: { id: number, position: number }[]): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

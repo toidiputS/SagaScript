@@ -312,3 +312,42 @@ export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+
+// Timeline Events
+export const timelineEvents = pgTable("timeline_events", {
+  id: serial("id").primaryKey(),
+  seriesId: integer("series_id").notNull().references(() => series.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  eventType: text("event_type").notNull().default("plot"), // plot, character, world
+  date: text("date"), // Text to allow flexible date formats like "Year 1242" or "Day 3"
+  bookId: integer("book_id").references(() => books.id),
+  chapterId: integer("chapter_id").references(() => chapters.id),
+  characterIds: jsonb("character_ids").notNull().default([]), // Array of character IDs involved
+  locationId: integer("location_id").references(() => locations.id),
+  importance: text("importance").notNull().default("medium"), // major, medium, minor
+  color: text("color"), // For visual distinction
+  position: integer("position").notNull().default(0), // For manual ordering
+  isPlotPoint: boolean("is_plot_point").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertTimelineEventSchema = createInsertSchema(timelineEvents).pick({
+  seriesId: true,
+  title: true,
+  description: true,
+  eventType: true,
+  date: true,
+  bookId: true,
+  chapterId: true,
+  characterIds: true,
+  locationId: true,
+  importance: true,
+  color: true,
+  position: true,
+  isPlotPoint: true,
+});
+
+export type TimelineEvent = typeof timelineEvents.$inferSelect;
+export type InsertTimelineEvent = z.infer<typeof insertTimelineEventSchema>;
