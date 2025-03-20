@@ -173,40 +173,192 @@ export class MemStorage implements IStorage {
   // Initialize predefined achievements
   private initializeAchievements() {
     const achievements: InsertAchievement[] = [
+      // Writing Streaks
       {
         name: "7-Day Streak",
         description: "Write every day for a week",
         type: "streak",
         icon: "ri-fire-line",
-        requiredValue: 7
+        requiredValue: 7,
+        category: "streak"
       },
+      {
+        name: "30-Day Streak",
+        description: "Write every day for a month",
+        type: "streak",
+        icon: "ri-fire-fill",
+        requiredValue: 30,
+        category: "streak"
+      },
+      {
+        name: "60-Day Streak",
+        description: "Write every day for two months",
+        type: "streak",
+        icon: "ri-flashlight-line",
+        requiredValue: 60,
+        category: "streak"
+      },
+      {
+        name: "90-Day Streak",
+        description: "Write every day for three months",
+        type: "streak",
+        icon: "ri-flashlight-fill",
+        requiredValue: 90,
+        category: "streak"
+      },
+      {
+        name: "180-Day Streak",
+        description: "Write every day for six months",
+        type: "streak",
+        icon: "ri-sun-line",
+        requiredValue: 180,
+        category: "streak"
+      },
+      {
+        name: "365-Day Streak",
+        description: "Write every day for a year",
+        type: "streak",
+        icon: "ri-sun-fill",
+        requiredValue: 365,
+        category: "streak"
+      },
+      
+      // Series Milestones
+      {
+        name: "Book Completer",
+        description: "Complete your first book",
+        type: "books",
+        icon: "ri-book-2-line",
+        requiredValue: 1,
+        category: "milestone"
+      },
+      {
+        name: "Series Starter",
+        description: "Begin a series with at least 2 books",
+        type: "books",
+        icon: "ri-book-open-line",
+        requiredValue: 2,
+        category: "milestone"
+      },
+      {
+        name: "Trilogy Master",
+        description: "Complete a trilogy of books",
+        type: "books",
+        icon: "ri-book-read-line",
+        requiredValue: 3,
+        category: "milestone"
+      },
+      {
+        name: "Epic Saga Creator",
+        description: "Complete a series with 5 or more books",
+        type: "books",
+        icon: "ri-book-read-fill",
+        requiredValue: 5,
+        category: "milestone"
+      },
+      
+      // Chapter Achievements
       {
         name: "Chapter Master",
         description: "Complete 10 chapters",
         type: "chapters",
         icon: "ri-book-mark-line",
-        requiredValue: 10
+        requiredValue: 10,
+        category: "content"
       },
+      {
+        name: "Chapter Virtuoso",
+        description: "Complete 50 chapters",
+        type: "chapters",
+        icon: "ri-bookmark-fill",
+        requiredValue: 50,
+        category: "content"
+      },
+      
+      // Character Achievements
       {
         name: "Character Creator",
         description: "Develop 5 detailed characters",
         type: "characters",
         icon: "ri-user-star-line",
-        requiredValue: 5
+        requiredValue: 5,
+        category: "worldbuilding"
       },
+      {
+        name: "Character Ensemble",
+        description: "Create a cast of at least 10 characters",
+        type: "characters",
+        icon: "ri-team-line",
+        requiredValue: 10,
+        category: "worldbuilding"
+      },
+      {
+        name: "Character Universe",
+        description: "Populate your world with 25 characters",
+        type: "characters",
+        icon: "ri-team-fill",
+        requiredValue: 25,
+        category: "worldbuilding"
+      },
+      
+      // World Building Achievements
       {
         name: "World Builder",
         description: "Create 10 unique locations",
         type: "locations",
         icon: "ri-earth-line",
-        requiredValue: 10
+        requiredValue: 10,
+        category: "worldbuilding"
+      },
+      {
+        name: "World Explorer",
+        description: "Design 25 distinctive locations",
+        type: "locations",
+        icon: "ri-map-pin-line",
+        requiredValue: 25,
+        category: "worldbuilding"
+      },
+      {
+        name: "World Architect",
+        description: "Craft a world with 50 mapped locations",
+        type: "locations",
+        icon: "ri-earth-fill",
+        requiredValue: 50,
+        category: "worldbuilding"
+      },
+      
+      // Word Count Achievements
+      {
+        name: "Prolific Writer",
+        description: "Write 10,000 words",
+        type: "words",
+        icon: "ri-quill-pen-line",
+        requiredValue: 10000,
+        category: "progress"
+      },
+      {
+        name: "Novel Completer",
+        description: "Write 50,000 words",
+        type: "words",
+        icon: "ri-quill-pen-fill",
+        requiredValue: 50000,
+        category: "progress"
       },
       {
         name: "Word Count Champion",
-        description: "Write 50,000 words",
+        description: "Write 100,000 words",
         type: "words",
-        icon: "ri-quill-pen-line",
-        requiredValue: 50000
+        icon: "ri-file-text-line",
+        requiredValue: 100000,
+        category: "progress"
+      },
+      {
+        name: "Epic Wordsmith",
+        description: "Write 500,000 words",
+        type: "words",
+        icon: "ri-file-text-fill",
+        requiredValue: 500000,
+        category: "progress"
       }
     ];
     
@@ -232,7 +384,7 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id, 
-      plan: 'free',
+      plan: 'apprentice',
       createdAt: timestamp 
     };
     this.users.set(id, user);
@@ -629,15 +781,36 @@ export class MemStorage implements IStorage {
     
     // Get current user stats
     const writingStats = await this.getWritingStatsByUser(userId);
-    const characters = (await this.getAllSeriesByUser(userId))
-      .flatMap(async series => await this.getCharactersBySeries(series.id));
-    const locations = (await this.getAllSeriesByUser(userId))
-      .flatMap(async series => await this.getLocationsBySeries(series.id));
-    const chapters = (await this.getAllSeriesByUser(userId))
-      .flatMap(async series => {
-        const books = await this.getBooksBySeries(series.id);
-        return books.flatMap(async book => await this.getChaptersByBook(book.id));
-      });
+    
+    // Get user series
+    const userSeries = await this.getAllSeriesByUser(userId);
+    
+    // Get characters, locations, books, and chapters
+    const characters = userSeries.flatMap(async series => await this.getCharactersBySeries(series.id));
+    const locations = userSeries.flatMap(async series => await this.getLocationsBySeries(series.id));
+    
+    // Get books and count completed ones
+    const books = await Promise.all(userSeries.map(async series => {
+      return await this.getBooksBySeries(series.id);
+    }));
+    
+    const allBooks = books.flat();
+    const completedBooks = allBooks.filter(book => book.status === 'completed');
+    
+    // Get the maximum number of completed books in a single series
+    const completedBooksPerSeries = new Map<number, number>();
+    for (const book of completedBooks) {
+      const count = completedBooksPerSeries.get(book.seriesId) || 0;
+      completedBooksPerSeries.set(book.seriesId, count + 1);
+    }
+    const maxCompletedBooksInASeries = Math.max(0, ...completedBooksPerSeries.values());
+    
+    // Get chapters
+    const chapters = await Promise.all(allBooks.map(async book => {
+      return await this.getChaptersByBook(book.id);
+    }));
+    const allChapters = chapters.flat();
+    const completedChapters = allChapters.filter(chapter => chapter.status === 'completed');
     
     // Total words written
     const totalWords = writingStats.reduce((sum, stat) => sum + stat.wordsWritten, 0);
@@ -687,10 +860,22 @@ export class MemStorage implements IStorage {
           isEarned = (await Promise.all(characters)).flat().length >= achievement.requiredValue;
           break;
         case 'chapters':
-          isEarned = (await Promise.all(chapters)).flat().length >= achievement.requiredValue;
+          isEarned = completedChapters.length >= achievement.requiredValue;
           break;
         case 'locations':
           isEarned = (await Promise.all(locations)).flat().length >= achievement.requiredValue;
+          break;
+        case 'books':
+          // For book achievements, we need to check two types:
+          // 1. Total completed books
+          // 2. Books completed in a single series (for series achievements)
+          if (achievement.category === 'milestone') {
+            // If it's a milestone achievement, check max books in a series
+            isEarned = maxCompletedBooksInASeries >= achievement.requiredValue;
+          } else {
+            // Otherwise check total completed books
+            isEarned = completedBooks.length >= achievement.requiredValue;
+          }
           break;
       }
       
@@ -710,50 +895,58 @@ export class MemStorage implements IStorage {
   private initializeSubscriptionPlans() {
     const plans: InsertSubscriptionPlan[] = [
       {
-        name: "free",
-        description: "Free tier with basic features",
+        name: "apprentice",
+        description: "Basic series organization and character tracking",
         price: 0,
         billingInterval: "monthly",
-        features: ["1 series", "3 books per series", "10 characters per series"],
+        features: [
+          "Basic series organization",
+          "Character tracking",
+          "Limited AI assistance",
+          "Core gamification features"
+        ],
         limits: {
           maxSeries: 1,
           maxBooksPerSeries: 3,
           maxCharactersPerSeries: 10,
           maxLocationsPerSeries: 5,
-          aiSuggestions: false
+          aiSuggestions: true,
+          aiSuggestionsLimit: 10 // Limited AI usage
         }
       },
       {
-        name: "pro",
-        description: "Professional tier with advanced features",
+        name: "wordsmith",
+        description: "Enhanced world-building tools with advanced character management",
         price: 999, // $9.99
         billingInterval: "monthly",
         features: [
-          "Unlimited series", 
-          "Unlimited books per series", 
-          "Unlimited characters",
-          "AI writing assistant",
-          "Advanced world building tools"
+          "Enhanced world-building tools", 
+          "Advanced character relationship mapping", 
+          "Expanded AI suggestions",
+          "Personalized writing challenges"
         ],
         limits: {
-          maxSeries: -1, // unlimited
+          maxSeries: 5,
           maxBooksPerSeries: -1, // unlimited
           maxCharactersPerSeries: -1, // unlimited
           maxLocationsPerSeries: -1, // unlimited
-          aiSuggestions: true
+          aiSuggestions: true,
+          aiSuggestionsLimit: 50,
+          worldBuildingAdvanced: true,
+          relationshipMapping: true,
+          writingChallenges: true
         }
       },
       {
-        name: "premium",
-        description: "Premium tier with all features",
+        name: "loremaster",
+        description: "Comprehensive timeline and multimedia integration",
         price: 1999, // $19.99
         billingInterval: "monthly",
         features: [
-          "Everything in Pro",
-          "Priority support",
-          "Advanced AI story plotting",
-          "Character evolution tracking",
-          "Advanced analytics"
+          "Comprehensive timeline and continuity management",
+          "Advanced multimedia integration",
+          "Community collaboration features",
+          "Custom voice assignment"
         ],
         limits: {
           maxSeries: -1, // unlimited
@@ -761,8 +954,44 @@ export class MemStorage implements IStorage {
           maxCharactersPerSeries: -1, // unlimited
           maxLocationsPerSeries: -1, // unlimited
           aiSuggestions: true,
+          aiSuggestionsLimit: 200,
+          worldBuildingAdvanced: true,
+          relationshipMapping: true,
+          writingChallenges: true,
+          timelineManagement: true,
+          multimediaIntegration: true,
+          communityCollaboration: true,
+          customVoices: true
+        }
+      },
+      {
+        name: "legendary",
+        description: "All features unlocked with priority support",
+        price: 4999, // $49.99
+        billingInterval: "monthly",
+        features: [
+          "All features unlocked",
+          "Priority access to new features",
+          "Dedicated support",
+          "Custom feature development"
+        ],
+        limits: {
+          maxSeries: -1, // unlimited
+          maxBooksPerSeries: -1, // unlimited
+          maxCharactersPerSeries: -1, // unlimited
+          maxLocationsPerSeries: -1, // unlimited
+          aiSuggestions: true,
+          aiSuggestionsLimit: -1, // unlimited
+          worldBuildingAdvanced: true,
+          relationshipMapping: true,
+          writingChallenges: true,
+          timelineManagement: true,
+          multimediaIntegration: true,
+          communityCollaboration: true,
+          customVoices: true,
           prioritySupport: true,
-          advancedAnalytics: true
+          priorityFeatures: true,
+          customFeatureDevelopment: true
         }
       }
     ];

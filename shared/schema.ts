@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   displayName: text("display_name").notNull(),
-  plan: text("plan").notNull().default("free"),
+  plan: text("plan").notNull().default("apprentice"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -196,6 +196,7 @@ export const achievements = pgTable("achievements", {
   type: text("type").notNull(),
   icon: text("icon").notNull(),
   requiredValue: integer("required_value").notNull(),
+  category: text("category").notNull().default("general"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -205,6 +206,7 @@ export const insertAchievementSchema = createInsertSchema(achievements).pick({
   type: true,
   icon: true,
   requiredValue: true,
+  category: true,
 });
 
 // User Achievements
