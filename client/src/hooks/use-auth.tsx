@@ -1,124 +1,127 @@
+import { createContext, useState, useContext, useEffect, ReactNode } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { createContext, useContext, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/components/ui/use-toast';
-
-interface User {
+type User = {
   id: number;
   username: string;
-  displayName: string;
-}
+  email: string;
+  displayName: string | null;
+  avatar: string | null;
+  tier: string;
+};
 
-interface AuthContextType {
+type AuthContextType = {
   user: User | null;
   isLoading: boolean;
-  isAuthenticated: boolean;
-  register: (username: string, password: string, displayName: string) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: () => void;
+  refreshUser: () => Promise<User | null>;
+};
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isLoading: true,
+  login: async () => {},
+  logout: () => {},
+  refreshUser: async () => null,
+});
+
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isLoading, setIsLoading] = useState(false);
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [isInitializing, setIsInitializing] = useState(true);
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
-    queryKey: ['user'],
+  // Use React Query to fetch the current user
+  const { data: user, isLoading, refetch } = useQuery<User | null>({
+    queryKey: ['/api/me'],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchInterval: 1000 * 60 * 15, // 15 minutes
+    throwOnError: false,
+    retry: false,
     queryFn: async () => {
       try {
-        const response = await fetch('/api/auth/me');
-        if (!response.ok) return null;
-        return response.json();
+        const res = await fetch('/api/me', {
+          credentials: 'include',
+        });
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            return null;
+          }
+          throw new Error(`Error fetching user: ${res.statusText}`);
+        }
+        
+        return res.json();
       } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error("Error fetching user:", error);
         return null;
       }
-    }
+    },
   });
 
-  const register = async (username: string, password: string, displayName: string) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, displayName })
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-
-      await queryClient.invalidateQueries({ queryKey: ['user'] });
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Registration failed');
-    } finally {
-      setIsLoading(false);
+  // Initialize auth state
+  useEffect(() => {
+    if (!isLoading) {
+      setIsInitializing(false);
     }
-  };
+  }, [isLoading]);
 
+  // Login function
   const login = async (username: string, password: string) => {
-    setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include',
       });
-
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
+        throw new Error('Login failed');
       }
-
-      await queryClient.invalidateQueries({ queryKey: ['user'] });
+      
+      // Refetch user data
+      await refetch();
     } catch (error) {
-      throw error instanceof Error ? error : new Error('Login failed');
-    } finally {
-      setIsLoading(false);
+      console.error("Login error:", error);
+      throw error;
     }
   };
 
-  const logout = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/auth/logout', { method: 'POST' });
-      if (!response.ok) {
-        throw new Error('Logout failed');
-      }
-      await queryClient.invalidateQueries({ queryKey: ['user'] });
-    } catch (error) {
-      toast({
-        title: "Logout failed",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  // Logout function
+  const logout = () => {
+    // Clear user from state
+    queryClient.setQueryData(['/api/me'], null);
+    
+    // Clear all query cache to ensure sensitive data isn't retained
+    queryClient.clear();
+  };
+
+  // Function to refresh user data
+  const refreshUser = async () => {
+    const { data } = await refetch();
+    return data as User | null;
+  };
+
+  const value = {
+    user: user || null,
+    isLoading: isInitializing || isLoading,
+    login,
+    logout,
+    refreshUser,
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isLoading,
-      isAuthenticated: !!user,
-      register,
-      login,
-      logout
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+export const useAuth = () => useContext(AuthContext);
