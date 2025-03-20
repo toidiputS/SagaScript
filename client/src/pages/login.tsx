@@ -37,8 +37,16 @@ export default function Login() {
       setIsLoading(true);
       setFormError(null);
       
-      // Fake login for now
+      // Simulate authentication
       setTimeout(() => {
+        // Mock successful login
+        localStorage.setItem("user", JSON.stringify({
+          id: 1,
+          username: values.username,
+          displayName: values.username,
+          plan: 'free'
+        }));
+        
         setIsLoading(false);
         navigate("/");
       }, 1000);

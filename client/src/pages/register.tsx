@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/contexts/auth-context";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link } from "wouter";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 // Registration form schema
 const registerSchema = z.object({
@@ -25,7 +25,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const [, navigate] = useLocation();
-  const { register, isLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Initialize form
@@ -42,10 +42,24 @@ export default function Register() {
   // Form submission handler
   const onSubmit = async (values: RegisterFormValues) => {
     try {
+      setIsLoading(true);
       setFormError(null);
-      await register(values.username, values.password, values.displayName);
-      navigate("/");
+      
+      // Simulate registration
+      setTimeout(() => {
+        // Mock successful registration
+        localStorage.setItem("user", JSON.stringify({
+          id: 1,
+          username: values.username,
+          displayName: values.displayName,
+          plan: 'free'
+        }));
+        
+        setIsLoading(false);
+        navigate("/");
+      }, 1000);
     } catch (error) {
+      setIsLoading(false);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
@@ -55,16 +69,16 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white mr-2">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground mr-2">
               <i className="ri-quill-pen-line text-xl"></i>
             </div>
-            <h1 className="font-serif font-bold text-3xl text-neutral-800">Saga Scribe</h1>
+            <h1 className="font-serif font-bold text-3xl text-foreground">Saga Scribe</h1>
           </div>
-          <p className="mt-2 text-neutral-600">The Ultimate Series Author's Companion</p>
+          <p className="mt-2 text-muted-foreground">The Ultimate Series Author's Companion</p>
         </div>
 
         <Card>
@@ -74,7 +88,7 @@ export default function Register() {
           </CardHeader>
           <CardContent>
             {formError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md text-sm">
                 {formError}
               </div>
             )}
@@ -137,11 +151,11 @@ export default function Register() {
                   )}
                 />
 
-                <Button type="submit" className="w-full bg-primary hover:bg-primary-dark" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <span className="mr-2">Creating account</span>
-                      <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                      <div className="h-4 w-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin"></div>
                     </>
                   ) : (
                     "Register"
@@ -151,7 +165,7 @@ export default function Register() {
             </Form>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link href="/login" className="text-primary hover:underline">
                 Login
