@@ -1022,12 +1022,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No active subscription found" });
       }
       
+      // Check if Stripe integration is available
+      if (!checkStripe(res)) {
+        return;
+      }
+      
+      if (subscription.paymentProviderSubscriptionId) {
+        try {
+          // Cancel the subscription in Stripe
+          await stripe!.subscriptions.update(subscription.paymentProviderSubscriptionId, {
+            cancel_at_period_end: true
+          });
+        } catch (stripeError: any) {
+          console.error('Stripe error during cancellation:', stripeError);
+        }
+      }
+      
       // Cancel subscription at period end
       const updated = await storage.cancelUserSubscription(subscription.id);
       
       res.status(200).json(updated);
     } catch (error) {
       res.status(500).json({ message: "Error canceling subscription" });
+    }
+  });
+  
+  // Webhook endpoint to handle Stripe events
+  app.post("/api/webhooks/stripe", async (req, res) => {
+    if (!checkStripe(res)) {
+      return;
+    }
+    
+    // Get the signature from the headers
+    const signature = req.headers['stripe-signature'];
+    
+    if (!signature) {
+      return res.status(400).json({ message: "Missing Stripe signature" });
+    }
+    
+    try {
+      // Construct event
+      const event = stripe!.webhooks.constructEvent(
+        req.body,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET || ''
+      );
+      
+      // Handle based on event type
+      switch (event.type) {
+        case 'checkout.session.completed': {
+          const session = event.data.object as Stripe.Checkout.Session;
+          
+          // Extract metadata
+          const userId = Number(session.metadata?.userId);
+          const planName = session.metadata?.planName;
+          
+          if (!userId || !planName) {
+            return res.status(400).json({ message: "Missing metadata in session" });
+          }
+          
+          // Get the user
+          const user = await storage.getUser(userId);
+          if (!user) {
+            return res.status(404).json({ message: "User not found" });
+          }
+          
+          // Get subscription from Stripe
+          const subscriptionId = session.subscription as string;
+          const subscription = await stripe!.subscriptions.retrieve(subscriptionId);
+          
+          // Get the plan from the subscription's metadata
+          const plans = await storage.getSubscriptionPlans();
+          const plan = plans.find(p => p.name === planName);
+          
+          if (!plan) {
+            return res.status(404).json({ message: "Plan not found" });
+          }
+          
+          // Extract customer ID
+          const customerId = session.customer as string;
+          
+          // Update user in database with Stripe info
+          await storage.updateUserStripeInfo(userId, {
+            customerId,
+            subscriptionId
+          });
+          
+          // Create or update the subscription in our database
+          const now = new Date();
+          const endDate = new Date();
+          endDate.setSeconds(endDate.getSeconds() + subscription.current_period_end);
+          
+          await storage.createUserSubscription({
+            userId,
+            planId: plan.id,
+            status: subscription.status,
+            currentPeriodStart: now,
+            currentPeriodEnd: endDate,
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            paymentMethod: 'stripe',
+            paymentProviderCustomerId: customerId,
+            paymentProviderSubscriptionId: subscriptionId,
+          });
+          
+          // Update user's plan
+          await storage.updateUserPlan(userId, planName);
+          
+          break;
+        }
+        
+        case 'customer.subscription.updated': {
+          const stripeSubscription = event.data.object as Stripe.Subscription;
+          
+          // Find subscription in our database
+          const allSubscriptions = await storage.getAllSubscriptions();
+          const subscription = allSubscriptions.find(
+            s => s.paymentProviderSubscriptionId === stripeSubscription.id
+          );
+          
+          if (subscription) {
+            // Update subscription status
+            await storage.updateUserSubscription(subscription.id, {
+              status: stripeSubscription.status,
+              cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+            });
+          }
+          
+          break;
+        }
+        
+        case 'customer.subscription.deleted': {
+          const stripeSubscription = event.data.object as Stripe.Subscription;
+          
+          // Find subscription in our database
+          const allSubscriptions = await storage.getAllSubscriptions();
+          const subscription = allSubscriptions.find(
+            s => s.paymentProviderSubscriptionId === stripeSubscription.id
+          );
+          
+          if (subscription) {
+            // Update subscription status
+            await storage.updateUserSubscription(subscription.id, {
+              status: 'canceled',
+              cancelAtPeriodEnd: false,
+            });
+            
+            // If this is the user's current subscription, downgrade them to free tier
+            const user = await storage.getUser(subscription.userId);
+            if (user && user.stripeSubscriptionId === stripeSubscription.id) {
+              await storage.updateUserPlan(subscription.userId, 'apprentice');
+            }
+          }
+          
+          break;
+        }
+      }
+      
+      res.status(200).json({ received: true });
+    } catch (error: any) {
+      console.error('Stripe webhook error:', error);
+      return res.status(400).json({ message: error.message });
     }
   });
 

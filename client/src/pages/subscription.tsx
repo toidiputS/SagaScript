@@ -28,10 +28,39 @@ export default function SubscriptionPage() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
+  const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
+  
+  // Check for Stripe success/cancel parameters
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('subscription') === 'success') {
+      toast({
+        title: 'Subscription successful!',
+        description: 'Your subscription has been activated.',
+        variant: 'default'
+      });
+      
+      // Clean URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Refresh user data
+      refreshUser();
+    } else if (query.get('canceled') === 'true') {
+      toast({
+        title: 'Subscription canceled',
+        description: 'Your subscription process was canceled.',
+        variant: 'destructive'
+      });
+      
+      // Clean URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
   
   const currentTier = (user?.plan || 'apprentice') as SubscriptionTier;
   
-  // Mock subscription features based on tier
+  // Subscription features based on tier
   const tierFeatures = {
     apprentice: [
       { feature: 'Series', value: '1 series' },
@@ -78,28 +107,22 @@ export default function SubscriptionPage() {
     ]
   };
 
-  // Subscription upgrade logic
-  const subscriptionMutation = useMutation({
+  // Create Stripe checkout session
+  const createCheckoutSession = useMutation({
     mutationFn: async (tier: SubscriptionTier) => {
       return await apiRequest('POST', '/api/subscriptions', { planName: tier });
     },
-    onSuccess: async () => {
-      // Refresh user data to get updated plan
-      await refreshUser();
-      
-      // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
-      
-      toast({
-        title: 'Subscription updated',
-        description: 'Your subscription has been updated successfully.',
-        variant: 'default'
-      });
+    onSuccess: async (data) => {
+      // Redirect to Stripe checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
     },
     onError: (error) => {
+      setIsLoading(prev => ({...prev, [error.message]: false}));
       toast({
-        title: 'Error updating subscription',
-        description: error.message || 'An error occurred while updating your subscription.',
+        title: 'Error creating checkout session',
+        description: error.message || 'An error occurred while setting up the payment process.',
         variant: 'destructive'
       });
     }
@@ -115,10 +138,11 @@ export default function SubscriptionPage() {
       return;
     }
     
-    // For a real implementation, we would redirect to payment processing here
+    // Set loading state for this tier
+    setIsLoading(prev => ({...prev, [tier]: true}));
     
-    // For now, just update the subscription in our mock data
-    subscriptionMutation.mutate(tier);
+    // Create Stripe checkout session and redirect
+    createCheckoutSession.mutate(tier);
   };
 
   return (
@@ -182,10 +206,15 @@ export default function SubscriptionPage() {
                 <Button 
                   className="w-full"
                   variant={isCurrentTier ? "outline" : "default"}
-                  disabled={isCurrentTier || isLowerTier || subscriptionMutation.isPending}
+                  disabled={isCurrentTier || isLowerTier || createCheckoutSession.isPending || isLoading[tier]}
                   onClick={() => handleUpgrade(tier)}
                 >
-                  {isCurrentTier 
+                  {isLoading[tier] || (createCheckoutSession.isPending && createCheckoutSession.variables === tier) ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                      Processing...
+                    </>
+                  ) : isCurrentTier 
                     ? 'Current Plan' 
                     : isLowerTier 
                       ? 'Downgrade Not Available' 
