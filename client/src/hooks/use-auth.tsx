@@ -1,129 +1,71 @@
-import { createContext, useState, useContext, useEffect, ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { api } from '@/lib/api';
 
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  displayName: string | null;
-  avatar: string | null;
-  tier: string;
-  isAdmin: boolean;
-};
-
-type AuthContextType = {
-  user: User | null;
+interface AuthContextType {
+  user: any | null;
   isLoading: boolean;
+  register: (username: string, password: string, displayName: string) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
-  refreshUser: () => Promise<User | null>;
-};
-
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isLoading: true,
-  login: async () => {},
-  logout: () => {},
-  refreshUser: async () => null,
-});
-
-interface AuthProviderProps {
-  children: ReactNode;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [isInitializing, setIsInitializing] = useState(true);
-  const queryClient = useQueryClient();
+const AuthContext = createContext<AuthContextType | null>(null);
 
-  // Use React Query to fetch the current user
-  const { data: user, isLoading, refetch } = useQuery<User | null>({
-    queryKey: ['/api/me'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchInterval: 1000 * 60 * 15, // 15 minutes
-    throwOnError: false,
-    retry: false,
-    queryFn: async () => {
-      try {
-        const res = await fetch('/api/me', {
-          credentials: 'include',
-        });
-        
-        if (!res.ok) {
-          if (res.status === 401) {
-            return null;
-          }
-          throw new Error(`Error fetching user: ${res.statusText}`);
-        }
-        
-        return res.json();
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        return null;
-      }
-    },
-  });
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize auth state
-  useEffect(() => {
-    if (!isLoading) {
-      setIsInitializing(false);
-    }
-  }, [isLoading]);
-
-  // Login function
-  const login = async (username: string, password: string) => {
+  const register = async (username: string, password: string, displayName: string) => {
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-      
-      // Refetch user data
-      await refetch();
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      const response = await api.post('/auth/register', { username, password, displayName });
+      setUser(response.data.user);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Logout function
-  const logout = () => {
-    // Clear user from state
-    queryClient.setQueryData(['/api/me'], null);
-    
-    // Clear all query cache to ensure sensitive data isn't retained
-    queryClient.clear();
+  const login = async (username: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const response = await api.post('/auth/login', { username, password });
+      setUser(response.data.user);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Function to refresh user data
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      await api.post('/auth/logout');
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const refreshUser = async () => {
-    const { data } = await refetch();
-    return data as User | null;
-  };
-
-  const value = {
-    user: user || null,
-    isLoading: isInitializing || isLoading,
-    register,
-    login,
-    logout,
-    refreshUser,
+    try {
+      const response = await api.get('/api/me');
+      setUser(response.data);
+    } catch (error) {
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, isLoading, register, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
