@@ -19,6 +19,7 @@ import {
   insertCharacterRelationshipSchema,
   insertLocationSchema,
   insertWritingStatSchema,
+  insertTimelineEventSchema,
   type Subscription,
 } from "@shared/schema";
 import { z } from "zod";
