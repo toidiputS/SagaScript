@@ -69,7 +69,12 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative">
+      {/* Theme Toggle in the corner */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center">
