@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTheme } from "@/contexts/theme-context";
 
 interface MobileMenuProps {
@@ -129,17 +128,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 </div>
               </div>
               
-              {/* Theme Toggle and Logout */}
-              <div className="mt-4 flex gap-2">
-                <div className="flex-1 flex items-center justify-center p-2.5 border border-border rounded-md bg-card">
-                  <ThemeToggle />
-                </div>
+              {/* Logout Button */}
+              <div className="mt-4 flex">
                 <button
                   onClick={() => {
                     logoutMutation.mutate();
                     onClose();
                   }}
-                  className="flex-1 py-2.5 px-4 border border-border rounded-md text-foreground hover:bg-accent flex items-center justify-center"
+                  className="w-full py-2.5 px-4 border border-border rounded-md text-foreground hover:bg-accent flex items-center justify-center"
                 >
                   <i className="ri-logout-box-line mr-2"></i>
                   Sign Out

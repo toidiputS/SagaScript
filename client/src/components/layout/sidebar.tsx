@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTheme } from "@/contexts/theme-context";
 
 export default function Sidebar() {
@@ -34,8 +33,7 @@ export default function Sidebar() {
             </div>
             {isSidebarOpen && <span className="font-serif font-bold text-lg text-foreground">Saga Scribe</span>}
           </div>
-          <div className="flex items-center space-x-1">
-            {isSidebarOpen && <ThemeToggle />}
+          <div className="flex items-center">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-1 rounded-md text-muted-foreground hover:text-foreground"
@@ -123,8 +121,7 @@ export default function Sidebar() {
                 <p className="text-sm font-medium text-foreground">{user.displayName}</p>
                 <p className="text-xs text-muted-foreground">{user.plan} Plan</p>
               </div>
-              <div className="ml-auto flex items-center">
-                {!isSidebarOpen && <ThemeToggle />}
+              <div className="ml-auto">
                 <button
                   onClick={() => logoutMutation.mutate()}
                   className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
@@ -134,8 +131,7 @@ export default function Sidebar() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-center space-x-2">
-              <ThemeToggle />
+            <div className="flex justify-center">
               <button
                 onClick={() => logoutMutation.mutate()}
                 className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
