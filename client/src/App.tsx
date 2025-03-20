@@ -11,6 +11,8 @@ import Timeline from "@/pages/timeline";
 import Achievements from "@/pages/achievements";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import Products from "@/pages/products";
+import Checkout from "@/pages/checkout";
 import Sidebar from "@/components/layout/sidebar";
 import MobileMenu from "@/components/layout/mobile-menu";
 import { useState, useEffect } from "react";
@@ -86,6 +88,8 @@ function Router() {
           <Route path="/world" component={() => <ProtectedRoute component={World} />} />
           <Route path="/timeline" component={() => <ProtectedRoute component={Timeline} />} />
           <Route path="/achievements" component={() => <ProtectedRoute component={Achievements} />} />
+          <Route path="/products" component={() => <ProtectedRoute component={Products} />} />
+          <Route path="/checkout" component={() => <ProtectedRoute component={Checkout} />} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />

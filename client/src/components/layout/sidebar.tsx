@@ -20,6 +20,7 @@ export default function Sidebar() {
     { name: "World", path: "/world", icon: "ri-earth-line" },
     { name: "Timeline", path: "/timeline", icon: "ri-time-line" },
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
+    { name: "Products", path: "/products", icon: "ri-shopping-bag-3-line" },
   ];
 
   return (
