@@ -1,5 +1,5 @@
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { AuthProvider } from "./hooks/use-auth";
+import { AuthProvider } from "./contexts/auth-context";
 import { ThemeProvider } from "./contexts/theme-context";
 import Router from "./Router";
 
