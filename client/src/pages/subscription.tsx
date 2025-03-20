@@ -1,5 +1,5 @@
-import React from 'react';
-import { Check, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Check, X, Loader2 } from 'lucide-react';
 import { 
   Card, 
   CardContent, 
@@ -21,6 +21,8 @@ import {
 } from '@/lib/subscription';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
+import { loadStripe } from '@stripe/stripe-js';
+import { useLocation } from 'wouter';
 
 export default function SubscriptionPage() {
   const { user, refreshUser } = useAuth();

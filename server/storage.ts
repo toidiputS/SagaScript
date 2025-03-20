@@ -30,6 +30,8 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateStripeCustomerId(userId: number, customerId: string): Promise<User | undefined>;
+  updateUserStripeInfo(userId: number, data: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
   
   // Series methods
   getSeries(id: number): Promise<Series | undefined>;
@@ -385,10 +387,40 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id, 
       plan: 'apprentice',
+      email: insertUser.email || null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
       createdAt: timestamp 
     };
     this.users.set(id, user);
     return user;
+  }
+  
+  async updateStripeCustomerId(userId: number, customerId: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+    
+    const updatedUser = {
+      ...user,
+      stripeCustomerId: customerId
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUserStripeInfo(userId: number, data: { customerId: string, subscriptionId: string }): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+    
+    const updatedUser = {
+      ...user,
+      stripeCustomerId: data.customerId,
+      stripeSubscriptionId: data.subscriptionId
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 
   // Series methods
