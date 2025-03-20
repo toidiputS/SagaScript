@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { BadgeIcon, BadgeContainer } from "@/components/ui/badge-icon";
 
 interface Achievement {
   id: number;
@@ -23,50 +24,6 @@ interface AchievementsDisplayProps {
 }
 
 export default function AchievementsDisplay({ achievements }: AchievementsDisplayProps) {
-  // Color mappings based on achievement types
-  const typeColorMap = {
-    streak: {
-      bgClass: "bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-900 spooky:bg-yellow-950/40 spooky:border-yellow-900/70",
-      borderClass: "border-yellow-100",
-      bgIconClass: "bg-yellow-100 dark:bg-yellow-900 spooky:bg-yellow-900/50",
-      iconColorClass: "text-yellow-500 dark:text-yellow-400 spooky:text-yellow-400"
-    },
-    chapters: {
-      bgClass: "bg-blue-50 dark:bg-blue-950 dark:border-blue-900 spooky:bg-blue-950/40 spooky:border-blue-900/70",
-      borderClass: "border-blue-100",
-      bgIconClass: "bg-blue-100 dark:bg-blue-900 spooky:bg-blue-900/50",
-      iconColorClass: "text-blue-500 dark:text-blue-400 spooky:text-blue-400"
-    },
-    characters: {
-      bgClass: "bg-green-50 dark:bg-green-950 dark:border-green-900 spooky:bg-green-950/40 spooky:border-green-900/70",
-      borderClass: "border-green-100",
-      bgIconClass: "bg-green-100 dark:bg-green-900 spooky:bg-green-900/50",
-      iconColorClass: "text-green-500 dark:text-green-400 spooky:text-green-400"
-    },
-    locations: {
-      bgClass: "bg-purple-50 dark:bg-purple-950 dark:border-purple-900 spooky:bg-purple-950/40 spooky:border-purple-900/70",
-      borderClass: "border-purple-100",
-      bgIconClass: "bg-purple-100 dark:bg-purple-900 spooky:bg-purple-900/50",
-      iconColorClass: "text-purple-500 dark:text-purple-400 spooky:text-purple-400"
-    },
-    words: {
-      bgClass: "bg-red-50 dark:bg-red-950 dark:border-red-900 spooky:bg-red-950/40 spooky:border-red-900/70",
-      borderClass: "border-red-100",
-      bgIconClass: "bg-red-100 dark:bg-red-900 spooky:bg-red-900/50",
-      iconColorClass: "text-red-500 dark:text-red-400 spooky:text-red-400"
-    }
-  };
-  
-  // Get default styling if achievement type is not in map
-  const getColorClasses = (type: string) => {
-    return typeColorMap[type as keyof typeof typeColorMap] || {
-      bgClass: "bg-gray-50 dark:bg-gray-900 dark:border-gray-800 spooky:bg-gray-900/40 spooky:border-gray-800/70",
-      borderClass: "border-gray-100",
-      bgIconClass: "bg-gray-100 dark:bg-gray-800 spooky:bg-gray-800/50",
-      iconColorClass: "text-gray-500 dark:text-gray-400 spooky:text-gray-400"
-    };
-  };
-  
   // Check if there are no achievements
   if (!achievements || achievements.length === 0) {
     return (
@@ -101,29 +58,54 @@ export default function AchievementsDisplay({ achievements }: AchievementsDispla
       </CardHeader>
       <CardContent className="p-5">
         {recentAchievements.map((item, index) => {
-          const { bgClass, borderClass, bgIconClass, iconColorClass } = getColorClasses(item.achievement.type);
           const isNew = new Date(item.earnedAt).getTime() > Date.now() - 86400000; // 24 hours
           
           return (
             <div 
               key={item.id} 
-              className={`flex items-center p-3 ${bgClass} rounded-lg mb-3 ${borderClass} border`}
+              className="flex items-center p-3 rounded-lg mb-3 border bg-card/50"
             >
-              <div className={`p-2 ${bgIconClass} rounded-full`}>
-                <i className={`${item.achievement.icon} ${iconColorClass}`}></i>
-              </div>
+              <BadgeIcon
+                variant={item.achievement.type as any}
+                state="earned"
+                size="md"
+                icon={item.achievement.icon}
+              />
               <div className="ml-3">
-                <p className="font-medium text-foreground">{item.achievement.name}</p>
+                <p className="font-medium text-foreground flex items-center">
+                  {item.achievement.name}
+                  {isNew && (
+                    <span className="ml-2 text-xs bg-yellow-100 dark:bg-yellow-950/50 text-yellow-800 dark:text-yellow-300 py-1 px-2 rounded-full font-medium">NEW</span>
+                  )}
+                </p>
                 <p className="text-xs text-muted-foreground">{item.achievement.description}</p>
               </div>
-              {isNew && (
-                <div className="ml-auto">
-                  <span className="text-xs text-yellow-600 dark:text-yellow-400 spooky:text-yellow-400 font-medium">NEW</span>
-                </div>
-              )}
             </div>
           );
         })}
+        
+        {achievements.length > 3 && (
+          <div className="flex items-center justify-center mt-3 mb-2">
+            <BadgeContainer>
+              {sortedAchievements.slice(3, 7).map(item => (
+                <BadgeIcon
+                  key={item.id}
+                  variant={item.achievement.type as any}
+                  state="earned"
+                  size="sm"
+                  icon={item.achievement.icon}
+                  tooltipText={item.achievement.name}
+                />
+              ))}
+              
+              {achievements.length > 7 && (
+                <div className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 spooky:bg-gray-800/50 h-8 w-8 text-sm text-gray-500 dark:text-gray-400">
+                  +{achievements.length - 7}
+                </div>
+              )}
+            </BadgeContainer>
+          </div>
+        )}
         
         <Button 
           variant="link" 

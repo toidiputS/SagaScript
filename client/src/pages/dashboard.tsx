@@ -3,6 +3,8 @@ import SeriesProgress from "@/components/dashboard/series-progress";
 import ChapterList from "@/components/dashboard/chapter-list";
 import WriterCompanion from "@/components/dashboard/writer-companion";
 import AchievementsDisplay from "@/components/dashboard/achievements-display";
+import BadgeProgression from "@/components/dashboard/badge-progression";
+import BadgeShowcase from "@/components/dashboard/badge-showcase";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { useQuery } from "@tanstack/react-query";
@@ -62,10 +64,10 @@ export default function Dashboard() {
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-neutral-800">
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
               Welcome back, {user?.displayName?.split(' ')[0] || 'Author'}
             </h1>
-            <p className="text-neutral-600 mt-1">Your writing journey continues today</p>
+            <p className="text-muted-foreground mt-1">Your writing journey continues today</p>
           </div>
           <div className="mt-4 md:mt-0">
             <button 
@@ -110,17 +112,25 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Badge Progression */}
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          <BadgeShowcase 
+            title="Your Badges" 
+            maxShown={6}
+          />
+        </div>
+        
         {/* Current Project & Companion */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Current Project */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
-            <div className="border-b border-neutral-200 px-5 py-4 flex justify-between items-center">
-              <h2 className="font-serif font-bold text-lg text-neutral-800">Current Project</h2>
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 spooky:bg-gray-800/90 rounded-lg shadow-sm border border-neutral-200 dark:border-gray-700 spooky:border-gray-700/70 overflow-hidden">
+            <div className="border-b border-neutral-200 dark:border-gray-700 spooky:border-gray-700/70 px-5 py-4 flex justify-between items-center">
+              <h2 className="font-serif font-bold text-lg text-foreground">Current Project</h2>
               <div className="flex space-x-2">
-                <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
+                <button className="p-1.5 rounded hover:bg-neutral-100 dark:hover:bg-gray-700 spooky:hover:bg-gray-700/80 text-neutral-500">
                   <i className="ri-edit-line"></i>
                 </button>
-                <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
+                <button className="p-1.5 rounded hover:bg-neutral-100 dark:hover:bg-gray-700 spooky:hover:bg-gray-700/80 text-neutral-500">
                   <i className="ri-more-2-fill"></i>
                 </button>
               </div>
@@ -130,7 +140,7 @@ export default function Dashboard() {
               <ChapterList series={currentSeries} />
             ) : (
               <div className="p-5 text-center">
-                <p className="text-neutral-600">No active series selected</p>
+                <p className="text-muted-foreground">No active series selected</p>
                 <button 
                   onClick={() => window.location.href = '/series'}
                   className="mt-4 text-primary hover:text-primary-dark flex items-center justify-center text-sm font-medium mx-auto"
@@ -146,6 +156,12 @@ export default function Dashboard() {
             {/* AI Companion */}
             <WriterCompanion />
 
+            {/* Badge Progression */}
+            <BadgeProgression 
+              limit={3}
+              showViewAll={true}
+            />
+            
             {/* Recent Achievements */}
             <AchievementsDisplay achievements={userAchievements} />
           </div>
