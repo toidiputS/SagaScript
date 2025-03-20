@@ -1300,5 +1300,165 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Timeline Event routes
+  app.get("/api/series/:seriesId/timeline", isAuthenticated, async (req, res) => {
+    try {
+      const seriesId = parseInt(req.params.seriesId);
+      const series = await storage.getSeries(seriesId);
+      
+      if (!series) {
+        return res.status(404).json({ message: "Series not found" });
+      }
+      
+      // Check ownership
+      if (series.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const timelineEvents = await storage.getTimelineEventsBySeries(seriesId);
+      res.status(200).json(timelineEvents);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching timeline events" });
+    }
+  });
+
+  app.get("/api/books/:bookId/timeline", isAuthenticated, async (req, res) => {
+    try {
+      const bookId = parseInt(req.params.bookId);
+      const book = await storage.getBook(bookId);
+      
+      if (!book) {
+        return res.status(404).json({ message: "Book not found" });
+      }
+      
+      // Check series ownership
+      const series = await storage.getSeries(book.seriesId);
+      if (series?.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const timelineEvents = await storage.getTimelineEventsByBook(bookId);
+      res.status(200).json(timelineEvents);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching timeline events" });
+    }
+  });
+
+  app.get("/api/characters/:characterId/timeline", isAuthenticated, async (req, res) => {
+    try {
+      const characterId = parseInt(req.params.characterId);
+      const character = await storage.getCharacter(characterId);
+      
+      if (!character) {
+        return res.status(404).json({ message: "Character not found" });
+      }
+      
+      // Check series ownership
+      const series = await storage.getSeries(character.seriesId);
+      if (series?.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const timelineEvents = await storage.getTimelineEventsByCharacter(characterId);
+      res.status(200).json(timelineEvents);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching timeline events" });
+    }
+  });
+
+  app.post("/api/timeline-events", isAuthenticated, async (req, res) => {
+    try {
+      const eventData = insertTimelineEventSchema.parse(req.body);
+      
+      // Check series ownership
+      const series = await storage.getSeries(eventData.seriesId);
+      if (!series) {
+        return res.status(404).json({ message: "Series not found" });
+      }
+      
+      if (series.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const newEvent = await storage.createTimelineEvent(eventData);
+      res.status(201).json(newEvent);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.message });
+      }
+      res.status(500).json({ message: "Error creating timeline event" });
+    }
+  });
+
+  app.put("/api/timeline-events/:id", isAuthenticated, async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const event = await storage.getTimelineEvent(eventId);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Timeline event not found" });
+      }
+      
+      // Check series ownership
+      const series = await storage.getSeries(event.seriesId);
+      if (series?.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const updatedEvent = await storage.updateTimelineEvent(eventId, req.body);
+      res.status(200).json(updatedEvent);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating timeline event" });
+    }
+  });
+
+  app.delete("/api/timeline-events/:id", isAuthenticated, async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const event = await storage.getTimelineEvent(eventId);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Timeline event not found" });
+      }
+      
+      // Check series ownership
+      const series = await storage.getSeries(event.seriesId);
+      if (series?.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      await storage.deleteTimelineEvent(eventId);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting timeline event" });
+    }
+  });
+
+  app.post("/api/timeline-events/reorder", isAuthenticated, async (req, res) => {
+    try {
+      const { events } = req.body;
+      
+      if (!Array.isArray(events) || events.length === 0) {
+        return res.status(400).json({ message: "Invalid events data" });
+      }
+      
+      // Check ownership of the first event's series (assuming all events belong to same series)
+      const firstEvent = await storage.getTimelineEvent(events[0].id);
+      if (!firstEvent) {
+        return res.status(404).json({ message: "Timeline event not found" });
+      }
+      
+      const series = await storage.getSeries(firstEvent.seriesId);
+      if (series?.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      await storage.updateTimelineEventPositions(events);
+      res.status(200).json({ message: "Timeline events reordered successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Error reordering timeline events" });
+    }
+  });
+
   return httpServer;
 }
