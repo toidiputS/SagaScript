@@ -25,7 +25,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const [, navigate] = useLocation();
-  const { register: registerUser, isLoading } = useAuth();
+  const { register, isLoading } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm<RegisterFormValues>({
@@ -41,7 +41,7 @@ export default function Register() {
   const onSubmit = async (values: RegisterFormValues) => {
     try {
       setFormError(null);
-      await registerUser(values.username, values.password, values.displayName);
+      await register(values.username, values.password, values.displayName);
       navigate("/");
     } catch (error) {
       if (error instanceof Error) {
