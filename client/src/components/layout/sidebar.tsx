@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTheme } from "@/contexts/theme-context";
@@ -8,7 +8,7 @@ import { useTheme } from "@/contexts/theme-context";
 export default function Sidebar() {
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { currentSeries } = useSeries();
   const { theme } = useTheme();
 
@@ -126,7 +126,7 @@ export default function Sidebar() {
               <div className="ml-auto flex items-center">
                 {!isSidebarOpen && <ThemeToggle />}
                 <button
-                  onClick={logout}
+                  onClick={() => logoutMutation.mutate()}
                   className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
                 >
                   <i className="ri-logout-box-line"></i>
@@ -137,7 +137,7 @@ export default function Sidebar() {
             <div className="flex justify-center space-x-2">
               <ThemeToggle />
               <button
-                onClick={logout}
+                onClick={() => logoutMutation.mutate()}
                 className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
               >
                 <i className="ri-logout-box-line"></i>

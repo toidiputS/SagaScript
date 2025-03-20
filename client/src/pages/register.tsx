@@ -45,19 +45,26 @@ export default function Register() {
       setIsLoading(true);
       setFormError(null);
       
-      // Simulate registration
-      setTimeout(() => {
-        // Mock successful registration
-        localStorage.setItem("user", JSON.stringify({
-          id: 1,
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           username: values.username,
+          password: values.password,
           displayName: values.displayName,
-          plan: 'free'
-        }));
-        
-        setIsLoading(false);
-        navigate("/");
-      }, 1000);
+        }),
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+      
+      setIsLoading(false);
+      navigate("/");
     } catch (error) {
       setIsLoading(false);
       if (error instanceof Error) {

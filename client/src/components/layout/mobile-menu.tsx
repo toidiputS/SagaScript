@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTheme } from "@/contexts/theme-context";
@@ -11,7 +11,7 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { currentSeries } = useSeries();
 
   // Navigation links
@@ -136,7 +136,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 </div>
                 <button
                   onClick={() => {
-                    logout();
+                    logoutMutation.mutate();
                     onClose();
                   }}
                   className="flex-1 py-2.5 px-4 border border-border rounded-md text-foreground hover:bg-accent flex items-center justify-center"

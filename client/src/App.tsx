@@ -15,31 +15,10 @@ import Products from "@/pages/products";
 import Checkout from "@/pages/checkout";
 import Sidebar from "@/components/layout/sidebar";
 import MobileMenu from "@/components/layout/mobile-menu";
-import { useState, useEffect } from "react";
-import { AuthProvider, useAuth } from "@/contexts/auth-context";
+import { useState } from "react";
+import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const [location, setLocation] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
-  
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      setLocation("/login");
-    }
-  }, [isAuthenticated, isLoading, setLocation]);
-  
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    return null;
-  }
-  
-  return <Component />;
-}
+import { ProtectedRoute } from "@/lib/protected-route";
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -82,14 +61,14 @@ function Router() {
           <Route path="/register" component={Register} />
           
           {/* Protected routes */}
-          <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
-          <Route path="/series" component={() => <ProtectedRoute component={Series} />} />
-          <Route path="/characters" component={() => <ProtectedRoute component={Characters} />} />
-          <Route path="/world" component={() => <ProtectedRoute component={World} />} />
-          <Route path="/timeline" component={() => <ProtectedRoute component={Timeline} />} />
-          <Route path="/achievements" component={() => <ProtectedRoute component={Achievements} />} />
-          <Route path="/products" component={() => <ProtectedRoute component={Products} />} />
-          <Route path="/checkout" component={() => <ProtectedRoute component={Checkout} />} />
+          <ProtectedRoute path="/" component={() => <Dashboard />} />
+          <ProtectedRoute path="/series" component={() => <Series />} />
+          <ProtectedRoute path="/characters" component={() => <Characters />} />
+          <ProtectedRoute path="/world" component={() => <World />} />
+          <ProtectedRoute path="/timeline" component={() => <Timeline />} />
+          <ProtectedRoute path="/achievements" component={() => <Achievements />} />
+          <ProtectedRoute path="/products" component={() => <Products />} />
+          <ProtectedRoute path="/checkout" component={() => <Checkout />} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />

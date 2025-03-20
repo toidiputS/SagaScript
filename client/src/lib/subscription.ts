@@ -1,4 +1,4 @@
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/hooks/use-auth';
 
 // Define subscription tiers in order of increasing capabilities
 export const SUBSCRIPTION_TIERS = ['apprentice', 'wordsmith', 'loremaster', 'legendary'] as const;

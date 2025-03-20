@@ -3,7 +3,7 @@ import SeriesProgress from "@/components/dashboard/series-progress";
 import ChapterList from "@/components/dashboard/chapter-list";
 import WriterCompanion from "@/components/dashboard/writer-companion";
 import AchievementsDisplay from "@/components/dashboard/achievements-display";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
