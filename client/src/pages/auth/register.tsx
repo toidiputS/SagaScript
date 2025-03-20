@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link } from "@/components/ui/link";
-import { ThemeToggle } from "../../components/ui/theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const registerSchema = z.object({
   displayName: z.string().min(2, "Display name must be at least 2 characters"),
@@ -54,33 +54,16 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground mr-2">
-              <i className="ri-quill-pen-line text-xl"></i>
-            </div>
-            <h1 className="font-serif font-bold text-3xl text-foreground">Saga Scribe</h1>
-          </div>
-          <p className="mt-2 text-muted-foreground">The Ultimate Series Author's Companion</p>
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold tracking-tight">Create Account</h1>
+          <p className="mt-2 text-muted-foreground">Get started with Saga Scribe</p>
         </div>
 
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-foreground">Create Your Account</CardTitle>
-            <CardDescription>Start your writing journey today</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {formError && (
-              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md text-sm">
-                {formError}
-              </div>
-            )}
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <Card>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <CardContent className="space-y-4 pt-6">
                 <FormField
                   control={form.control}
                   name="displayName"
@@ -133,27 +116,23 @@ export default function Register() {
                     </FormItem>
                   )}
                 />
+                {formError && (
+                  <div className="text-sm text-destructive">{formError}</div>
+                )}
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-4">
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <span className="mr-2">Creating account</span>
-                      <div className="h-4 w-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin"></div>
-                    </>
-                  ) : (
-                    "Register"
-                  )}
+                  {isLoading ? "Creating account..." : "Create account"}
                 </Button>
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
-                Login
-              </Link>
-            </p>
-          </CardFooter>
+                <div className="text-sm text-muted-foreground text-center">
+                  Already have an account?{" "}
+                  <Link href="/login" className="text-primary hover:underline">
+                    Sign in
+                  </Link>
+                </div>
+              </CardFooter>
+            </form>
+          </Form>
         </Card>
       </div>
     </div>
