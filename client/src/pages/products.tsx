@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, BookOpen, Crown, Gift, Lightbulb, Palette, ShieldCheck } from 'lucide-react';
+import { BookOpen, Crown, Gift, Info, Lightbulb, Palette, ShieldCheck } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -95,17 +95,8 @@ export default function ProductsPage() {
   ];
 
   const handlePurchase = (product: Product) => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please login to make a purchase",
-        variant: "destructive",
-      });
-      setLocation('/login');
-      return;
-    }
-    
-    // Navigate to checkout with product details
+    // Allow viewing products without being logged in
+    // Just redirect to checkout - the ProtectedRoute there will handle auth
     setLocation(`/checkout?productId=${product.id}&amount=${product.price}`);
   };
 
@@ -119,12 +110,12 @@ export default function ProductsPage() {
       </div>
 
       {!user && (
-        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-8 flex items-start">
-          <AlertCircle className="text-amber-600 dark:text-amber-400 mr-3 mt-0.5 shrink-0" />
+        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-8 flex items-start">
+          <Info className="text-blue-600 dark:text-blue-400 mr-3 mt-0.5 shrink-0" />
           <div>
-            <h3 className="font-medium text-amber-800 dark:text-amber-300">Login Required</h3>
-            <p className="text-amber-700 dark:text-amber-400 text-sm">
-              You need to be logged in to make purchases. <Button variant="link" className="h-auto p-0 text-amber-800 dark:text-amber-300 underline" onClick={() => setLocation('/login')}>Login now</Button>
+            <h3 className="font-medium text-blue-800 dark:text-blue-300">Browse Products</h3>
+            <p className="text-blue-700 dark:text-blue-400 text-sm">
+              You can browse all products without logging in. You'll be prompted to log in or register when you proceed to checkout. <Button variant="link" className="h-auto p-0 text-blue-800 dark:text-blue-300 underline" onClick={() => setLocation('/login')}>Login now</Button>
             </p>
           </div>
         </div>
@@ -159,7 +150,6 @@ export default function ProductsPage() {
               <Button 
                 className="w-full" 
                 onClick={() => handlePurchase(product)}
-                disabled={!user}
               >
                 Purchase Now
               </Button>
