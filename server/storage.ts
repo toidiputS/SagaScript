@@ -130,6 +130,8 @@ export class MemStorage implements IStorage {
     writingStat: number;
     achievement: number;
     userAchievement: number;
+    subscriptionPlan: number;
+    subscription: number;
   };
 
   constructor() {
@@ -143,6 +145,8 @@ export class MemStorage implements IStorage {
     this.writingStats = new Map();
     this.achievements = new Map();
     this.userAchievements = new Map();
+    this.subscriptionPlans = new Map();
+    this.subscriptions = new Map();
     
     this.currentIds = {
       user: 1,
@@ -154,11 +158,16 @@ export class MemStorage implements IStorage {
       location: 1,
       writingStat: 1,
       achievement: 1,
-      userAchievement: 1
+      userAchievement: 1,
+      subscriptionPlan: 1,
+      subscription: 1
     };
     
     // Initialize sample achievements
     this.initializeAchievements();
+    
+    // Initialize subscription plans
+    this.initializeSubscriptionPlans();
   }
 
   // Initialize predefined achievements
@@ -695,6 +704,199 @@ export class MemStorage implements IStorage {
     }
     
     return newAchievements;
+  }
+
+  // Initialize predefined subscription plans
+  private initializeSubscriptionPlans() {
+    const plans: InsertSubscriptionPlan[] = [
+      {
+        name: "free",
+        description: "Free tier with basic features",
+        price: 0,
+        billingInterval: "monthly",
+        features: ["1 series", "3 books per series", "10 characters per series"],
+        limits: {
+          maxSeries: 1,
+          maxBooksPerSeries: 3,
+          maxCharactersPerSeries: 10,
+          maxLocationsPerSeries: 5,
+          aiSuggestions: false
+        }
+      },
+      {
+        name: "pro",
+        description: "Professional tier with advanced features",
+        price: 999, // $9.99
+        billingInterval: "monthly",
+        features: [
+          "Unlimited series", 
+          "Unlimited books per series", 
+          "Unlimited characters",
+          "AI writing assistant",
+          "Advanced world building tools"
+        ],
+        limits: {
+          maxSeries: -1, // unlimited
+          maxBooksPerSeries: -1, // unlimited
+          maxCharactersPerSeries: -1, // unlimited
+          maxLocationsPerSeries: -1, // unlimited
+          aiSuggestions: true
+        }
+      },
+      {
+        name: "premium",
+        description: "Premium tier with all features",
+        price: 1999, // $19.99
+        billingInterval: "monthly",
+        features: [
+          "Everything in Pro",
+          "Priority support",
+          "Advanced AI story plotting",
+          "Character evolution tracking",
+          "Advanced analytics"
+        ],
+        limits: {
+          maxSeries: -1, // unlimited
+          maxBooksPerSeries: -1, // unlimited
+          maxCharactersPerSeries: -1, // unlimited
+          maxLocationsPerSeries: -1, // unlimited
+          aiSuggestions: true,
+          prioritySupport: true,
+          advancedAnalytics: true
+        }
+      }
+    ];
+    
+    plans.forEach(plan => {
+      this.createSubscriptionPlan(plan);
+    });
+  }
+
+  // Subscription Plan methods
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return Array.from(this.subscriptionPlans.values());
+  }
+
+  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
+    return this.subscriptionPlans.get(id);
+  }
+
+  async createSubscriptionPlan(insertPlan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
+    const id = this.currentIds.subscriptionPlan++;
+    const timestamp = new Date();
+    const plan: SubscriptionPlan = {
+      ...insertPlan,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.subscriptionPlans.set(id, plan);
+    return plan;
+  }
+
+  async updateSubscriptionPlan(id: number, updates: Partial<SubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
+    const existingPlan = this.subscriptionPlans.get(id);
+    if (!existingPlan) return undefined;
+    
+    const updatedPlan: SubscriptionPlan = {
+      ...existingPlan,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.subscriptionPlans.set(id, updatedPlan);
+    return updatedPlan;
+  }
+
+  async deleteSubscriptionPlan(id: number): Promise<boolean> {
+    return this.subscriptionPlans.delete(id);
+  }
+
+  // User Subscription methods
+  async getUserSubscription(userId: number): Promise<Subscription | undefined> {
+    return Array.from(this.subscriptions.values()).find(
+      sub => sub.userId === userId && sub.status === 'active'
+    );
+  }
+
+  async createUserSubscription(insertSubscription: InsertSubscription): Promise<Subscription> {
+    // Cancel any existing active subscription
+    const existingSubscription = await this.getUserSubscription(insertSubscription.userId);
+    if (existingSubscription) {
+      await this.cancelUserSubscription(existingSubscription.id);
+    }
+    
+    const id = this.currentIds.subscription++;
+    const timestamp = new Date();
+    const subscription: Subscription = {
+      ...insertSubscription,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.subscriptions.set(id, subscription);
+    
+    // Update user's plan
+    const plan = await this.getSubscriptionPlan(insertSubscription.planId);
+    if (plan) {
+      await this.updateUserPlan(insertSubscription.userId, plan.name);
+    }
+    
+    return subscription;
+  }
+
+  async updateUserSubscription(id: number, updates: Partial<Subscription>): Promise<Subscription | undefined> {
+    const existingSubscription = this.subscriptions.get(id);
+    if (!existingSubscription) return undefined;
+    
+    const updatedSubscription: Subscription = {
+      ...existingSubscription,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.subscriptions.set(id, updatedSubscription);
+    
+    // If updating the plan, also update the user's plan field
+    if (updates.planId) {
+      const plan = await this.getSubscriptionPlan(updates.planId);
+      if (plan) {
+        await this.updateUserPlan(existingSubscription.userId, plan.name);
+      }
+    }
+    
+    return updatedSubscription;
+  }
+
+  async cancelUserSubscription(id: number): Promise<Subscription | undefined> {
+    const subscription = this.subscriptions.get(id);
+    if (!subscription) return undefined;
+    
+    const updatedSubscription: Subscription = {
+      ...subscription,
+      status: 'canceled',
+      cancelAtPeriodEnd: true,
+      updatedAt: new Date()
+    };
+    
+    this.subscriptions.set(id, updatedSubscription);
+    
+    // Don't downgrade the user's plan immediately, let them keep their benefits until the end of the billing period
+    
+    return updatedSubscription;
+  }
+
+  async updateUserPlan(userId: number, planName: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    const updatedUser: User = {
+      ...user,
+      plan: planName
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 }
 
