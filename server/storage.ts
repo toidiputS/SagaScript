@@ -22,7 +22,9 @@ import {
   type SubscriptionPlan,
   type InsertSubscriptionPlan,
   type Subscription,
-  type InsertSubscription
+  type InsertSubscription,
+  type TimelineEvent,
+  type InsertTimelineEvent
 } from "@shared/schema";
 
 export interface IStorage {
@@ -131,6 +133,7 @@ export class MemStorage implements IStorage {
   private userAchievements: Map<number, UserAchievement>;
   private subscriptionPlans: Map<number, SubscriptionPlan>;
   private subscriptions: Map<number, Subscription>;
+  private timelineEvents: Map<number, TimelineEvent>;
   
   private currentIds: {
     user: number;
@@ -145,6 +148,7 @@ export class MemStorage implements IStorage {
     userAchievement: number;
     subscriptionPlan: number;
     subscription: number;
+    timelineEvent: number;
   };
 
   constructor() {
@@ -160,6 +164,7 @@ export class MemStorage implements IStorage {
     this.userAchievements = new Map();
     this.subscriptionPlans = new Map();
     this.subscriptions = new Map();
+    this.timelineEvents = new Map();
     
     this.currentIds = {
       user: 1,
@@ -173,7 +178,8 @@ export class MemStorage implements IStorage {
       achievement: 1,
       userAchievement: 1,
       subscriptionPlan: 1,
-      subscription: 1
+      subscription: 1,
+      timelineEvent: 1
     };
     
     // Initialize sample achievements
@@ -1173,6 +1179,73 @@ export class MemStorage implements IStorage {
     
     this.users.set(userId, updatedUser);
     return updatedUser;
+  }
+
+  // Timeline Event methods
+  async getTimelineEvent(id: number): Promise<TimelineEvent | undefined> {
+    return this.timelineEvents.get(id);
+  }
+
+  async getTimelineEventsBySeries(seriesId: number): Promise<TimelineEvent[]> {
+    return Array.from(this.timelineEvents.values())
+      .filter(event => event.seriesId === seriesId)
+      .sort((a, b) => a.position - b.position);
+  }
+
+  async getTimelineEventsByBook(bookId: number): Promise<TimelineEvent[]> {
+    return Array.from(this.timelineEvents.values())
+      .filter(event => event.bookId === bookId)
+      .sort((a, b) => a.position - b.position);
+  }
+
+  async getTimelineEventsByCharacter(characterId: number): Promise<TimelineEvent[]> {
+    return Array.from(this.timelineEvents.values())
+      .filter(event => {
+        const charIds = event.characterIds as number[];
+        return charIds.includes(characterId);
+      })
+      .sort((a, b) => a.position - b.position);
+  }
+
+  async createTimelineEvent(insertEvent: InsertTimelineEvent): Promise<TimelineEvent> {
+    const id = this.currentIds.timelineEvent++;
+    const timestamp = new Date();
+    const event: TimelineEvent = {
+      ...insertEvent,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.timelineEvents.set(id, event);
+    return event;
+  }
+
+  async updateTimelineEvent(id: number, updates: Partial<TimelineEvent>): Promise<TimelineEvent | undefined> {
+    const existingEvent = this.timelineEvents.get(id);
+    if (!existingEvent) return undefined;
+    
+    const updatedEvent: TimelineEvent = {
+      ...existingEvent,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.timelineEvents.set(id, updatedEvent);
+    return updatedEvent;
+  }
+
+  async deleteTimelineEvent(id: number): Promise<boolean> {
+    return this.timelineEvents.delete(id);
+  }
+
+  async updateTimelineEventPositions(events: { id: number, position: number }[]): Promise<boolean> {
+    for (const { id, position } of events) {
+      const event = this.timelineEvents.get(id);
+      if (event) {
+        this.timelineEvents.set(id, { ...event, position, updatedAt: new Date() });
+      }
+    }
+    return true;
   }
 }
 
