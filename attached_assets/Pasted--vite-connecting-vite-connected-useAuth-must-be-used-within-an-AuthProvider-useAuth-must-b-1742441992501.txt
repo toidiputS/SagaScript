@@ -1,0 +1,34 @@
+[vite] connecting...
+[vite] connected.
+useAuth must be used within an AuthProvider
+useAuth must be used within an AuthProvider
+The above error occurred in the <Register> component:
+
+    at Register (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/pages/auth/register.tsx:41:24)
+    at Route (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=692547ef:323:16)
+    at Switch (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=692547ef:379:17)
+    at Router
+    at ThemeProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/theme-context.tsx:20:33)
+    at AuthProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/hooks/use-auth.jsx:29:32)
+    at QueryClientProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=692547ef:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+at Register (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/pages/auth/register.tsx:41:24)
+at Route (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=692547ef:323:16)
+at Switch (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=692547ef:379:17)
+at Router
+at ThemeProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/theme-context.tsx:20:33)
+at AuthProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/hooks/use-auth.jsx:29:32)
+at QueryClientProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=692547ef:2805:3)
+at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+at t.value (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+useAuth must be used within an AuthProvider
