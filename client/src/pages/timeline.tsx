@@ -257,35 +257,36 @@ export default function TimelinePage() {
 
         {/* Timeline view options */}
         <div className="border-b border-neutral-200 mb-6">
-          <Tabs 
-            defaultValue="chronological"
-            value={viewMode}
-            onValueChange={(value) => setViewMode(value as any)}
-          >
-            <TabsList className="flex">
-              <TabsTrigger value="chronological" className="px-4 py-2">Chronological</TabsTrigger>
-              <TabsTrigger value="narrative" className="px-4 py-2">Narrative</TabsTrigger>
-              <TabsTrigger value="character" className="px-4 py-2">Character-Based</TabsTrigger>
-            </TabsList>
+          <div className="flex flex-col md:flex-row md:items-center gap-4 pb-4">
+            <Tabs 
+              defaultValue="chronological"
+              value={viewMode}
+              onValueChange={(value) => setViewMode(value as any)}
+            >
+              <TabsList className="flex">
+                <TabsTrigger value="chronological" className="px-4 py-2">Chronological</TabsTrigger>
+                <TabsTrigger value="narrative" className="px-4 py-2">Narrative</TabsTrigger>
+                <TabsTrigger value="character" className="px-4 py-2">Character-Based</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-            <TabsContent value="character" className="mt-4">
-              {viewMode === "character" && characters && characters.length > 0 && (
-                <Select value={selectedCharacterId?.toString() || ""} onValueChange={handleCharacterChange}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Select character" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Characters</SelectItem>
-                    {characters.map((character) => (
-                      <SelectItem key={character.id} value={character.id.toString()}>
-                        {character.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </TabsContent>
-          </Tabs>
+            {/* Character selector shown only when in character view mode */}
+            {viewMode === "character" && characters && characters.length > 0 && (
+              <Select value={selectedCharacterId?.toString() || ""} onValueChange={handleCharacterChange}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select character" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Characters</SelectItem>
+                  {characters.map((character) => (
+                    <SelectItem key={character.id} value={character.id.toString()}>
+                      {character.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
 
         {/* Timeline Content */}

@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TimelineEvent } from "@shared/schema";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Clock, Bookmark, Edit2, Trash2, Flag } from "lucide-react";
+import { TimelineEvent } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 
 interface TimelineEventCardProps {
@@ -11,64 +11,84 @@ interface TimelineEventCardProps {
 }
 
 export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineEventCardProps) {
-  const getEventTypeColor = (eventType: string): string => {
-    switch (eventType) {
-      case 'plot':
-        return 'bg-blue-500';
-      case 'character':
-        return 'bg-green-500';
-      case 'world':
-        return 'bg-amber-500';
+  // Choose color based on event importance
+  const getImportanceColor = () => {
+    switch (event.importance) {
+      case "major":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "medium":
+        return "bg-amber-100 text-amber-800 border-amber-200";
       default:
-        return 'bg-neutral-500';
+        return "bg-blue-100 text-blue-800 border-blue-200";
     }
   };
 
-  const getImportanceClass = (importance: string): string => {
-    switch (importance) {
-      case 'major':
-        return 'bg-red-100 text-red-800 border-red-300';
-      case 'medium':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'minor':
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+  // Choose icon based on event type
+  const getEventTypeIcon = () => {
+    switch (event.eventType) {
+      case "character":
+        return <Bookmark className="h-4 w-4 mr-1" />;
+      case "world":
+        return <Flag className="h-4 w-4 mr-1" />;
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return <Clock className="h-4 w-4 mr-1" />;
     }
   };
 
   return (
-    <Card className={`border-l-4 ${event.color ? `border-l-[${event.color}]` : 'border-l-primary'}`}>
+    <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-l-4" 
+      style={{ borderLeftColor: event.color || "#6366f1" }}>
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
         <div>
-          <div className="flex items-center space-x-2 mb-1">
-            <div className={`w-3 h-3 rounded-full ${getEventTypeColor(event.eventType)}`}></div>
-            <CardTitle className="text-lg">{event.title}</CardTitle>
+          <CardTitle className="text-lg font-semibold text-foreground">
+            {event.title}
+          </CardTitle>
+          <div className="flex items-center mt-1 text-sm text-muted-foreground">
+            {event.date && (
+              <span className="flex items-center mr-3">
+                <Clock className="h-3.5 w-3.5 mr-1 opacity-70" />
+                {event.date}
+              </span>
+            )}
           </div>
-          {event.date && <div className="text-sm text-muted-foreground">{event.date}</div>}
         </div>
-        <div className="flex space-x-1">
-          <Button variant="ghost" size="icon" onClick={() => onEdit(event)}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(event.id)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-3">{event.description || "No description provided"}</p>
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="flex gap-1">
+          <Badge variant="outline" className={`${getImportanceColor()} text-xs`}>
+            {event.importance === "major" ? "Major" : event.importance === "medium" ? "Medium" : "Minor"}
+          </Badge>
           {event.isPlotPoint && (
-            <Badge variant="outline" className="bg-primary-50 text-primary border-primary">
+            <Badge variant="secondary" className="text-xs">
               Plot Point
             </Badge>
           )}
-          <Badge variant="outline" className={getImportanceClass(event.importance)}>
-            {event.importance.charAt(0).toUpperCase() + event.importance.slice(1)} Importance
-          </Badge>
         </div>
+      </CardHeader>
+      
+      <CardContent className="pb-2">
+        <p className="text-sm text-foreground">
+          {event.description || "No description provided."}
+        </p>
       </CardContent>
+      
+      <CardFooter className="pt-1 justify-between">
+        <div className="flex items-center text-xs text-muted-foreground">
+          <span className="flex items-center">
+            {getEventTypeIcon()}
+            {event.eventType === "character" ? "Character Event" : 
+             event.eventType === "world" ? "World Event" : "Plot Event"}
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
+            <Edit2 className="h-3.5 w-3.5" />
+            <span className="sr-only">Edit</span>
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onDelete(event.id)}>
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="sr-only">Delete</span>
+          </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 }
