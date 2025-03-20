@@ -130,6 +130,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error during login" });
     }
   });
+  
+  // Add the /api/login endpoint to match client expectations
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Set session
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = user;
+      
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Error during login" });
+    }
+  });
 
   app.post("/api/auth/logout", (req, res) => {
     req.session.destroy((err) => {
@@ -141,6 +173,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/auth/me", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove password from response
+      const { password, ...userWithoutPassword } = user;
+      
+      res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user data" });
+    }
+  });
+  
+  // Add the /api/user endpoint to match client expectations
+  app.get("/api/user", async (req, res) => {
     try {
       if (!req.session.userId) {
         return res.status(401).json({ message: "Not authenticated" });
