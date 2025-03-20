@@ -68,10 +68,10 @@ export default function Register() {
           <p className="mt-2 text-muted-foreground">The Ultimate Series Author's Companion</p>
         </div>
 
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Create an Account</CardTitle>
-            <CardDescription>Begin your writing journey</CardDescription>
+            <CardTitle className="text-foreground">Create Your Account</CardTitle>
+            <CardDescription>Start your writing journey today</CardDescription>
           </CardHeader>
           <CardContent>
             {formError && (
