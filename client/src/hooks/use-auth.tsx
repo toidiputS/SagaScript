@@ -113,6 +113,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = {
     user: user || null,
     isLoading: isInitializing || isLoading,
+    register,
     login,
     logout,
     refreshUser,
