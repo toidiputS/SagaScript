@@ -19,6 +19,7 @@ import {
   insertCharacterRelationshipSchema,
   insertLocationSchema,
   insertWritingStatSchema,
+  type Subscription,
 } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -1137,7 +1138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Find subscription in our database
           const allSubscriptions = await storage.getAllSubscriptions();
           const subscription = allSubscriptions.find(
-            s => s.paymentProviderSubscriptionId === stripeSubscription.id
+            (s: Subscription) => s.paymentProviderSubscriptionId === stripeSubscription.id
           );
           
           if (subscription) {
@@ -1157,7 +1158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Find subscription in our database
           const allSubscriptions = await storage.getAllSubscriptions();
           const subscription = allSubscriptions.find(
-            s => s.paymentProviderSubscriptionId === stripeSubscription.id
+            (s: Subscription) => s.paymentProviderSubscriptionId === stripeSubscription.id
           );
           
           if (subscription) {
