@@ -267,7 +267,7 @@ function RegisterForm() {
   const onSubmit = (values: RegisterFormValues) => {
     // Remove confirmPassword from the data sent to the API
     const { confirmPassword, ...registerData } = values;
-    registerMutation.mutate({ ...registerData, plan: "apprentice" });
+    registerMutation.mutate(registerData);
   };
 
   return (

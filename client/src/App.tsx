@@ -19,13 +19,14 @@ import { useState } from "react";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
+import AuthPage from "@/pages/auth-page";
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
   
   // Check if the current route is auth-related
-  const isAuthRoute = ['/login', '/register'].includes(location);
+  const isAuthRoute = ['/login', '/register', '/auth'].includes(location);
   
   return (
     <div className="h-screen flex overflow-hidden">
@@ -57,6 +58,7 @@ function Router() {
       <main className={`flex-1 overflow-y-auto bg-neutral-50 ${!isAuthRoute ? 'pt-16 md:pt-0' : ''}`}>
         <Switch>
           {/* Auth routes */}
+          <Route path="/auth" component={AuthPage} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           
