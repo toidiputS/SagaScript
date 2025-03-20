@@ -180,7 +180,7 @@ export default function AuthPage() {
 
 function LoginForm() {
   const { loginMutation } = useAuth();
-  const isPending = loginMutation.isPending;
+  const isPending = loginMutation?.isPending || false;
 
   // Initialize form
   const form = useForm<LoginFormValues>({
@@ -193,7 +193,7 @@ function LoginForm() {
 
   // Submit handler
   const onSubmit = (values: LoginFormValues) => {
-    loginMutation.mutate(values);
+    loginMutation?.mutate(values);
   };
 
   return (
@@ -250,7 +250,7 @@ function LoginForm() {
 
 function RegisterForm() {
   const { registerMutation } = useAuth();
-  const isPending = registerMutation.isPending;
+  const isPending = registerMutation?.isPending || false;
 
   // Initialize form
   const form = useForm<RegisterFormValues>({
@@ -267,7 +267,7 @@ function RegisterForm() {
   const onSubmit = (values: RegisterFormValues) => {
     // Remove confirmPassword from the data sent to the API
     const { confirmPassword, ...registerData } = values;
-    registerMutation.mutate(registerData);
+    registerMutation?.mutate(registerData);
   };
 
   return (

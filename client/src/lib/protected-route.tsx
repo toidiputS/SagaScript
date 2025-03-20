@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
-import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 export function ProtectedRoute({
   path,
@@ -9,25 +9,9 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { user, isLoading } = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
-        setIsAuthenticated(response.ok);
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        setIsAuthenticated(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return (
       <Route path={path}>
         <div className="flex items-center justify-center min-h-screen">
@@ -37,10 +21,10 @@ export function ProtectedRoute({
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <Route path={path}>
-        <Redirect to="/login" />
+        <Redirect to="/auth" />
       </Route>
     );
   }
