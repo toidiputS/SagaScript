@@ -1771,8 +1771,7 @@ export class MemStorage implements IStorage {
     const newRewardType: RewardType = {
       ...rewardType,
       id,
-      createdAt: timestamp,
-      updatedAt: timestamp
+      createdAt: timestamp
     };
     this.rewardTypes.set(id, newRewardType);
     return newRewardType;
@@ -1784,8 +1783,7 @@ export class MemStorage implements IStorage {
     
     const updated: RewardType = {
       ...existing,
-      ...updates,
-      updatedAt: new Date()
+      ...updates
     };
     
     this.rewardTypes.set(id, updated);
@@ -1815,8 +1813,7 @@ export class MemStorage implements IStorage {
     const newMilestone: WritingMilestone = {
       ...milestone,
       id,
-      createdAt: timestamp,
-      updatedAt: timestamp
+      createdAt: timestamp
     };
     this.writingMilestones.set(id, newMilestone);
     return newMilestone;
@@ -1828,8 +1825,7 @@ export class MemStorage implements IStorage {
     
     const updated: WritingMilestone = {
       ...existing,
-      ...updates,
-      updatedAt: new Date()
+      ...updates
     };
     
     this.writingMilestones.set(id, updated);
@@ -1903,7 +1899,7 @@ export class MemStorage implements IStorage {
     const updated: UserReward = {
       ...reward,
       redeemedAt: new Date(),
-      updatedAt: new Date()
+      isRedeemed: true
     };
     
     this.userRewards.set(id, updated);
