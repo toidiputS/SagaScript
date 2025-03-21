@@ -1920,7 +1920,9 @@ export class MemStorage implements IStorage {
     const id = this.currentIds.writingStreak++;
     const timestamp = new Date();
     const newStreak: WritingStreak = {
-      ...streak,
+      userId: streak.userId,
+      currentStreak: streak.currentStreak || 0,
+      longestStreak: streak.longestStreak || 0,
       id,
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -2032,17 +2034,12 @@ export class MemStorage implements IStorage {
       id,
       createdAt: timestamp,
       updatedAt: timestamp,
-      goalType: goal.goalType || 'wordCount',
-      targetValue: goal.targetValue,
       currentValue: 0,
-      isRecurring: goal.isRecurring || false,
-      recurringPeriod: goal.recurringPeriod || null,
-      startDate: goal.startDate || timestamp,
-      endDate: goal.endDate || null,
       isCompleted: false,
       completedAt: null,
       seriesId: goal.seriesId || null,
-      bookId: goal.bookId || null
+      bookId: goal.bookId || null,
+      deadline: goal.deadline || null
     };
     this.writingGoals.set(id, newGoal);
     return newGoal;
@@ -2120,7 +2117,7 @@ export class MemStorage implements IStorage {
     const entries = Array.from(this.pointLedger.values())
       .filter(entry => entry.userId === userId);
       
-    return entries.reduce((total, entry) => total + entry.amount, 0);
+    return entries.reduce((total, entry) => total + entry.points, 0);
   }
   
   async addPointsTransaction(transaction: InsertPointLedgerEntry): Promise<PointLedgerEntry> {
