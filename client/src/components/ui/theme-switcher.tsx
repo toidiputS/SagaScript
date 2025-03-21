@@ -1,59 +1,64 @@
-import { useState } from 'react';
-import { useTheme } from '@/contexts/theme-context';
-import { Button } from './button';
-import { Sun, Moon, Skull, Sunset } from 'lucide-react';
+import { useState } from "react";
+import { useTheme } from "@/contexts/theme-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './dropdown-menu';
-import { toast } from '@/hooks/use-toast';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Sun, Moon, Palette, Sunset } from "lucide-react";
+
+type ThemeOption = 'light' | 'dark' | 'spooky' | 'sunset';
 
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
-  const handleThemeChange = (newTheme: 'light' | 'dark' | 'spooky' | 'sunset') => {
+  const themeIcons = {
+    light: <Sun className="h-4 w-4" />,
+    dark: <Moon className="h-4 w-4" />,
+    spooky: <Palette className="h-4 w-4" />,
+    sunset: <Sunset className="h-4 w-4" />,
+  };
+
+  const themeNames = {
+    light: "Light",
+    dark: "Dark",
+    spooky: "Spooky",
+    sunset: "Sunset",
+  };
+
+  const handleThemeChange = (newTheme: ThemeOption) => {
     setTheme(newTheme);
     setOpen(false);
-    
-    // Show toast notification
-    const themeName = newTheme.charAt(0).toUpperCase() + newTheme.slice(1);
-    toast({
-      title: `${themeName} Theme Applied`,
-      description: `The application theme has been changed to ${themeName}.`,
-    });
   };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          {theme === 'light' && <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />}
-          {theme === 'dark' && <Moon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />}
-          {theme === 'spooky' && <Skull className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />}
-          {theme === 'sunset' && <Sunset className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />}
-          <span className="sr-only">Toggle theme</span>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="rounded-full"
+          aria-label="Change theme"
+        >
+          {theme && themeIcons[theme as ThemeOption]}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleThemeChange('light')}>
-          <Sun className="h-4 w-4 mr-2" />
-          <span>Light</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleThemeChange('dark')}>
-          <Moon className="h-4 w-4 mr-2" />
-          <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleThemeChange('spooky')}>
-          <Skull className="h-4 w-4 mr-2" />
-          <span>Spooky</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleThemeChange('sunset')}>
-          <Sunset className="h-4 w-4 mr-2" />
-          <span>Sunset</span>
-        </DropdownMenuItem>
+        {(Object.keys(themeNames) as ThemeOption[]).map((themeOption) => (
+          <DropdownMenuItem
+            key={themeOption}
+            onClick={() => handleThemeChange(themeOption)}
+            className={theme === themeOption ? "bg-accent text-accent-foreground" : ""}
+          >
+            <div className="flex items-center gap-2">
+              {themeIcons[themeOption]}
+              <span>{themeNames[themeOption]}</span>
+            </div>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

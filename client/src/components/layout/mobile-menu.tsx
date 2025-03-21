@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { useTheme } from "@/contexts/theme-context";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -40,12 +41,15 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       <div className="md:hidden fixed inset-y-0 left-0 z-30 w-72 flex flex-col bg-background shadow-xl transform transition duration-300">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <span className="font-serif font-bold text-lg text-foreground">Saga Scribe</span>
-          <button 
-            onClick={onClose} 
-            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
-          >
-            <i className="ri-close-line text-xl"></i>
-          </button>
+          <div className="flex items-center space-x-2">
+            <ThemeSwitcher />
+            <button 
+              onClick={onClose} 
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
+            >
+              <i className="ri-close-line text-xl"></i>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

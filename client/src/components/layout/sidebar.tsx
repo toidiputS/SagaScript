@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { useTheme } from "@/contexts/theme-context";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 export default function Sidebar() {
   const [location] = useLocation();
@@ -33,7 +34,8 @@ export default function Sidebar() {
             </div>
             {isSidebarOpen && <span className="font-serif font-bold text-lg text-foreground">Saga Scribe</span>}
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
+            {isSidebarOpen && <ThemeSwitcher />}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-1 rounded-md text-muted-foreground hover:text-foreground"
