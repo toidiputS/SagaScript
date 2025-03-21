@@ -252,11 +252,11 @@ export default function TimelineEventDialog({
                     <FormLabel>Book</FormLabel>
                     <Select
                       onValueChange={(value) => {
-                        const numValue = value ? parseInt(value) : null;
+                        const numValue = value === "none" ? null : parseInt(value);
                         setSelectedBook(numValue);
                         field.onChange(numValue);
                       }}
-                      value={field.value?.toString() || ""}
+                      value={field.value?.toString() || "none"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -264,7 +264,7 @@ export default function TimelineEventDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {books?.map((book) => (
                           <SelectItem key={book.id} value={book.id.toString()}>
                             {book.title}
