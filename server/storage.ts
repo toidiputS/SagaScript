@@ -2394,4 +2394,10 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Choose which storage implementation to use
+const USE_POSTGRES = process.env.DATABASE_URL !== undefined;
+
+// Export the appropriate storage implementation
+export const storage = USE_POSTGRES 
+  ? new PostgreSQLStorage() 
+  : new MemStorage();

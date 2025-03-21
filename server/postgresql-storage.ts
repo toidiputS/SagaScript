@@ -541,10 +541,19 @@ export class PostgreSQLStorage implements IStorage {
             break;
         }
         
-        query = query.where(dateFilter);
+        // Apply the date filter
+        if (dateFilter) {
+          query = db.select()
+            .from(writingStats)
+            .where(and(
+              eq(writingStats.userId, userId),
+              dateFilter
+            ));
+        }
       }
       
-      return await query.orderBy(desc(writingStats.date));
+      const results = await query.orderBy(desc(writingStats.date));
+      return results;
     } catch (error) {
       console.error('Error getting writing stats by user:', error);
       return [];
@@ -553,7 +562,13 @@ export class PostgreSQLStorage implements IStorage {
 
   async createWritingStat(stat: InsertWritingStat): Promise<WritingStat> {
     try {
-      const results = await db.insert(writingStats).values(stat).returning();
+      // Ensure date is set
+      const statWithDate = {
+        ...stat,
+        date: stat.date || new Date()
+      };
+      
+      const results = await db.insert(writingStats).values(statWithDate).returning();
       return results[0];
     } catch (error) {
       console.error('Error creating writing stat:', error);
@@ -917,13 +932,13 @@ export class PostgreSQLStorage implements IStorage {
   // Writing Milestones
   async getWritingMilestones(tier?: string): Promise<WritingMilestone[]> {
     try {
-      let query = db.select().from(writingMilestones);
-      
       if (tier) {
-        query = query.where(eq(writingMilestones.tier, tier));
+        return await db.select()
+          .from(writingMilestones)
+          .where(eq(writingMilestones.tier, tier));
+      } else {
+        return await db.select().from(writingMilestones);
       }
-      
-      return await query;
     } catch (error) {
       console.error('Error getting writing milestones:', error);
       return [];
@@ -1074,8 +1089,8 @@ export class PostgreSQLStorage implements IStorage {
           userId, 
           currentStreak: 1,
           longestStreak: 1,
-          lastWritingDate: new Date(),
-          totalDaysWritten: 1
+          lastWritingDay: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+          totalWritingDays: 1
         });
       }
       
@@ -1084,8 +1099,8 @@ export class PostgreSQLStorage implements IStorage {
         .set({
           currentStreak: sql`${writingStreaks.currentStreak} + 1`,
           longestStreak: sql`GREATEST(${writingStreaks.longestStreak}, ${writingStreaks.currentStreak} + 1)`,
-          lastWritingDate: new Date(),
-          totalDaysWritten: sql`${writingStreaks.totalDaysWritten} + 1`
+          lastWritingDay: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+          totalWritingDays: sql`${writingStreaks.totalWritingDays} + 1`
         })
         .where(eq(writingStreaks.userId, userId))
         .returning();
@@ -1102,7 +1117,7 @@ export class PostgreSQLStorage implements IStorage {
       const results = await db.update(writingStreaks)
         .set({
           currentStreak: 0,
-          lastWritingDate: new Date()
+          lastWritingDay: new Date().toISOString().split('T')[0] // YYYY-MM-DD format
         })
         .where(eq(writingStreaks.userId, userId))
         .returning();
