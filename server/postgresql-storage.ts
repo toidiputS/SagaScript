@@ -77,6 +77,9 @@ export class PostgreSQLStorage implements IStorage {
       pool: this.pool,
       createTableIfMissing: true
     });
+    
+    // Incorporate collaboration methods from collaborationMethods
+    Object.assign(this, collaborationMethods);
   }
 
   // User methods

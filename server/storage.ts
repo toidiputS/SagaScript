@@ -280,6 +280,14 @@ export class MemStorage implements IStorage {
   private subscriptions: Map<number, Subscription>;
   private timelineEvents: Map<number, TimelineEvent>;
   
+  // Collaboration-related data structures
+  private collaborativeSeries: Map<number, CollaborativeSeries>;
+  private collaborators: Map<number, Collaborator>;
+  private collaborationInvites: Map<number, CollaborationInvite>;
+  private comments: Map<number, Comment>;
+  private feedbackRequests: Map<number, FeedbackRequest>;
+  private feedbackResponses: Map<number, FeedbackResponse>;
+  
   // Reward system maps
   private rewardTypes: Map<number, RewardType>;
   private writingMilestones: Map<number, WritingMilestone>;
@@ -312,6 +320,14 @@ export class MemStorage implements IStorage {
     subscriptionPlan: number;
     subscription: number;
     timelineEvent: number;
+    // Collaboration-related IDs
+    collaborativeSeries: number;
+    collaborator: number;
+    collaborationInvite: number;
+    comment: number;
+    feedbackRequest: number;
+    feedbackResponse: number;
+    // Reward system IDs
     rewardType: number;
     writingMilestone: number;
     userReward: number;
@@ -342,6 +358,14 @@ export class MemStorage implements IStorage {
     this.subscriptions = new Map();
     this.timelineEvents = new Map();
     
+    // Initialize collaboration maps
+    this.collaborativeSeries = new Map();
+    this.collaborators = new Map();
+    this.collaborationInvites = new Map();
+    this.comments = new Map();
+    this.feedbackRequests = new Map();
+    this.feedbackResponses = new Map();
+    
     // Initialize reward system maps
     this.rewardTypes = new Map();
     this.writingMilestones = new Map();
@@ -365,6 +389,14 @@ export class MemStorage implements IStorage {
       subscriptionPlan: 1,
       subscription: 1,
       timelineEvent: 1,
+      // Collaboration IDs
+      collaborativeSeries: 1,
+      collaborator: 1,
+      collaborationInvite: 1,
+      comment: 1,
+      feedbackRequest: 1,
+      feedbackResponse: 1,
+      // Reward system IDs
       rewardType: 1,
       writingMilestone: 1,
       userReward: 1,
