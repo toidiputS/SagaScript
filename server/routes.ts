@@ -22,6 +22,12 @@ import {
   insertTimelineEventSchema,
   type Subscription,
 } from "@shared/schema";
+import { 
+  generateWritingSuggestions, 
+  generateSingleSuggestion, 
+  analyzeWriting,
+  type SuggestionType
+} from "./services/openai";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import session from "express-session";
