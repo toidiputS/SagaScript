@@ -9,7 +9,7 @@ interface User {
 
 export async function login(username: string, password: string): Promise<User> {
   try {
-    const response = await apiRequest("POST", "/api/auth/login", {
+    const response = await apiRequest("POST", "/api/login", {
       username,
       password,
     });
@@ -34,7 +34,7 @@ export async function register(
   displayName: string
 ): Promise<User> {
   try {
-    const response = await apiRequest("POST", "/api/auth/register", {
+    const response = await apiRequest("POST", "/api/register", {
       username,
       password,
       displayName,
@@ -57,7 +57,7 @@ export async function register(
 
 export async function logout(): Promise<void> {
   try {
-    await apiRequest("POST", "/api/auth/logout");
+    await apiRequest("POST", "/api/logout");
   } catch (error) {
     console.error("Logout error:", error);
     throw error;
@@ -66,7 +66,7 @@ export async function logout(): Promise<void> {
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
-    const response = await apiRequest("GET", "/api/auth/me");
+    const response = await apiRequest("GET", "/api/user");
     if (!response.ok) {
       return null;
     }
