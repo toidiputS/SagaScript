@@ -237,7 +237,19 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
                 <Label>Source Character</Label>
                 <Select
                   value={newRelationship.source.toString()}
-                  onValueChange={(value) => setNewRelationship({...newRelationship, source: parseInt(value)})}
+                  onValueChange={(value) => {
+                    const sourceId = parseInt(value);
+                    // Reset target if it's the same as the new source
+                    if (sourceId === newRelationship.target) {
+                      setNewRelationship({
+                        ...newRelationship, 
+                        source: sourceId,
+                        target: 0
+                      });
+                    } else {
+                      setNewRelationship({...newRelationship, source: sourceId});
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select character" />
@@ -255,18 +267,21 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
               <div className="space-y-2">
                 <Label>Target Character</Label>
                 <Select
-                  value={newRelationship.target.toString()}
+                  value={newRelationship.target ? newRelationship.target.toString() : undefined}
                   onValueChange={(value) => setNewRelationship({...newRelationship, target: parseInt(value)})}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select character" />
                   </SelectTrigger>
                   <SelectContent>
-                    {characters.map((character) => (
-                      <SelectItem key={character.id} value={character.id.toString()}>
-                        {character.name}
-                      </SelectItem>
-                    ))}
+                    {characters
+                      .filter(character => character.id !== newRelationship.source) // Filter out the source character
+                      .map((character) => (
+                        <SelectItem key={character.id} value={character.id.toString()}>
+                          {character.name}
+                        </SelectItem>
+                      ))
+                    }
                   </SelectContent>
                 </Select>
               </div>
