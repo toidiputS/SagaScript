@@ -38,9 +38,9 @@ export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineE
   return (
     <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-l-4 relative group" 
       style={{ borderLeftColor: event.color || "#6366f1" }}>
-      {/* Drag handle indicator */}
-      <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 bg-neutral-100 hover:bg-neutral-200 rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm cursor-grab">
-        <GripVertical className="h-4 w-4 text-neutral-500" />
+      {/* Drag handle indicator - always visible for better accessibility */}
+      <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 bg-neutral-100 hover:bg-neutral-200 rounded-md p-1.5 shadow-sm cursor-grab border border-neutral-200">
+        <GripVertical className="h-5 w-5 text-neutral-600" />
       </div>
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
         <div>

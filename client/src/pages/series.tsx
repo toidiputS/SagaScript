@@ -240,19 +240,19 @@ export default function SeriesPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-neutral-600 line-clamp-2">
+                  <p className="text-sm text-foreground line-clamp-2">
                     {series.description || "No description provided"}
                   </p>
                 </CardContent>
                 <CardFooter>
                   <div className="w-full">
-                    <div className="flex justify-between text-xs text-neutral-500 mb-1">
-                      <span>Progress</span>
-                      <span>{Math.round((series.currentBook / series.totalBooks) * 100)}%</span>
+                    <div className="flex justify-between text-xs font-medium mb-1">
+                      <span className="text-foreground">Progress</span>
+                      <span className="text-foreground">{Math.round((series.currentBook / series.totalBooks) * 100)}%</span>
                     </div>
-                    <div className="w-full bg-neutral-200 rounded-full h-1.5">
+                    <div className="w-full bg-secondary rounded-full h-2">
                       <div
-                        className="bg-primary h-1.5 rounded-full"
+                        className="bg-primary h-2 rounded-full"
                         style={{
                           width: `${Math.round((series.currentBook / series.totalBooks) * 100)}%`,
                         }}

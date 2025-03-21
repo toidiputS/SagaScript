@@ -185,6 +185,41 @@ h1, h2, h3, h4, h5, h6,
   background-color: hsl(var(--background)) !important;
 }
 
+/* Better contrast for series cards in dark mode */
+.dark CardTitle,
+.dark .card-title,
+.spooky CardTitle,
+.spooky .card-title {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark CardDescription,
+.dark .card-description,
+.spooky CardDescription,
+.spooky .card-description {
+  color: hsl(var(--foreground)) !important;
+  opacity: 0.8;
+}
+
+.dark .text-neutral-500,
+.dark .text-neutral-600,
+.dark .text-neutral-700,
+.dark .text-neutral-800,
+.spooky .text-neutral-500,
+.spooky .text-neutral-600,
+.spooky .text-neutral-700,
+.spooky .text-neutral-800 {
+  color: hsl(var(--foreground)) !important;
+  opacity: 0.85;
+}
+
+.dark span,
+.dark p,
+.spooky span,
+.spooky p {
+  color: hsl(var(--foreground)) !important;
+}
+
 /* Improve hover states for dark themes */
 .dark .hover\:bg-neutral-100:hover,
 .spooky .hover\:bg-neutral-100:hover,
