@@ -204,7 +204,14 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
           <div className="mt-2 space-y-1 max-h-28 overflow-y-auto pr-1">
             {chapters.length > 0 ? (
               chapters.map((chapter) => (
-                <div key={chapter.id} className="flex justify-between items-center text-sm">
+                <div 
+                  key={chapter.id} 
+                  className="flex justify-between items-center text-sm hover:bg-gray-100 p-1 rounded cursor-pointer"
+                  onClick={() => {
+                    // Navigate to chapter editor
+                    window.location.href = `/chapter-editor?id=${chapter.id}&bookId=${book.id}&seriesId=${seriesId}`;
+                  }}
+                >
                   <span className="truncate max-w-[70%]">{chapter.title}</span>
                   <Badge variant="outline" className="text-xs">
                     {chapter.wordCount.toLocaleString()}
