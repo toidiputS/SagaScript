@@ -351,3 +351,384 @@ export const insertTimelineEventSchema = createInsertSchema(timelineEvents).pick
 
 export type TimelineEvent = typeof timelineEvents.$inferSelect;
 export type InsertTimelineEvent = z.infer<typeof insertTimelineEventSchema>;
+
+// =========== COLLABORATION FEATURES ===========
+
+// Shared Projects (collaborative series)
+export const collaborativeSeries = pgTable("collaborative_series", {
+  id: serial("id").primaryKey(),
+  seriesId: integer("series_id").notNull().references(() => series.id),
+  ownerId: integer("owner_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  isPublic: boolean("is_public").notNull().default(false),
+  collaborationSettings: jsonb("collaboration_settings").notNull().default({
+    allowEditContent: false,
+    allowAddCharacters: false,
+    allowEditCharacters: false, 
+    allowAddLocations: false,
+    allowEditLocations: false,
+    allowAddBooks: false,
+    allowEditBooks: false,
+    allowComments: true,
+  }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCollaborativeSeriesSchema = createInsertSchema(collaborativeSeries).pick({
+  seriesId: true,
+  ownerId: true,
+  name: true,
+  description: true,
+  isPublic: true,
+  collaborationSettings: true,
+});
+
+// Collaborators (users who can access shared projects)
+export const collaborators = pgTable("collaborators", {
+  id: serial("id").primaryKey(),
+  collaborativeSeriesId: integer("collaborative_series_id").notNull().references(() => collaborativeSeries.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  role: text("role").notNull().default("viewer"), // owner, editor, contributor, viewer
+  permissions: jsonb("permissions").notNull().default({}),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCollaboratorSchema = createInsertSchema(collaborators).pick({
+  collaborativeSeriesId: true,
+  userId: true,
+  role: true,
+  permissions: true,
+});
+
+// Collaboration Invites
+export const collaborationInvites = pgTable("collaboration_invites", {
+  id: serial("id").primaryKey(),
+  collaborativeSeriesId: integer("collaborative_series_id").notNull().references(() => collaborativeSeries.id),
+  inviterId: integer("inviter_id").notNull().references(() => users.id),
+  inviteeEmail: text("invitee_email").notNull(),
+  inviteeId: integer("invitee_id").references(() => users.id),
+  role: text("role").notNull().default("viewer"),
+  status: text("status").notNull().default("pending"), // pending, accepted, declined, expired
+  inviteCode: text("invite_code").notNull(),
+  expiresAt: timestamp("expires_at"),
+  message: text("message"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCollaborationInviteSchema = createInsertSchema(collaborationInvites).pick({
+  collaborativeSeriesId: true,
+  inviterId: true,
+  inviteeEmail: true,
+  inviteeId: true,
+  role: true,
+  status: true,
+  inviteCode: true,
+  expiresAt: true,
+  message: true,
+});
+
+// Comments on various content
+export const comments = pgTable("comments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  
+  // Optional references to different content types
+  // Only one of these should be set for any given comment
+  bookId: integer("book_id").references(() => books.id),
+  chapterId: integer("chapter_id").references(() => chapters.id),
+  characterId: integer("character_id").references(() => characters.id),
+  locationId: integer("location_id").references(() => locations.id),
+  timelineEventId: integer("timeline_event_id").references(() => timelineEvents.id),
+  
+  // For nested comments/replies (using a text field to avoid circular references)
+  parentCommentId: integer("parent_comment_id"),
+  
+  // Range selection for text-based comments (e.g., in chapter content)
+  selectionStart: integer("selection_start"),
+  selectionEnd: integer("selection_end"),
+  
+  status: text("status").notNull().default("active"), // active, resolved, deleted
+  isEdited: boolean("is_edited").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCommentSchema = createInsertSchema(comments).pick({
+  userId: true,
+  content: true,
+  bookId: true,
+  chapterId: true,
+  characterId: true,
+  locationId: true,
+  timelineEventId: true,
+  parentCommentId: true,
+  selectionStart: true,
+  selectionEnd: true,
+  status: true,
+});
+
+// Feedback requests
+export const feedbackRequests = pgTable("feedback_requests", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  
+  // Optional references to different content types
+  // Only one of these should be set for any given feedback request
+  bookId: integer("book_id").references(() => books.id),
+  chapterId: integer("chapter_id").references(() => chapters.id),
+  
+  feedbackType: text("feedback_type").notNull().default("general"), // general, plot, characters, style, etc.
+  status: text("status").notNull().default("open"), // open, closed
+  isAnonymous: boolean("is_anonymous").notNull().default(false),
+  isPublic: boolean("is_public").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  closedAt: timestamp("closed_at"),
+});
+
+export const insertFeedbackRequestSchema = createInsertSchema(feedbackRequests).pick({
+  userId: true,
+  title: true,
+  description: true,
+  bookId: true,
+  chapterId: true,
+  feedbackType: true,
+  status: true,
+  isAnonymous: true,
+  isPublic: true,
+});
+
+// Feedback responses
+export const feedbackResponses = pgTable("feedback_responses", {
+  id: serial("id").primaryKey(),
+  feedbackRequestId: integer("feedback_request_id").notNull().references(() => feedbackRequests.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  rating: integer("rating"), // Optional rating (e.g., 1-5)
+  isAnonymous: boolean("is_anonymous").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFeedbackResponseSchema = createInsertSchema(feedbackResponses).pick({
+  feedbackRequestId: true,
+  userId: true,
+  content: true,
+  rating: true,
+  isAnonymous: true,
+});
+
+// Export types for collaboration features
+export type CollaborativeSeries = typeof collaborativeSeries.$inferSelect;
+export type InsertCollaborativeSeries = z.infer<typeof insertCollaborativeSeriesSchema>;
+
+export type Collaborator = typeof collaborators.$inferSelect;
+export type InsertCollaborator = z.infer<typeof insertCollaboratorSchema>;
+
+export type CollaborationInvite = typeof collaborationInvites.$inferSelect;
+export type InsertCollaborationInvite = z.infer<typeof insertCollaborationInviteSchema>;
+
+export type Comment = typeof comments.$inferSelect;
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+
+export type FeedbackRequest = typeof feedbackRequests.$inferSelect;
+export type InsertFeedbackRequest = z.infer<typeof insertFeedbackRequestSchema>;
+
+export type FeedbackResponse = typeof feedbackResponses.$inferSelect;
+export type InsertFeedbackResponse = z.infer<typeof insertFeedbackResponseSchema>;
+
+// =========== MICRO REWARD SYSTEM ===========
+
+// Reward types
+export const rewardTypes = pgTable("reward_types", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // daily, word-count, streak, completion, etc.
+  icon: text("icon").notNull(),
+  color: text("color").notNull().default("#4F46E5"), // Default to indigo
+  points: integer("points").notNull().default(10),
+  rarity: text("rarity").notNull().default("common"), // common, uncommon, rare, epic, legendary
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertRewardTypeSchema = createInsertSchema(rewardTypes).pick({
+  name: true,
+  description: true,
+  category: true,
+  icon: true,
+  color: true,
+  points: true,
+  rarity: true,
+  isActive: true,
+});
+
+// Writing milestones
+export const writingMilestones = pgTable("writing_milestones", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  milestoneType: text("milestone_type").notNull(), // wordCount, streakDays, chaptersCompleted, booksCompleted, etc.
+  targetValue: integer("target_value").notNull(),
+  rewardTypeId: integer("reward_type_id").notNull().references(() => rewardTypes.id),
+  isRecurring: boolean("is_recurring").notNull().default(false),
+  recurringPeriod: text("recurring_period"), // daily, weekly, monthly, etc. (if isRecurring is true)
+  isGlobal: boolean("is_global").notNull().default(true), // false for user-defined custom milestones
+  tier: text("tier").notNull().default("apprentice"), // Minimum subscription tier required
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertWritingMilestoneSchema = createInsertSchema(writingMilestones).pick({
+  name: true,
+  description: true,
+  milestoneType: true,
+  targetValue: true, 
+  rewardTypeId: true,
+  isRecurring: true,
+  recurringPeriod: true,
+  isGlobal: true,
+  tier: true,
+});
+
+// User rewards
+export const userRewards = pgTable("user_rewards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  rewardTypeId: integer("reward_type_id").notNull().references(() => rewardTypes.id),
+  milestoneId: integer("milestone_id").references(() => writingMilestones.id),
+  
+  // Related content that earned the reward (optional)
+  seriesId: integer("series_id").references(() => series.id),
+  bookId: integer("book_id").references(() => books.id),
+  chapterId: integer("chapter_id").references(() => chapters.id),
+  
+  earnedAt: timestamp("earned_at").notNull().defaultNow(),
+  isRedeemed: boolean("is_redeemed").notNull().default(false),
+  redeemedAt: timestamp("redeemed_at"),
+  pointsAwarded: integer("points_awarded").notNull().default(0),
+  note: text("note"), // Optional context for the reward
+});
+
+export const insertUserRewardSchema = createInsertSchema(userRewards).pick({
+  userId: true,
+  rewardTypeId: true,
+  milestoneId: true,
+  seriesId: true,
+  bookId: true,
+  chapterId: true,
+  earnedAt: true,
+  isRedeemed: true,
+  redeemedAt: true,
+  pointsAwarded: true,
+  note: true,
+});
+
+// Writing streaks
+export const writingStreaks = pgTable("writing_streaks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastWritingDay: date("last_writing_day"),
+  streakStartDate: date("streak_start_date"),
+  totalWritingDays: integer("total_writing_days").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertWritingStreakSchema = createInsertSchema(writingStreaks).pick({
+  userId: true,
+  currentStreak: true,
+  longestStreak: true,
+  lastWritingDay: true,
+  streakStartDate: true,
+  totalWritingDays: true,
+});
+
+// Writing goals
+export const writingGoals = pgTable("writing_goals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  goalType: text("goal_type").notNull(), // wordCount, chaptersCompleted, streakDays, etc.
+  targetValue: integer("target_value").notNull(),
+  currentValue: integer("current_value").notNull().default(0),
+  deadline: timestamp("deadline"),
+  isCompleted: boolean("is_completed").notNull().default(false),
+  completedAt: timestamp("completed_at"),
+  isRecurring: boolean("is_recurring").notNull().default(false),
+  recurringPeriod: text("recurring_period"), // daily, weekly, monthly, etc.
+  
+  // Optional related content
+  seriesId: integer("series_id").references(() => series.id),
+  bookId: integer("book_id").references(() => books.id),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertWritingGoalSchema = createInsertSchema(writingGoals).pick({
+  userId: true,
+  title: true,
+  goalType: true,
+  targetValue: true,
+  currentValue: true,
+  deadline: true,
+  isCompleted: true,
+  completedAt: true,
+  isRecurring: true,
+  recurringPeriod: true,
+  seriesId: true,
+  bookId: true,
+});
+
+// User points ledger (tracks point transactions)
+export const pointLedger = pgTable("point_ledger", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  points: integer("points").notNull(),
+  transactionType: text("transaction_type").notNull(), // earned, spent, expired, bonus
+  description: text("description").notNull(),
+  
+  // References to related entities
+  rewardId: integer("reward_id").references(() => userRewards.id),
+  milestoneId: integer("milestone_id").references(() => writingMilestones.id),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertPointLedgerSchema = createInsertSchema(pointLedger).pick({
+  userId: true,
+  points: true,
+  transactionType: true,
+  description: true,
+  rewardId: true,
+  milestoneId: true,
+});
+
+// Export types for micro rewards system
+export type RewardType = typeof rewardTypes.$inferSelect;
+export type InsertRewardType = z.infer<typeof insertRewardTypeSchema>;
+
+export type WritingMilestone = typeof writingMilestones.$inferSelect;
+export type InsertWritingMilestone = z.infer<typeof insertWritingMilestoneSchema>;
+
+export type UserReward = typeof userRewards.$inferSelect;
+export type InsertUserReward = z.infer<typeof insertUserRewardSchema>;
+
+export type WritingStreak = typeof writingStreaks.$inferSelect;
+export type InsertWritingStreak = z.infer<typeof insertWritingStreakSchema>;
+
+export type WritingGoal = typeof writingGoals.$inferSelect;
+export type InsertWritingGoal = z.infer<typeof insertWritingGoalSchema>;
+
+export type PointLedgerEntry = typeof pointLedger.$inferSelect;
+export type InsertPointLedgerEntry = z.infer<typeof insertPointLedgerSchema>;

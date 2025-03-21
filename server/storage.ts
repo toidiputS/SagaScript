@@ -118,6 +118,57 @@ export interface IStorage {
   updateTimelineEvent(id: number, event: Partial<TimelineEvent>): Promise<TimelineEvent | undefined>;
   deleteTimelineEvent(id: number): Promise<boolean>;
   updateTimelineEventPositions(events: { id: number, position: number }[]): Promise<boolean>;
+  
+  // === Micro Reward System Methods ===
+  
+  // Reward Types
+  getRewardTypes(): Promise<RewardType[]>;
+  getRewardType(id: number): Promise<RewardType | undefined>;
+  createRewardType(rewardType: InsertRewardType): Promise<RewardType>;
+  updateRewardType(id: number, updates: Partial<RewardType>): Promise<RewardType | undefined>;
+  deleteRewardType(id: number): Promise<boolean>;
+  
+  // Writing Milestones
+  getWritingMilestones(tier?: string): Promise<WritingMilestone[]>;
+  getWritingMilestone(id: number): Promise<WritingMilestone | undefined>;
+  createWritingMilestone(milestone: InsertWritingMilestone): Promise<WritingMilestone>;
+  updateWritingMilestone(id: number, updates: Partial<WritingMilestone>): Promise<WritingMilestone | undefined>;
+  deleteWritingMilestone(id: number): Promise<boolean>;
+  
+  // User Rewards
+  getUserRewards(userId: number): Promise<(UserReward & { rewardType: RewardType })[]>;
+  getUserReward(id: number): Promise<UserReward | undefined>;
+  createUserReward(reward: InsertUserReward): Promise<UserReward>;
+  redeemUserReward(id: number): Promise<UserReward | undefined>;
+  
+  // Writing Streaks
+  getWritingStreak(userId: number): Promise<WritingStreak | undefined>;
+  createWritingStreak(streak: InsertWritingStreak): Promise<WritingStreak>;
+  updateWritingStreak(userId: number, updates: Partial<WritingStreak>): Promise<WritingStreak | undefined>;
+  incrementWritingStreak(userId: number): Promise<WritingStreak | undefined>;
+  resetWritingStreak(userId: number): Promise<WritingStreak | undefined>;
+  
+  // Writing Goals
+  getUserWritingGoals(userId: number): Promise<WritingGoal[]>;
+  getWritingGoal(id: number): Promise<WritingGoal | undefined>;
+  createWritingGoal(goal: InsertWritingGoal): Promise<WritingGoal>;
+  updateWritingGoal(id: number, updates: Partial<WritingGoal>): Promise<WritingGoal | undefined>;
+  deleteWritingGoal(id: number): Promise<boolean>;
+  incrementGoalProgress(id: number, amount: number): Promise<WritingGoal | undefined>;
+  completeWritingGoal(id: number): Promise<WritingGoal | undefined>;
+  
+  // Points System
+  getUserPoints(userId: number): Promise<number>;
+  addPointsTransaction(transaction: InsertPointLedgerEntry): Promise<PointLedgerEntry>;
+  getPointsLedger(userId: number, limit?: number): Promise<PointLedgerEntry[]>;
+  
+  // Milestone Tracking
+  checkAndAwardMilestones(userId: number, context?: {
+    wordCount?: number;
+    chapterId?: number;
+    bookId?: number;
+    seriesId?: number;
+  }): Promise<UserReward[]>;
 }
 
 export class MemStorage implements IStorage {
