@@ -39,8 +39,15 @@ import {
   type PointLedgerEntry,
   type InsertPointLedgerEntry
 } from "@shared/schema";
+import fs from 'fs';
+import path from 'path';
+import session from "express-session";
+import MemoryStore from "memorystore";
 
 export interface IStorage {
+  // Session store
+  sessionStore: session.Store;
+  
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -207,6 +214,16 @@ export class MemStorage implements IStorage {
   private writingGoals: Map<number, WritingGoal>;
   private pointLedger: Map<number, PointLedgerEntry>;
   
+  // Session store for authentication
+  public sessionStore: session.Store;
+  
+  // Path for persistent storage files
+  private dataDir: string = './data';
+  private dataFiles = {
+    users: `${this.dataDir}/users.json`,
+    currentIds: `${this.dataDir}/currentIds.json`
+  };
+  
   private currentIds: {
     user: number;
     series: number;
@@ -230,6 +247,13 @@ export class MemStorage implements IStorage {
   };
 
   constructor() {
+    // Create MemoryStore instance for session data
+    const MemStore = MemoryStore(session);
+    this.sessionStore = new MemStore({
+      checkPeriod: 86400000 // Prune expired entries every 24h
+    });
+    
+    // Initialize maps
     this.users = new Map();
     this.series = new Map();
     this.books = new Map();
@@ -252,6 +276,7 @@ export class MemStorage implements IStorage {
     this.writingGoals = new Map();
     this.pointLedger = new Map();
     
+    // Default currentIds
     this.currentIds = {
       user: 1,
       series: 1,
@@ -274,14 +299,75 @@ export class MemStorage implements IStorage {
       pointLedger: 1
     };
     
-    // Initialize sample achievements
-    this.initializeAchievements();
+    // Load data from persistent storage if available
+    this.loadFromDisk();
     
-    // Initialize subscription plans
-    this.initializeSubscriptionPlans();
+    // Initialize sample achievements if not already loaded
+    if (this.achievements.size === 0) {
+      this.initializeAchievements();
+    }
     
-    // Initialize reward system
-    this.initializeRewardSystem();
+    // Initialize subscription plans if not already loaded
+    if (this.subscriptionPlans.size === 0) {
+      this.initializeSubscriptionPlans();
+    }
+    
+    // Initialize reward system if not already loaded
+    if (this.rewardTypes.size === 0) {
+      this.initializeRewardSystem();
+    }
+  }
+  
+  // Load data from disk
+  private loadFromDisk() {
+    try {
+      // Load user data if file exists
+      if (fs.existsSync(this.dataFiles.users)) {
+        console.log('[Storage] Loading user data from', this.dataFiles.users);
+        const userData = JSON.parse(fs.readFileSync(this.dataFiles.users, 'utf8'));
+        
+        // Convert array back to Map
+        userData.forEach((user: User) => {
+          this.users.set(user.id, user);
+        });
+        
+        console.log(`[Storage] Loaded ${this.users.size} users from disk`);
+      }
+      
+      // Load currentIds if file exists
+      if (fs.existsSync(this.dataFiles.currentIds)) {
+        console.log('[Storage] Loading ID counters from', this.dataFiles.currentIds);
+        const idData = JSON.parse(fs.readFileSync(this.dataFiles.currentIds, 'utf8'));
+        
+        // Update currentIds with loaded values
+        this.currentIds = { ...this.currentIds, ...idData };
+        
+        console.log('[Storage] Loaded ID counters from disk');
+      }
+    } catch (error) {
+      console.error('[Storage] Error loading data from disk:', error);
+    }
+  }
+  
+  // Save data to disk
+  private saveToDisk() {
+    try {
+      // Ensure data directory exists
+      if (!fs.existsSync(this.dataDir)) {
+        fs.mkdirSync(this.dataDir, { recursive: true });
+      }
+      
+      // Save user data
+      const userData = Array.from(this.users.values());
+      fs.writeFileSync(this.dataFiles.users, JSON.stringify(userData, null, 2));
+      
+      // Save current IDs
+      fs.writeFileSync(this.dataFiles.currentIds, JSON.stringify(this.currentIds, null, 2));
+      
+      console.log('[Storage] Data saved to disk');
+    } catch (error) {
+      console.error('[Storage] Error saving data to disk:', error);
+    }
   }
 
   // Initialize predefined achievements
