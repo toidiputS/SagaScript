@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth";
+import { useSimpleAuth } from "@/contexts/simple-auth";
 import { Redirect } from "wouter";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -40,18 +40,13 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const auth = useAuth();
-  const { loginMutation, registerMutation, user, isLoading } = auth;
+  const auth = useSimpleAuth();
+  const { user, isLoading } = auth;
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   
-  console.log("Auth Page - Auth state:", {
+  console.log("Auth Page - Simple Auth state:", {
     isAuthenticated: auth.isAuthenticated,
-    isLoading: auth.isLoading,
-    hasMutations: {
-      login: !!loginMutation,
-      register: !!registerMutation,
-      logout: !!auth.logoutMutation
-    }
+    isLoading: auth.isLoading
   });
 
   // Redirect if already logged in
@@ -196,8 +191,8 @@ export default function AuthPage() {
 }
 
 function LoginForm() {
-  const auth = useAuth();
-  const isPending = auth.loginMutation?.isPending ?? false;
+  const auth = useSimpleAuth();
+  const [isPending, setIsPending] = useState(false);
 
   // Initialize form
   const form = useForm<LoginFormValues>({
@@ -209,20 +204,16 @@ function LoginForm() {
   });
 
   // Submit handler
-  const onSubmit = (values: LoginFormValues) => {
+  const onSubmit = async (values: LoginFormValues) => {
     try {
       console.log("Submitting login form with values:", values);
-      if (auth.loginMutation) {
-        auth.loginMutation.mutate(values, {
-          onError: (error) => {
-            console.error("Login error details:", error.message);
-          }
-        });
-      } else {
-        console.error("Login mutation is not available");
-      }
+      setIsPending(true);
+      await auth.login(values);
     } catch (error) {
       console.error("Login submission error:", error);
+      // Error is handled in the auth context with toasts
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -283,8 +274,8 @@ function LoginForm() {
 }
 
 function RegisterForm() {
-  const auth = useAuth();
-  const isPending = auth.registerMutation?.isPending ?? false;
+  const auth = useSimpleAuth();
+  const [isPending, setIsPending] = useState(false);
 
   // Initialize form
   const form = useForm<RegisterFormValues>({
@@ -298,7 +289,7 @@ function RegisterForm() {
   });
 
   // Submit handler
-  const onSubmit = (values: RegisterFormValues) => {
+  const onSubmit = async (values: RegisterFormValues) => {
     try {
       // Remove confirmPassword from the data sent to the API
       const { confirmPassword, ...registerData } = values;
@@ -311,18 +302,13 @@ function RegisterForm() {
       
       console.log("Submitting registration form with values:", registerWithPlan);
       
-      // Use the mutation properly
-      if (auth.registerMutation) {
-        auth.registerMutation.mutate(registerWithPlan, {
-          onError: (error) => {
-            console.error("Registration error details:", error.message);
-          }
-        });
-      } else {
-        console.error("Registration mutation is not available");
-      }
+      setIsPending(true);
+      await auth.register(registerWithPlan);
     } catch (error) {
       console.error("Registration submission error:", error);
+      // Error is handled in the auth context with toasts
+    } finally {
+      setIsPending(false);
     }
   };
 

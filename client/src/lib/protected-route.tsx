@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useSimpleAuth } from "@/contexts/simple-auth";
 
 export function ProtectedRoute({
   path,
@@ -9,7 +9,7 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useSimpleAuth();
 
   if (isLoading) {
     return (

@@ -17,7 +17,7 @@ import ChapterEditor from "@/pages/chapter-editor";
 import Sidebar from "@/components/layout/sidebar";
 import MobileMenu from "@/components/layout/mobile-menu";
 import { useState } from "react";
-import { AuthProvider } from "@/hooks/use-auth";
+import { SimpleAuthProvider } from "@/contexts/simple-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
@@ -85,12 +85,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <SimpleAuthProvider>
         <ThemeProvider>
           <Router />
           <Toaster />
         </ThemeProvider>
-      </AuthProvider>
+      </SimpleAuthProvider>
     </QueryClientProvider>
   );
 }
