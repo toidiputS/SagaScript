@@ -1298,13 +1298,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id!;
       const user = await storage.getUser(userId);
       
-      // Check if user has AI suggestions access based on plan
-      if (user?.plan === 'free' || user?.plan === 'apprentice') {
-        return res.status(403).json({ 
-          message: "AI suggestions require an upgraded plan",
-          requiredPlan: 'wordsmith' 
-        });
-      }
+      // All users now have access to AI suggestions
+      // Permission check removed to make AI suggestions available to all users including apprentice tier
       
       // Get request parameters with defaults
       const seriesId = req.query.seriesId ? parseInt(req.query.seriesId as string) : undefined;
