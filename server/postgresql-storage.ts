@@ -1,5 +1,6 @@
 import { IStorage } from './storage';
 import { db } from './db';
+import { collaborationMethods } from './postgresql-storage-collaboration';
 import {
   users,
   series,
