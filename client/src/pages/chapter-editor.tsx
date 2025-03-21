@@ -20,7 +20,7 @@ export default function ChapterEditor() {
   const seriesId = params.get("seriesId") ? parseInt(params.get("seriesId")!) : undefined;
 
   const [chapter, setChapter] = useState<Partial<Chapter>>({
-    bookId,
+    bookId: bookId || undefined,
     title: "",
     content: "",
     wordCount: 0,
@@ -182,7 +182,7 @@ export default function ChapterEditor() {
     // Ensure bookId is provided as a number
     const chapterToSave = {
       ...chapter,
-      bookId: bookId ? Number(bookId) : null,
+      bookId: bookId ? Number(bookId) : undefined,
       wordCount: wordCount || 0,
     };
     

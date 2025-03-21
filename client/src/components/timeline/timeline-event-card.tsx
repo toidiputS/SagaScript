@@ -15,11 +15,11 @@ export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineE
   const getImportanceColor = () => {
     switch (event.importance) {
       case "major":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-destructive/10 text-destructive border-destructive/20";
       case "medium":
-        return "bg-amber-100 text-amber-800 border-amber-200";
+        return "bg-warning/10 text-warning border-warning/20";
       default:
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-primary/10 text-primary border-primary/20";
     }
   };
 
@@ -39,8 +39,8 @@ export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineE
     <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-l-4 relative group" 
       style={{ borderLeftColor: event.color || "#6366f1" }}>
       {/* Drag handle indicator - always visible for better accessibility */}
-      <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 bg-neutral-100 hover:bg-neutral-200 rounded-md p-1.5 shadow-sm cursor-grab border border-neutral-200">
-        <GripVertical className="h-5 w-5 text-neutral-600" />
+      <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 bg-muted hover:bg-accent rounded-md p-1.5 shadow-sm cursor-grab border border-border">
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
       </div>
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
         <div>
