@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import collaborationRoutes from "./routes/collaboration";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe integration will be disabled.');
@@ -1508,6 +1509,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error generating AI suggestion" });
     }
   });
+
+  // Mount collaboration routes
+  app.use('/api/collaboration', isAuthenticated, collaborationRoutes);
 
   return httpServer;
 }
