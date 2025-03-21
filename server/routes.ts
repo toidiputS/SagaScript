@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe integration will be disabled.');
@@ -29,273 +30,37 @@ import {
   type SuggestionType
 } from "./services/openai";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
-import session from "express-session";
-import MemoryStore from "memorystore";
-
-// Utility function to hash passwords
-async function hashPassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt(10);
-  return bcrypt.hash(password, salt);
-}
-
-// Session type augmentation
-declare module "express-session" {
-  interface SessionData {
-    userId: number;
-    username: string;
-  }
-}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
-  const MemoryStoreSession = MemoryStore(session);
-
-  // Setup session middleware
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET || "saga-scribe-secret",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-      },
-      store: new MemoryStoreSession({
-        checkPeriod: 86400000, // prune expired entries every 24h
-      }),
-    })
-  );
+  
+  // Setup authentication using Passport
+  setupAuth(app);
 
   // Middleware to check if user is authenticated
   const isAuthenticated = (req: Request, res: Response, next: Function) => {
-    if (req.session.userId) {
+    if (req.isAuthenticated()) {
       return next();
     }
     return res.status(401).json({ message: "Unauthorized" });
   };
 
-  // Authentication routes
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      
-      // Check if username already exists
-      const existingUser = await storage.getUserByUsername(userData.username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      // Hash password
-      const hashedPassword = await hashPassword(userData.password);
-      
-      // Create user with hashed password
-      const user = await storage.createUser({
-        ...userData,
-        password: hashedPassword,
-      });
-      
-      // Set session on registration
-      req.session.userId = user.id;
-      req.session.username = user.username;
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(201).json(userWithoutPassword);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.message });
-      }
-      res.status(500).json({ message: "Error creating user" });
+  // Authentication routes are now handled in auth.ts
+  // We still keep the /api/me endpoint for backward compatibility
+  app.get("/api/me", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
     }
-  });
-  
-  // Add the /api/register endpoint to match client expectations
-  app.post("/api/register", async (req, res) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      
-      // Check if username already exists
-      const existingUser = await storage.getUserByUsername(userData.username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      // Hash password
-      const hashedPassword = await hashPassword(userData.password);
-      
-      // Create user with hashed password
-      const user = await storage.createUser({
-        ...userData,
-        password: hashedPassword,
-      });
-      
-      // Set session on registration
-      req.session.userId = user.id;
-      req.session.username = user.username;
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(201).json(userWithoutPassword);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.message });
-      }
-      res.status(500).json({ message: "Error creating user" });
-    }
-  });
-
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Set session
-      req.session.userId = user.id;
-      req.session.username = user.username;
-      
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Error during login" });
-    }
-  });
-  
-  // Add the /api/login endpoint to match client expectations
-  app.post("/api/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Set session
-      req.session.userId = user.id;
-      req.session.username = user.username;
-      
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Error during login" });
-    }
-  });
-
-  app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Error during logout" });
-      }
-      res.status(200).json({ message: "Logged out successfully" });
-    });
-  });
-  
-  // Add the /api/logout endpoint to match client expectations
-  app.post("/api/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Error during logout" });
-      }
-      res.status(200).json({ message: "Logged out successfully" });
-    });
-  });
-
-  app.get("/api/auth/me", async (req, res) => {
-    try {
-      if (!req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      
-      const user = await storage.getUser(req.session.userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching user data" });
-    }
-  });
-  
-  // Add the /api/user endpoint to match client expectations
-  app.get("/api/user", async (req, res) => {
-    try {
-      if (!req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      
-      const user = await storage.getUser(req.session.userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching user data" });
-    }
-  });
-  
-  // Add the /api/me endpoint for backward compatibility
-  app.get("/api/me", async (req, res) => {
-    try {
-      if (!req.session.userId) {
-        // The key issue: Make sure this returns 401 NOT 200 for unauthenticated requests
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      
-      const user = await storage.getUser(req.session.userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Remove password from response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching user data" });
-    }
+    
+    // Remove password from response
+    const { password, ...userWithoutPassword } = req.user;
+    res.status(200).json(userWithoutPassword);
   });
 
   // Series routes
   app.get("/api/series", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const allSeries = await storage.getAllSeriesByUser(userId);
       res.status(200).json(allSeries);
     } catch (error) {
@@ -313,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -325,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/series", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const seriesData = insertSeriesSchema.parse({
         ...req.body,
         userId
@@ -351,7 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -372,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -394,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -415,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Series not found" });
       }
       
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -440,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(book.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -462,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(book.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -488,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const series = await storage.getSeries(firstBook.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -511,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(book.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -533,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const series = await storage.getSeries(book.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -566,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check book ownership
       const book = await storage.getBook(chapter.bookId);
       const series = await storage.getSeries(book!.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -597,7 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check book ownership
       const book = await storage.getBook(chapter.bookId);
       const series = await storage.getSeries(book!.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -629,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const book = await storage.getBook(firstChapter.bookId);
       const series = await storage.getSeries(book!.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -651,7 +416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -672,14 +437,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Series not found" });
       }
       
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
       const newCharacter = await storage.createCharacter(characterData);
       
       // Check achievements after adding a character
-      await storage.checkAndAwardAchievements(req.session.userId!);
+      await storage.checkAndAwardAchievements(req.user!.id!);
       
       res.status(201).json(newCharacter);
     } catch (error) {
@@ -701,7 +466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(character.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -723,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(character.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -745,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -778,7 +543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(sourceChar.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -804,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check character ownership
       const sourceChar = await storage.getCharacter(relationship.sourceCharacterId);
       const series = await storage.getSeries(sourceChar!.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -827,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check character ownership
       const sourceChar = await storage.getCharacter(relationship.sourceCharacterId);
       const series = await storage.getSeries(sourceChar!.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -849,7 +614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -870,14 +635,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Series not found" });
       }
       
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
       const newLocation = await storage.createLocation(locationData);
       
       // Check achievements after adding a location
-      await storage.checkAndAwardAchievements(req.session.userId!);
+      await storage.checkAndAwardAchievements(req.user!.id!);
       
       res.status(201).json(newLocation);
     } catch (error) {
@@ -899,7 +664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(location.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -921,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(location.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -935,7 +700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Writing Stats routes
   app.get("/api/writing-stats", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const period = req.query.period as 'day' | 'week' | 'month' | 'year' | undefined;
       
       const stats = await storage.getWritingStatsByUser(userId, period);
@@ -947,7 +712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/writing-stats", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const statData = insertWritingStatSchema.parse({
         ...req.body,
         userId
@@ -1002,7 +767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/user-achievements", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const userAchievements = await storage.getUserAchievements(userId);
       res.status(200).json(userAchievements);
     } catch (error) {
@@ -1012,7 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/check-achievements", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const newAchievements = await storage.checkAndAwardAchievements(userId);
       res.status(200).json(newAchievements);
     } catch (error) {
@@ -1045,7 +810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User subscription management
   app.get("/api/subscriptions/current", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const subscription = await storage.getUserSubscription(userId);
       
       if (!subscription) {
@@ -1066,7 +831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/subscriptions", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const { planName } = req.body;
       
       if (!planName) {
@@ -1148,7 +913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/subscriptions/cancel", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const subscription = await storage.getUserSubscription(userId);
       
       if (!subscription) {
@@ -1197,7 +962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
         metadata: {
-          userId: req.session.userId!.toString(),
+          userId: req.user!.id!.toString(),
           items: JSON.stringify(items)
         }
       });
@@ -1357,7 +1122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check ownership
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -1379,7 +1144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(book.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -1401,7 +1166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(character.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -1422,7 +1187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Series not found" });
       }
       
-      if (series.userId !== req.session.userId) {
+      if (series.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -1447,7 +1212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(event.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -1469,7 +1234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check series ownership
       const series = await storage.getSeries(event.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -1495,7 +1260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const series = await storage.getSeries(firstEvent.seriesId);
-      if (series?.userId !== req.session.userId) {
+      if (series?.userId !== req.user!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -1509,7 +1274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Writing Suggestions routes
   app.get("/api/ai/suggestions", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const user = await storage.getUser(userId);
       
       // Check if user has AI suggestions access based on plan
@@ -1611,7 +1376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/ai/analyze", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const user = await storage.getUser(userId);
       
       // Check if user has writing analysis access based on plan
@@ -1667,7 +1432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/ai/suggestion", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id!;
       const user = await storage.getUser(userId);
       
       // Check if user has AI suggestions access based on plan
