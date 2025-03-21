@@ -193,10 +193,15 @@ function LoginForm() {
 
   // Submit handler
   const onSubmit = (values: LoginFormValues) => {
-    if (loginMutation) {
-      loginMutation.mutate(values);
-    } else {
-      console.error("Login mutation is not available");
+    try {
+      console.log("Submitting login for:", values.username);
+      if (loginMutation) {
+        loginMutation.mutate(values);
+      } else {
+        console.error("Login mutation is not available");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
     }
   };
 
@@ -279,12 +284,25 @@ function RegisterForm() {
 
   // Submit handler
   const onSubmit = (values: RegisterFormValues) => {
-    // Remove confirmPassword from the data sent to the API
-    const { confirmPassword, ...registerData } = values;
-    if (registerMutation) {
-      registerMutation.mutate(registerData);
-    } else {
-      console.error("Register mutation is not available");
+    try {
+      // Remove confirmPassword from the data sent to the API
+      const { confirmPassword, ...registerData } = values;
+      
+      // Set default plan to free tier
+      const registerWithPlan = {
+        ...registerData,
+        plan: "apprentice",
+      };
+      
+      console.log("Submitting registration:", registerWithPlan);
+      
+      if (registerMutation) {
+        registerMutation.mutate(registerWithPlan);
+      } else {
+        console.error("Register mutation is not available");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
     }
   };
 
