@@ -43,6 +43,7 @@ import fs from 'fs';
 import path from 'path';
 import session from "express-session";
 import MemoryStore from "memorystore";
+import { PostgreSQLStorage } from "./postgresql-storage";
 
 export interface IStorage {
   // Session store
