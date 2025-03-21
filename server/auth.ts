@@ -86,8 +86,11 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
+      console.log("[AUTH] Register request received:", req.body.username);
+      
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
+        console.log("[AUTH] Registration failed: Username already exists");
         return res.status(400).json({ message: "Username already exists" });
       }
 
@@ -96,31 +99,48 @@ export function setupAuth(app: Express) {
         ...req.body,
         password: hashedPassword,
       });
+      
+      console.log("[AUTH] User created:", user.id);
 
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          console.log("[AUTH] Login after registration failed:", err);
+          return next(err);
+        }
         
         // Remove password from response
         const { password, ...userWithoutPassword } = user;
+        console.log("[AUTH] Registration successful, user logged in");
         res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
+      console.log("[AUTH] Registration error:", error);
       next(error);
     }
   });
 
   app.post("/api/login", (req, res, next) => {
+    console.log("[AUTH] Login attempt for:", req.body.username);
+    
     passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) return next(err);
+      if (err) {
+        console.log("[AUTH] Login error:", err);
+        return next(err);
+      }
       if (!user) {
+        console.log("[AUTH] Login failed:", info?.message || "Authentication failed");
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       
       req.login(user, (err: any) => {
-        if (err) return next(err);
+        if (err) {
+          console.log("[AUTH] Login session error:", err);
+          return next(err);
+        }
         
         // Remove password from response
         const { password, ...userWithoutPassword } = user;
+        console.log("[AUTH] Login successful for user:", user.id);
         res.status(200).json(userWithoutPassword);
       });
     })(req, res, next);

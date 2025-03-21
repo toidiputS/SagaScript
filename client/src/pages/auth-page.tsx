@@ -179,8 +179,7 @@ export default function AuthPage() {
 }
 
 function LoginForm() {
-  const auth = useAuth();
-  const loginMutation = auth?.loginMutation;
+  const { loginMutation } = useAuth();
   const isPending = loginMutation?.isPending ?? false;
 
   // Initialize form
@@ -264,8 +263,7 @@ function LoginForm() {
 }
 
 function RegisterForm() {
-  const auth = useAuth();
-  const registerMutation = auth?.registerMutation;
+  const { registerMutation } = useAuth();
   const isPending = registerMutation?.isPending ?? false;
 
   // Initialize form
