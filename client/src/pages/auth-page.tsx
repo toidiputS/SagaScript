@@ -195,7 +195,11 @@ function LoginForm() {
   const onSubmit = (values: LoginFormValues) => {
     try {
       console.log("Submitting login form with values:", values);
-      auth.loginMutation.mutate(values);
+      auth.loginMutation.mutate(values, {
+        onError: (error) => {
+          console.error("Login error details:", error.message);
+        }
+      });
     } catch (error) {
       console.error("Login submission error:", error);
     }
@@ -286,7 +290,11 @@ function RegisterForm() {
       
       console.log("Submitting registration form with values:", registerWithPlan);
       
-      auth.registerMutation.mutate(registerWithPlan);
+      auth.registerMutation.mutate(registerWithPlan, {
+        onError: (error) => {
+          console.error("Registration error details:", error.message);
+        }
+      });
     } catch (error) {
       console.error("Registration submission error:", error);
     }

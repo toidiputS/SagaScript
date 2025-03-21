@@ -62,51 +62,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify(credentials)
         });
         
-        // Use direct fetch for more control over the response handling
-        const res = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentials),
-          credentials: "include"
-        });
+        // Use apiRequest helper which is more reliable for error handling
+        const res = await apiRequest("POST", "/api/login", credentials);
         
         console.log("Login response status:", res.status, res.statusText);
-        
-        let responseText;
-        try {
-          responseText = await res.text();
-          console.log("Login response body:", responseText);
-        } catch (e) {
-          console.error("Error reading response text:", e);
-          throw new Error("Failed to read response");
-        }
-        
-        // Handle non-200 responses
-        if (!res.ok) {
-          let errorMessage = "Login failed";
-          try {
-            if (responseText) {
-              const errorData = JSON.parse(responseText);
-              errorMessage = errorData.message || errorMessage;
-            }
-          } catch (e) {
-            console.error("Failed to parse error response:", e);
-          }
-          throw new Error(errorMessage);
-        }
+        console.log("Login successful, parsing response");
         
         // Parse the successful response as JSON
-        try {
-          if (!responseText) {
-            throw new Error("Empty response received");
-          }
-          const userData = JSON.parse(responseText);
-          console.log("Parsed user data:", userData);
-          return userData;
-        } catch (e) {
-          console.error("Failed to parse response as JSON:", e);
-          throw new Error("Invalid response format");
-        }
+        const userData = await res.json();
+        console.log("Parsed user data:", userData);
+        return userData;
       } catch (error) {
         console.error("Login request failed:", error);
         throw error;
@@ -143,51 +108,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify(data)
         });
         
-        // Our apiRequest function now handles errors and logs, just use it directly
-        const res = await fetch("/api/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-          credentials: "include"
-        });
+        // Use apiRequest helper which is more reliable for error handling
+        const res = await apiRequest("POST", "/api/register", data);
         
         console.log("Register response status:", res.status, res.statusText);
-        
-        let responseText;
-        try {
-          responseText = await res.text();
-          console.log("Register response body:", responseText);
-        } catch (e) {
-          console.error("Error reading response text:", e);
-          throw new Error("Failed to read response");
-        }
-        
-        // Handle non-200 responses
-        if (!res.ok) {
-          let errorMessage = "Registration failed";
-          try {
-            if (responseText) {
-              const errorData = JSON.parse(responseText);
-              errorMessage = errorData.message || errorMessage;
-            }
-          } catch (e) {
-            console.error("Failed to parse error response:", e);
-          }
-          throw new Error(errorMessage);
-        }
+        console.log("Registration successful, parsing response");
         
         // Parse the successful response as JSON
-        try {
-          if (!responseText) {
-            throw new Error("Empty response received");
-          }
-          const userData = JSON.parse(responseText);
-          console.log("Parsed user data:", userData);
-          return userData;
-        } catch (e) {
-          console.error("Failed to parse response as JSON:", e);
-          throw new Error("Invalid response format");
-        }
+        const userData = await res.json();
+        console.log("Parsed user data:", userData);
+        return userData;
       } catch (error) {
         console.error("Registration request failed:", error);
         throw error;
@@ -217,36 +147,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Logout mutation executing");
       
       try {
-        // Use direct fetch
-        const res = await fetch("/api/logout", {
-          method: "POST",
-          credentials: "include"
-        });
+        // Use apiRequest helper which is more reliable for error handling
+        const res = await apiRequest("POST", "/api/logout");
         
         console.log("Logout response status:", res.status, res.statusText);
-        
-        let responseText;
-        try {
-          responseText = await res.text();
-          console.log("Logout response body:", responseText);
-        } catch (e) {
-          console.error("Error reading response text:", e);
-          throw new Error("Failed to read response");
-        }
-        
-        // Handle non-200 responses
-        if (!res.ok) {
-          let errorMessage = "Logout failed";
-          try {
-            if (responseText) {
-              const errorData = JSON.parse(responseText);
-              errorMessage = errorData.message || errorMessage;
-            }
-          } catch (e) {
-            console.error("Failed to parse error response:", e);
-          }
-          throw new Error(errorMessage);
-        }
+        console.log("Logout successful");
       } catch (error) {
         console.error("Logout request failed:", error);
         throw error;
