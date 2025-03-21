@@ -290,11 +290,35 @@ function RegisterForm() {
       
       console.log("Submitting registration form with values:", registerWithPlan);
       
-      auth.registerMutation.mutate(registerWithPlan, {
-        onError: (error) => {
-          console.error("Registration error details:", error.message);
-        }
-      });
+      // Try a direct fetch to see what's happening
+      fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registerWithPlan),
+        credentials: "include"
+      })
+        .then(async (res) => {
+          console.log("Direct registration response status:", res.status, res.statusText);
+          const text = await res.text();
+          console.log("Direct registration response body:", text);
+          
+          if (!res.ok) {
+            console.error("Registration failed:", text);
+            return;
+          }
+          
+          try {
+            const data = JSON.parse(text);
+            console.log("Parsed registration data:", data);
+            // Refresh the auth context
+            auth.refreshUser();
+          } catch (e) {
+            console.error("Failed to parse response JSON:", e);
+          }
+        })
+        .catch(error => {
+          console.error("Direct registration fetch error:", error);
+        });
     } catch (error) {
       console.error("Registration submission error:", error);
     }
