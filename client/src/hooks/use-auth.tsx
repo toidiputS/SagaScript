@@ -36,6 +36,8 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   
+  console.log("AuthProvider initialized");
+  
   // User data query
   const {
     data: user,
@@ -47,6 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
     refetchOnWindowFocus: false,
+    onError: (err) => {
+      console.error("User query error:", err);
+    }
   });
 
   // Login mutation
