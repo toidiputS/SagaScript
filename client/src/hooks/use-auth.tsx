@@ -126,27 +126,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify(data)
         });
         
-        const res = await apiRequest("POST", "/api/register", data);
+        // Our apiRequest function now handles errors and logs, just use it directly
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          credentials: "include"
+        });
+        
         console.log("Register response status:", res.status, res.statusText);
         
-        // Always log the response body for debugging purposes
-        const responseText = await res.text();
-        console.log("Register response body:", responseText);
+        let responseText;
+        try {
+          responseText = await res.text();
+          console.log("Register response body:", responseText);
+        } catch (e) {
+          console.error("Error reading response text:", e);
+          throw new Error("Failed to read response");
+        }
         
-        // If not OK status, throw an error
+        // Handle non-200 responses
         if (!res.ok) {
           let errorMessage = "Registration failed";
           try {
-            const errorData = JSON.parse(responseText);
-            errorMessage = errorData.message || errorMessage;
+            if (responseText) {
+              const errorData = JSON.parse(responseText);
+              errorMessage = errorData.message || errorMessage;
+            }
           } catch (e) {
             console.error("Failed to parse error response:", e);
           }
           throw new Error(errorMessage);
         }
         
-        // Parse the response as JSON
+        // Parse the successful response as JSON
         try {
+          if (!responseText) {
+            throw new Error("Empty response received");
+          }
           const userData = JSON.parse(responseText);
           console.log("Parsed user data:", userData);
           return userData;
