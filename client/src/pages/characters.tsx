@@ -65,10 +65,13 @@ export default function CharactersPage() {
       return;
     }
 
-    // The mutation handler now handles bookAppearances type compatibility
+    // Make sure bookAppearances is an array of numbers
     addCharacter({
       ...characterData,
       seriesId: currentSeries.id,
+      bookAppearances: Array.isArray(characterData.bookAppearances) 
+        ? characterData.bookAppearances 
+        : []
     });
     
     setIsAddCharacterDialogOpen(false);

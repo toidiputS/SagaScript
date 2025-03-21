@@ -9,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Book, Character, Location, TimelineEvent } from "@shared/schema";
 import TimelineEventCard from "@/components/timeline/timeline-event-card";
 import TimelineEventDialog from "@/components/timeline/timeline-event-dialog";
+import TimelineDragAndDrop from "@/components/timeline/timeline-drag-and-drop";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, GripVertical } from "lucide-react";
 
 export default function TimelinePage() {
   const { toast } = useToast();
@@ -107,6 +108,28 @@ export default function TimelinePage() {
     },
   });
 
+  // Reorder mutation for drag-and-drop
+  const reorderMutation = useMutation({
+    mutationFn: async (events: { id: number, position: number }[]) => {
+      const res = await apiRequest('POST', '/api/timeline-events/reorder', { events });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/series', currentSeries?.id, 'timeline'] });
+      toast({
+        title: "Timeline updated",
+        description: "Event order has been saved.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to reorder events: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Handle series selection change
   const handleSeriesChange = (seriesId: string) => {
     changeCurrentSeries(parseInt(seriesId));
@@ -143,6 +166,18 @@ export default function TimelinePage() {
   // Handle character selection for character-based view
   const handleCharacterChange = (characterId: string) => {
     setSelectedCharacterId(characterId ? parseInt(characterId) : null);
+  };
+
+  // Handle timeline event reordering
+  const handleEventReorder = (reorderedEvents: TimelineEvent[]) => {
+    // Prepare events for the API - just need id and position
+    const events = reorderedEvents.map((event, index) => ({
+      id: event.id,
+      position: index + 1
+    }));
+    
+    // Send the updated positions to the server
+    reorderMutation.mutate(events);
   };
 
   // Get events based on current view mode
@@ -370,18 +405,20 @@ export default function TimelinePage() {
                             </Card>
                           )}
 
-                          {/* Book's timeline events */}
-                          <div className="pl-6 space-y-4 mb-6">
-                            {bookGroup.events.map(event => (
-                              <div key={event.id} className="relative">
-                                <div className="absolute -left-3 w-2 h-2 rounded-full bg-neutral-400 mt-1.5"></div>
-                                <TimelineEventCard 
-                                  event={event} 
-                                  onEdit={handleEditEvent} 
-                                  onDelete={handleDeleteEvent} 
-                                />
+                          {/* Book's timeline events with drag-and-drop */}
+                          <div className="pl-6 mb-6">
+                            {viewMode === "narrative" && (
+                              <div className="text-xs text-neutral-600 mb-2 flex items-center">
+                                <GripVertical className="h-3 w-3 mr-1" />
+                                <span>Drag to reorder events</span>
                               </div>
-                            ))}
+                            )}
+                            <TimelineDragAndDrop
+                              events={bookGroup.events}
+                              onEventReorder={handleEventReorder}
+                              onEdit={handleEditEvent}
+                              onDelete={handleDeleteEvent}
+                            />
                           </div>
                         </div>
                       </div>
