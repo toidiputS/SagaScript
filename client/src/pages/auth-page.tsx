@@ -194,16 +194,11 @@ function LoginForm() {
   // Submit handler
   const onSubmit = (values: LoginFormValues) => {
     try {
-      console.log("Submitting login for:", values.username);
-      auth.loginMutation?.mutate(values);
+      console.log("Submitting login form with values:", values);
+      auth.loginMutation.mutate(values);
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login submission error:", error);
     }
-  };
-
-  // Create a button click handler to prevent button click issues
-  const handleLoginClick = () => {
-    form.handleSubmit(onSubmit)();
   };
 
   return (
@@ -214,7 +209,7 @@ function LoginForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="username"
@@ -241,11 +236,10 @@ function LoginForm() {
                 </FormItem>
               )}
             />
-            <button
-              type="button"
-              className="w-full rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center font-medium"
+            <Button 
+              type="submit" 
+              className="w-full"
               disabled={isPending}
-              onClick={handleLoginClick}
             >
               {isPending ? (
                 <>
@@ -255,8 +249,8 @@ function LoginForm() {
               ) : (
                 "Login"
               )}
-            </button>
-          </div>
+            </Button>
+          </form>
         </Form>
       </CardContent>
     </Card>
@@ -290,17 +284,12 @@ function RegisterForm() {
         plan: "apprentice",
       };
       
-      console.log("Submitting registration:", registerWithPlan);
+      console.log("Submitting registration form with values:", registerWithPlan);
       
-      auth.registerMutation?.mutate(registerWithPlan);
+      auth.registerMutation.mutate(registerWithPlan);
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Registration submission error:", error);
     }
-  };
-
-  // Create a button click handler to prevent button click issues
-  const handleRegisterClick = () => {
-    form.handleSubmit(onSubmit)();
   };
 
   return (
@@ -311,7 +300,7 @@ function RegisterForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="username"
@@ -364,11 +353,10 @@ function RegisterForm() {
                 </FormItem>
               )}
             />
-            <button
-              type="button"
-              className="w-full rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center font-medium"
+            <Button 
+              type="submit" 
+              className="w-full"
               disabled={isPending}
-              onClick={handleRegisterClick}
             >
               {isPending ? (
                 <>
@@ -378,8 +366,8 @@ function RegisterForm() {
               ) : (
                 "Register"
               )}
-            </button>
-          </div>
+            </Button>
+          </form>
         </Form>
       </CardContent>
     </Card>
