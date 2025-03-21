@@ -257,8 +257,8 @@ export default function TimelinePage() {
         {/* Timeline Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-neutral-800">Timeline</h1>
-            <p className="text-neutral-600 mt-1">Chart the chronology of your story</p>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Timeline</h1>
+            <p className="text-muted-foreground mt-1">Chart the chronology of your story</p>
           </div>
           <div className="mt-4 md:mt-0 flex space-x-3">
             {allSeries && allSeries.length > 0 && (
@@ -291,7 +291,7 @@ export default function TimelinePage() {
         </div>
 
         {/* Timeline view options */}
-        <div className="border-b border-neutral-200 mb-6">
+        <div className="border-b border-border mb-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4 pb-4">
             <Tabs 
               defaultValue="chronological"
@@ -326,12 +326,12 @@ export default function TimelinePage() {
 
         {/* Timeline Content */}
         {!currentSeries ? (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="text-neutral-500 mb-4">
+          <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+            <div className="text-muted-foreground mb-4">
               <i className="ri-time-line text-4xl"></i>
             </div>
-            <h3 className="text-lg font-medium mb-2">No Series Selected</h3>
-            <p className="text-neutral-600 mb-4">Please select a series to view its timeline</p>
+            <h3 className="text-lg font-medium mb-2 text-foreground">No Series Selected</h3>
+            <p className="text-muted-foreground mb-4">Please select a series to view its timeline</p>
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -343,14 +343,14 @@ export default function TimelinePage() {
             {(viewMode === "chronological" || viewMode === "character") && (
               <div className="relative">
                 {/* Timeline line */}
-                <div className="absolute left-[150px] top-0 bottom-0 w-0.5 bg-neutral-200 z-0"></div>
+                <div className="absolute left-[150px] top-0 bottom-0 w-0.5 bg-border z-0"></div>
 
                 {/* Timeline events */}
                 <div className="relative z-10 space-y-8">
                   {getSortedEvents().map((event) => (
                     <div key={event.id} className="relative">
                       <div className="flex">
-                        <div className="w-[150px] pr-8 pt-2 font-medium text-neutral-700 text-right">
+                        <div className="w-[150px] pr-8 pt-2 font-medium text-muted-foreground text-right">
                           {event.date || "Undated"}
                         </div>
                         <div className="flex-grow pl-8">
@@ -374,12 +374,12 @@ export default function TimelinePage() {
             {viewMode === "narrative" && (
               <div className="relative">
                 {/* Enhanced drag-and-drop instructions for narrative view */}
-                <div className="text-sm bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+                <div className="text-sm bg-primary/5 border border-primary/20 rounded-md p-4 mb-6">
                   <div className="flex items-center mb-2">
-                    <GripVertical className="h-5 w-5 mr-2 text-blue-500" />
-                    <h3 className="font-bold text-blue-800 text-base">Timeline Drag & Drop Enabled</h3>
+                    <GripVertical className="h-5 w-5 mr-2 text-primary" />
+                    <h3 className="font-bold text-primary-foreground text-base">Timeline Drag & Drop Enabled</h3>
                   </div>
-                  <div className="ml-7 text-blue-700">
+                  <div className="ml-7 text-foreground">
                     <p className="mb-2">You can now reorder your story events easily:</p>
                     <ol className="list-decimal ml-5 space-y-1">
                       <li><span className="font-medium">Grab the handle</span> on the left side of any event card</li>
@@ -391,14 +391,14 @@ export default function TimelinePage() {
                 </div>
                 
                 {/* Timeline line */}
-                <div className="absolute left-[150px] top-0 bottom-0 w-0.5 bg-neutral-200 z-0"></div>
+                <div className="absolute left-[150px] top-0 bottom-0 w-0.5 bg-border z-0"></div>
 
                 {/* Timeline events grouped by book */}
                 <div className="relative z-10 space-y-12">
                   {getBookEvents().map((bookGroup, index) => (
                     <div key={bookGroup.book?.id || `no-book-${index}`} className="relative">
                       <div className="flex">
-                        <div className="w-[150px] pr-8 pt-2 font-medium text-neutral-700 text-right">
+                        <div className="w-[150px] pr-8 pt-2 font-medium text-muted-foreground text-right">
                           {bookGroup.book 
                             ? `Book ${bookGroup.book.position}: ${bookGroup.book.title}` 
                             : "General Events"}
@@ -412,10 +412,10 @@ export default function TimelinePage() {
                                 <CardTitle>{bookGroup.book.title}</CardTitle>
                               </CardHeader>
                               <CardContent>
-                                <p className="text-sm text-neutral-600 mb-3">
+                                <p className="text-sm text-foreground mb-3">
                                   {bookGroup.book.description || "No description provided"}
                                 </p>
-                                <div className="text-xs text-neutral-500">
+                                <div className="text-xs text-muted-foreground">
                                   Status: {bookGroup.book.status === "completed" ? "Completed" : "In Progress"}
                                 </div>
                               </CardContent>
@@ -425,7 +425,7 @@ export default function TimelinePage() {
                           {/* Book's timeline events with drag-and-drop */}
                           <div className="pl-6 mb-6">
                             {viewMode === "narrative" && (
-                              <div className="text-xs text-neutral-600 mb-2 flex items-center">
+                              <div className="text-xs text-muted-foreground mb-2 flex items-center">
                                 <GripVertical className="h-3 w-3 mr-1" />
                                 <span>Drag to reorder events</span>
                               </div>
@@ -446,17 +446,17 @@ export default function TimelinePage() {
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="text-neutral-500 mb-4">
+          <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+            <div className="text-muted-foreground mb-4">
               <i className="ri-time-line text-4xl"></i>
             </div>
-            <h3 className="text-lg font-medium mb-2">No Timeline Events</h3>
-            <p className="text-neutral-600 mb-4">
+            <h3 className="text-lg font-medium mb-2 text-foreground">No Timeline Events</h3>
+            <p className="text-muted-foreground mb-4">
               Add events to start building your story timeline
             </p>
             <Button 
               onClick={handleAddEvent}
-              className="bg-primary hover:bg-primary-dark text-white"
+              variant="default"
             >
               <PlusCircle className="mr-2 h-4 w-4" /> Add First Event
             </Button>
