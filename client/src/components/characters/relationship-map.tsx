@@ -25,6 +25,7 @@ import { Character, CharacterRelationship } from "@shared/schema";
 interface RelationshipMapProps {
   characters: Character[];
   seriesId: number;
+  initialZoom?: number;
 }
 
 // Type for relationship connection data
@@ -45,12 +46,12 @@ const relationshipTypes = [
   { value: "professional", label: "Professional", color: "#60A5FA" },
 ];
 
-export default function RelationshipMap({ characters, seriesId }: RelationshipMapProps) {
+export default function RelationshipMap({ characters, seriesId, initialZoom = 1 }: RelationshipMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const { relationships, isLoadingRelationships } = useCharacters(seriesId);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(initialZoom);
   const [isAddRelationshipOpen, setIsAddRelationshipOpen] = useState(false);
   const [isCharacterDialogOpen, setIsCharacterDialogOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
@@ -136,6 +137,13 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
     setSelectedCharacter(character);
     setIsCharacterDialogOpen(true);
   };
+  
+  // Update zoom level when initialZoom prop changes
+  useEffect(() => {
+    if (initialZoom !== zoomLevel) {
+      setZoomLevel(initialZoom);
+    }
+  }, [initialZoom]);
 
   return (
     <div className="relative">
@@ -347,7 +355,36 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
           {selectedCharacter && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-xl">{selectedCharacter.name}</DialogTitle>
+                <div className="flex items-center space-x-4">
+                  {selectedCharacter.avatar ? (
+                    <div className="w-12 h-12 rounded-full overflow-hidden">
+                      <img 
+                        src={selectedCharacter.avatar} 
+                        alt={selectedCharacter.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white">
+                      <i className="ri-user-line text-xl"></i>
+                    </div>
+                  )}
+                  <DialogTitle className="text-xl">{selectedCharacter.name}</DialogTitle>
+                </div>
+                {selectedCharacter.isProtagonist && (
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Protagonist
+                    </span>
+                  </div>
+                )}
+                {selectedCharacter.role === 'antagonist' && (
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Antagonist
+                    </span>
+                  </div>
+                )}
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-3 gap-4">
@@ -371,17 +408,31 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
                   </div>
                 )}
                 
-                {selectedCharacter.background && (
+                {selectedCharacter.appearance && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Background</h4>
-                    <p className="text-sm">{selectedCharacter.background}</p>
+                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Appearance</h4>
+                    <p className="text-sm">{selectedCharacter.appearance}</p>
                   </div>
                 )}
                 
-                {selectedCharacter.motivation && (
+                {selectedCharacter.personality && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Motivation</h4>
-                    <p className="text-sm">{selectedCharacter.motivation}</p>
+                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Personality</h4>
+                    <p className="text-sm">{selectedCharacter.personality}</p>
+                  </div>
+                )}
+                
+                {selectedCharacter.backstory && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Backstory</h4>
+                    <p className="text-sm">{selectedCharacter.backstory}</p>
+                  </div>
+                )}
+                
+                {selectedCharacter.goals && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Goals</h4>
+                    <p className="text-sm">{selectedCharacter.goals}</p>
                   </div>
                 )}
                 

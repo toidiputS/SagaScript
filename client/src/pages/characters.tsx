@@ -197,13 +197,23 @@ export default function CharactersPage() {
               <div className="border-b border-neutral-200 px-5 py-4 flex justify-between items-center">
                 <h2 className="font-serif font-bold text-lg text-neutral-800">Character Relationship Map</h2>
                 <div className="flex space-x-2">
-                  <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
+                  <button 
+                    className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500"
+                    onClick={() => setRelationshipMapZoom(prev => Math.min(prev + 0.2, 2))}
+                  >
                     <i className="ri-zoom-in-line"></i>
                   </button>
-                  <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
+                  <button 
+                    className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500"
+                    onClick={() => setRelationshipMapZoom(prev => Math.max(prev - 0.2, 0.5))}
+                  >
                     <i className="ri-zoom-out-line"></i>
                   </button>
-                  <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
+                  <button 
+                    className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500"
+                    onClick={() => setRelationshipMapZoom(1)}
+                    title="Reset zoom"
+                  >
                     <i className="ri-fullscreen-line"></i>
                   </button>
                 </div>
@@ -211,7 +221,8 @@ export default function CharactersPage() {
               <div className="p-0">
                 <RelationshipMap 
                   characters={characters} 
-                  seriesId={currentSeries.id} 
+                  seriesId={currentSeries.id}
+                  initialZoom={relationshipMapZoom}
                 />
               </div>
             </div>
