@@ -39,8 +39,14 @@ export function useCharacters(seriesId?: number) {
 
   // Add a new character
   const addCharacterMutation = useMutation({
-    mutationFn: async (character: InsertCharacter) => {
-      const res = await apiRequest('POST', '/api/characters', character);
+    mutationFn: async (character: Omit<InsertCharacter, 'bookAppearances'> & { bookAppearances: number[] }) => {
+      // Ensure bookAppearances is a valid JSON array
+      const characterToAdd = {
+        ...character,
+        bookAppearances: Array.isArray(character.bookAppearances) ? character.bookAppearances : []
+      };
+      
+      const res = await apiRequest('POST', '/api/characters', characterToAdd);
       return res.json() as Promise<Character>;
     },
     onSuccess: () => {
@@ -62,7 +68,17 @@ export function useCharacters(seriesId?: number) {
   // Update an existing character
   const updateCharacterMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number, updates: Partial<Character> }) => {
-      const res = await apiRequest('PUT', `/api/characters/${id}`, updates);
+      // Handle bookAppearances properly if it's being updated
+      let updatesToSend = updates;
+      
+      if (updates.bookAppearances !== undefined) {
+        updatesToSend = {
+          ...updates,
+          bookAppearances: Array.isArray(updates.bookAppearances) ? updates.bookAppearances : []
+        };
+      }
+      
+      const res = await apiRequest('PUT', `/api/characters/${id}`, updatesToSend);
       return res.json() as Promise<Character>;
     },
     onSuccess: () => {

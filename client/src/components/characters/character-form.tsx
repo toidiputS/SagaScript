@@ -50,7 +50,10 @@ export default function CharacterForm({
 
   // Handle book appearance changes
   const handleBookAppearanceChange = (bookNumber: number, checked: boolean) => {
-    const currentAppearances = [...(formData.bookAppearances as number[] || [])];
+    // Convert from Json type to proper array and ensure it's an array
+    const currentAppearances = Array.isArray(formData.bookAppearances) 
+      ? [...formData.bookAppearances] 
+      : [];
     
     if (checked && !currentAppearances.includes(bookNumber)) {
       setFormData({
@@ -67,7 +70,11 @@ export default function CharacterForm({
 
   // Check if a book is in the appearances array
   const isBookInAppearances = (bookNumber: number) => {
-    return (formData.bookAppearances as number[] || []).includes(bookNumber);
+    // Ensure bookAppearances is treated as an array
+    const appearances = Array.isArray(formData.bookAppearances) 
+      ? formData.bookAppearances 
+      : [];
+    return appearances.includes(bookNumber);
   };
 
   return (

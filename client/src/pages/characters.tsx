@@ -65,6 +65,7 @@ export default function CharactersPage() {
       return;
     }
 
+    // The mutation handler now handles bookAppearances type compatibility
     addCharacter({
       ...characterData,
       seriesId: currentSeries.id,
