@@ -1361,91 +1361,101 @@ export class MemStorage implements IStorage {
         name: "Word Count Badge",
         description: "Badge awarded for reaching word count milestones",
         category: "progress",
-        iconUrl: "ri-quill-pen-line",
-        pointValue: 50,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "wordCount", threshold: 5000 })
+        icon: "ri-quill-pen-line",
+        color: "#4F46E5",
+        points: 50,
+        rarity: "common",
+        isActive: true
       },
       {
         name: "Streak Badge",
         description: "Badge awarded for maintaining writing streaks",
         category: "consistency",
-        iconUrl: "ri-fire-line",
-        pointValue: 100,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "streak", threshold: 7 })
+        icon: "ri-fire-line",
+        color: "#F97316",
+        points: 100,
+        rarity: "uncommon",
+        isActive: true
       },
       {
         name: "Character Creator Badge",
         description: "Badge awarded for creating detailed characters",
         category: "worldbuilding",
-        iconUrl: "ri-user-star-line",
-        pointValue: 75,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "characters", threshold: 5 })
+        icon: "ri-user-star-line",
+        color: "#10B981",
+        points: 75,
+        rarity: "common",
+        isActive: true
       },
       {
         name: "World Builder Badge",
         description: "Badge awarded for creating detailed locations",
         category: "worldbuilding",
-        iconUrl: "ri-earth-line",
-        pointValue: 75,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "locations", threshold: 10 })
+        icon: "ri-earth-line",
+        color: "#10B981",
+        points: 75,
+        rarity: "common",
+        isActive: true
       },
       {
         name: "Chapter Completer Badge",
         description: "Badge awarded for completing chapters",
         category: "progress",
-        iconUrl: "ri-book-mark-line",
-        pointValue: 25,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "chapters", threshold: 5 })
+        icon: "ri-book-mark-line",
+        color: "#4F46E5",
+        points: 25,
+        rarity: "common",
+        isActive: true
       },
       {
         name: "Book Completer Badge",
         description: "Badge awarded for completing books",
         category: "achievement",
-        iconUrl: "ri-book-read-line",
-        pointValue: 200,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "books", threshold: 1 })
+        icon: "ri-book-read-line",
+        color: "#8B5CF6",
+        points: 200,
+        rarity: "rare",
+        isActive: true
       },
       {
         name: "Goal Achiever Badge",
         description: "Badge awarded for completing writing goals",
         category: "consistency",
-        iconUrl: "ri-target-line",
-        pointValue: 100,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "goals", threshold: 3 })
+        icon: "ri-target-line",
+        color: "#F97316",
+        points: 100,
+        rarity: "uncommon",
+        isActive: true
       },
       {
         name: "Custom Theme",
         description: "Unlock a custom theme for your dashboard",
         category: "cosmetic",
-        iconUrl: "ri-palette-line",
-        pointValue: 500,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "points", threshold: 500 })
+        icon: "ri-palette-line",
+        color: "#EC4899",
+        points: 500,
+        rarity: "epic",
+        isActive: true
       },
       {
         name: "Advanced Analytics",
         description: "Unlock advanced writing analytics",
         category: "feature",
-        iconUrl: "ri-line-chart-line",
-        pointValue: 750,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "points", threshold: 750 })
+        icon: "ri-line-chart-line",
+        color: "#8B5CF6",
+        points: 750,
+        rarity: "epic",
+        isActive: true
       },
       {
         name: "AI Suggestion Boost",
         description: "Temporary boost to AI suggestion quality",
         category: "feature",
-        iconUrl: "ri-robot-line",
-        pointValue: 1000,
-        isUnlockable: true,
-        unlockCriteria: JSON.stringify({ type: "points", threshold: 1000 })
+        icon: "ri-robot-line",
+        color: "#0EA5E9",
+        points: 1000,
+        rarity: "legendary",
+        isActive: true
       }
     ];
     
@@ -1456,60 +1466,87 @@ export class MemStorage implements IStorage {
   
   // Initialize writing milestones
   private initializeWritingMilestones() {
+    // First create the reward types if not already created
+    if (this.rewardTypes.size === 0) {
+      this.initializeRewardTypes();
+    }
+  
+    // Find reward type IDs by name
+    const getRewardTypeId = (name: string): number => {
+      const rewardType = Array.from(this.rewardTypes.values()).find(r => r.name === name);
+      if (!rewardType) {
+        throw new Error(`Reward type '${name}' not found`);
+      }
+      return rewardType.id;
+    };
+
+    const wordCountRewardId = getRewardTypeId("Word Count Badge");
+    const streakRewardId = getRewardTypeId("Streak Badge");
+    const chapterRewardId = getRewardTypeId("Chapter Completer Badge");
+    const bookRewardId = getRewardTypeId("Book Completer Badge");
+    const characterRewardId = getRewardTypeId("Character Creator Badge");
+    const worldBuilderRewardId = getRewardTypeId("World Builder Badge");
+  
     const milestones: InsertWritingMilestone[] = [
       // Word count milestones - All Tiers
       {
         name: "First 1,000 Words",
         description: "Write your first 1,000 words",
-        category: "wordCount",
-        threshold: 1000,
-        rewardPoints: 50,
-        iconUrl: "ri-quill-pen-line",
+        milestoneType: "wordCount",
+        targetValue: 1000,
+        rewardTypeId: wordCountRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "5,000 Word Journey",
         description: "Reach 5,000 total words written",
-        category: "wordCount",
-        threshold: 5000,
-        rewardPoints: 100,
-        iconUrl: "ri-quill-pen-line",
+        milestoneType: "wordCount",
+        targetValue: 5000,
+        rewardTypeId: wordCountRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "10,000 Word Milestone",
         description: "Reach 10,000 total words written",
-        category: "wordCount",
-        threshold: 10000,
-        rewardPoints: 150,
-        iconUrl: "ri-quill-pen-fill",
+        milestoneType: "wordCount",
+        targetValue: 10000,
+        rewardTypeId: wordCountRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "25,000 Word Achievement",
         description: "Write 25,000 words across all your works",
-        category: "wordCount",
-        threshold: 25000,
-        rewardPoints: 250,
-        iconUrl: "ri-quill-pen-fill",
+        milestoneType: "wordCount",
+        targetValue: 25000,
+        rewardTypeId: wordCountRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "wordsmith"
       },
       {
         name: "50,000 Word Accomplishment",
         description: "Complete 50,000 words - the length of a novel!",
-        category: "wordCount",
-        threshold: 50000,
-        rewardPoints: 500,
-        iconUrl: "ri-book-read-line",
+        milestoneType: "wordCount",
+        targetValue: 50000,
+        rewardTypeId: wordCountRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "wordsmith"
       },
       {
         name: "100,000 Word Masterpiece",
         description: "Write 100,000 words - you're a true wordsmith!",
-        category: "wordCount",
-        threshold: 100000,
-        rewardPoints: 1000,
-        iconUrl: "ri-book-read-fill",
+        milestoneType: "wordCount",
+        targetValue: 100000,
+        rewardTypeId: wordCountRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "loremaster"
       },
       
@@ -1517,46 +1554,51 @@ export class MemStorage implements IStorage {
       {
         name: "7-Day Streak",
         description: "Write every day for a week",
-        category: "streak",
-        threshold: 7,
-        rewardPoints: 100,
-        iconUrl: "ri-fire-line",
+        milestoneType: "streak",
+        targetValue: 7,
+        rewardTypeId: streakRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "14-Day Streak",
         description: "Write every day for two weeks",
-        category: "streak",
-        threshold: 14,
-        rewardPoints: 150,
-        iconUrl: "ri-fire-line",
+        milestoneType: "streak",
+        targetValue: 14,
+        rewardTypeId: streakRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "30-Day Streak",
         description: "Write every day for a month",
-        category: "streak",
-        threshold: 30,
-        rewardPoints: 300,
-        iconUrl: "ri-fire-fill",
+        milestoneType: "streak",
+        targetValue: 30,
+        rewardTypeId: streakRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "60-Day Streak",
         description: "Write every day for two months",
-        category: "streak",
-        threshold: 60,
-        rewardPoints: 500,
-        iconUrl: "ri-flashlight-line",
+        milestoneType: "streak",
+        targetValue: 60,
+        rewardTypeId: streakRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "wordsmith"
       },
       {
         name: "100-Day Streak",
         description: "Write every day for 100 days",
-        category: "streak",
-        threshold: 100,
-        rewardPoints: 1000,
-        iconUrl: "ri-flashlight-fill",
+        milestoneType: "streak",
+        targetValue: 100,
+        rewardTypeId: streakRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "loremaster"
       },
       
@@ -1564,46 +1606,51 @@ export class MemStorage implements IStorage {
       {
         name: "First Chapter",
         description: "Complete your first chapter",
-        category: "chapters",
-        threshold: 1,
-        rewardPoints: 50,
-        iconUrl: "ri-book-mark-line",
+        milestoneType: "chapters",
+        targetValue: 1,
+        rewardTypeId: chapterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "Five Chapters",
         description: "Complete five chapters",
-        category: "chapters",
-        threshold: 5,
-        rewardPoints: 100,
-        iconUrl: "ri-book-mark-line",
+        milestoneType: "chapters",
+        targetValue: 5,
+        rewardTypeId: chapterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "Ten Chapters",
         description: "Complete ten chapters",
-        category: "chapters",
-        threshold: 10,
-        rewardPoints: 200,
-        iconUrl: "ri-bookmark-line",
+        milestoneType: "chapters",
+        targetValue: 10,
+        rewardTypeId: chapterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "Twenty Five Chapters",
         description: "Complete twenty-five chapters",
-        category: "chapters",
-        threshold: 25,
-        rewardPoints: 300,
-        iconUrl: "ri-bookmark-fill",
+        milestoneType: "chapters",
+        targetValue: 25,
+        rewardTypeId: chapterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "wordsmith"
       },
       {
         name: "Fifty Chapters",
         description: "Complete fifty chapters",
-        category: "chapters",
-        threshold: 50,
-        rewardPoints: 500,
-        iconUrl: "ri-booklet-fill",
+        milestoneType: "chapters",
+        targetValue: 50,
+        rewardTypeId: chapterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "loremaster"
       },
       
@@ -1611,28 +1658,31 @@ export class MemStorage implements IStorage {
       {
         name: "First Book",
         description: "Complete your first book",
-        category: "books",
-        threshold: 1,
-        rewardPoints: 250,
-        iconUrl: "ri-book-2-line",
+        milestoneType: "books",
+        targetValue: 1,
+        rewardTypeId: bookRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "Trilogy",
         description: "Complete three books in a series",
-        category: "books",
-        threshold: 3,
-        rewardPoints: 500,
-        iconUrl: "ri-book-read-line",
+        milestoneType: "books",
+        targetValue: 3,
+        rewardTypeId: bookRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "wordsmith"
       },
       {
         name: "Epic Series",
         description: "Complete five books in a series",
-        category: "books",
-        threshold: 5,
-        rewardPoints: 1000,
-        iconUrl: "ri-book-read-fill",
+        milestoneType: "books",
+        targetValue: 5,
+        rewardTypeId: bookRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "loremaster"
       },
       
@@ -1640,28 +1690,31 @@ export class MemStorage implements IStorage {
       {
         name: "Character Creator",
         description: "Create your first five characters",
-        category: "characters",
-        threshold: 5,
-        rewardPoints: 100,
-        iconUrl: "ri-user-star-line",
+        milestoneType: "characters",
+        targetValue: 5,
+        rewardTypeId: characterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "Character Ensemble",
         description: "Create ten detailed characters",
-        category: "characters",
-        threshold: 10,
-        rewardPoints: 200,
-        iconUrl: "ri-team-line",
+        milestoneType: "characters",
+        targetValue: 10,
+        rewardTypeId: characterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "wordsmith"
       },
       {
         name: "Character Universe",
         description: "Create twenty-five characters",
-        category: "characters",
-        threshold: 25,
-        rewardPoints: 500,
-        iconUrl: "ri-team-fill",
+        milestoneType: "characters",
+        targetValue: 25,
+        rewardTypeId: characterRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "loremaster"
       },
       
@@ -1669,28 +1722,31 @@ export class MemStorage implements IStorage {
       {
         name: "World Builder",
         description: "Create five unique locations",
-        category: "locations",
-        threshold: 5,
-        rewardPoints: 100,
-        iconUrl: "ri-map-pin-line",
+        milestoneType: "locations",
+        targetValue: 5,
+        rewardTypeId: worldBuilderRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "apprentice"
       },
       {
         name: "World Explorer",
         description: "Create ten distinctive locations",
-        category: "locations",
-        threshold: 10,
-        rewardPoints: 200,
-        iconUrl: "ri-earth-line",
+        milestoneType: "locations",
+        targetValue: 10,
+        rewardTypeId: worldBuilderRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "wordsmith"
       },
       {
         name: "World Architect",
         description: "Create twenty-five mapped locations",
-        category: "locations",
-        threshold: 25,
-        rewardPoints: 500,
-        iconUrl: "ri-earth-fill",
+        milestoneType: "locations",
+        targetValue: 25,
+        rewardTypeId: worldBuilderRewardId,
+        isRecurring: false,
+        isGlobal: true,
         tier: "loremaster"
       }
     ];
@@ -1811,21 +1867,30 @@ export class MemStorage implements IStorage {
     const newReward: UserReward = {
       ...reward,
       id,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      redeemedAt: null
+      earnedAt: reward.earnedAt || timestamp,
+      isRedeemed: reward.isRedeemed || false,
+      redeemedAt: reward.redeemedAt || null,
+      pointsAwarded: reward.pointsAwarded || 0,
+      milestoneId: reward.milestoneId || null,
+      note: reward.note || null,
+      seriesId: reward.seriesId || null,
+      bookId: reward.bookId || null,
+      chapterId: reward.chapterId || null
     };
     this.userRewards.set(id, newReward);
     
-    // Add points to user's point ledger
-    const rewardType = await this.getRewardType(reward.rewardTypeId);
-    if (rewardType) {
-      await this.addPointsTransaction({
-        userId: reward.userId,
-        amount: rewardType.pointValue,
-        description: `Earned reward: ${rewardType.name}`,
-        source: 'reward'
-      });
+    // Add points to user's point ledger if points are awarded
+    if (newReward.pointsAwarded > 0) {
+      const rewardType = await this.getRewardType(reward.rewardTypeId);
+      if (rewardType) {
+        await this.addPointsTransaction({
+          userId: reward.userId,
+          points: newReward.pointsAwarded,
+          description: `Earned reward: ${rewardType.name}`,
+          transactionType: 'earned',
+          rewardId: id
+        });
+      }
     }
     
     return newReward;
@@ -1859,7 +1924,9 @@ export class MemStorage implements IStorage {
       id,
       createdAt: timestamp,
       updatedAt: timestamp,
-      lastUpdatedAt: timestamp
+      lastWritingDay: streak.lastWritingDay || null,
+      streakStartDate: streak.streakStartDate || null,
+      totalWritingDays: streak.totalWritingDays || 0
     };
     this.writingStreaks.set(id, newStreak);
     return newStreak;
@@ -1884,6 +1951,7 @@ export class MemStorage implements IStorage {
   async incrementWritingStreak(userId: number): Promise<WritingStreak | undefined> {
     let streak = await this.getWritingStreak(userId);
     const timestamp = new Date();
+    const today = timestamp.toISOString().split('T')[0]; // YYYY-MM-DD format
     
     if (!streak) {
       // Create new streak
@@ -1891,33 +1959,44 @@ export class MemStorage implements IStorage {
         userId,
         currentStreak: 1,
         longestStreak: 1,
-        lastUpdatedAt: timestamp
+        lastWritingDay: today,
+        streakStartDate: today,
+        totalWritingDays: 1
       });
       return streak;
     }
     
-    // Check if streak is still active (updated within last 24-36 hours)
-    const lastUpdate = new Date(streak.lastUpdatedAt);
-    const daysSinceLastUpdate = (timestamp.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24);
-    
-    if (daysSinceLastUpdate > 1.5) {
-      // Streak broken, reset to 1
-      return this.updateWritingStreak(userId, {
-        currentStreak: 1,
-        lastUpdatedAt: timestamp
-      });
-    } else if (daysSinceLastUpdate < 0.5) {
+    // Check if already updated today
+    if (streak.lastWritingDay === today) {
       // Already updated today, no change
       return streak;
-    } else {
-      // Increment streak
+    }
+    
+    // Check if streak is still active (updated yesterday)
+    const lastDay = new Date(streak.lastWritingDay || timestamp);
+    const yesterday = new Date(timestamp);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const isYesterday = lastDay.toISOString().split('T')[0] === yesterday.toISOString().split('T')[0];
+    
+    if (isYesterday) {
+      // Streak continues
       const currentStreak = streak.currentStreak + 1;
       const longestStreak = Math.max(currentStreak, streak.longestStreak);
       
       return this.updateWritingStreak(userId, {
         currentStreak,
         longestStreak,
-        lastUpdatedAt: timestamp
+        lastWritingDay: today,
+        totalWritingDays: streak.totalWritingDays + 1
+      });
+    } else {
+      // Streak broken, reset to 1
+      return this.updateWritingStreak(userId, {
+        currentStreak: 1,
+        lastWritingDay: today,
+        streakStartDate: today,
+        totalWritingDays: streak.totalWritingDays + 1
       });
     }
   }
@@ -1926,9 +2005,12 @@ export class MemStorage implements IStorage {
     const streak = await this.getWritingStreak(userId);
     if (!streak) return undefined;
     
+    const today = new Date().toISOString().split('T')[0];
+    
     return this.updateWritingStreak(userId, {
       currentStreak: 0,
-      lastUpdatedAt: new Date()
+      lastWritingDay: null,
+      streakStartDate: null
     });
   }
   
@@ -1950,9 +2032,17 @@ export class MemStorage implements IStorage {
       id,
       createdAt: timestamp,
       updatedAt: timestamp,
-      currentProgress: 0,
+      goalType: goal.goalType || 'wordCount',
+      targetValue: goal.targetValue,
+      currentValue: 0,
+      isRecurring: goal.isRecurring || false,
+      recurringPeriod: goal.recurringPeriod || null,
+      startDate: goal.startDate || timestamp,
+      endDate: goal.endDate || null,
       isCompleted: false,
-      completedAt: null
+      completedAt: null,
+      seriesId: goal.seriesId || null,
+      bookId: goal.bookId || null
     };
     this.writingGoals.set(id, newGoal);
     return newGoal;
@@ -1980,11 +2070,11 @@ export class MemStorage implements IStorage {
     const goal = this.writingGoals.get(id);
     if (!goal || goal.isCompleted) return undefined;
     
-    const newProgress = goal.currentProgress + amount;
+    const newProgress = goal.currentValue + amount;
     const isCompleted = newProgress >= goal.targetValue;
     
     const updates: Partial<WritingGoal> = {
-      currentProgress: newProgress,
+      currentValue: newProgress,
       updatedAt: new Date()
     };
     
@@ -1995,9 +2085,9 @@ export class MemStorage implements IStorage {
       // Add points to user ledger for completing goal
       await this.addPointsTransaction({
         userId: goal.userId,
-        amount: Math.ceil(goal.targetValue / 100), // 1 point per 100 units of target
+        points: Math.ceil(goal.targetValue / 100), // 1 point per 100 units of target
         description: `Completed writing goal: ${goal.title}`,
-        source: 'goal'
+        transactionType: 'earned'
       });
     }
     
@@ -2013,13 +2103,13 @@ export class MemStorage implements IStorage {
     // Add points to user ledger for completing goal
     await this.addPointsTransaction({
       userId: goal.userId,
-      amount: Math.ceil(goal.targetValue / 100), // 1 point per 100 units of target
+      points: Math.ceil(goal.targetValue / 100), // 1 point per 100 units of target
       description: `Completed writing goal: ${goal.title}`,
-      source: 'goal'
+      transactionType: 'earned'
     });
     
     return this.updateWritingGoal(id, {
-      currentProgress: goal.targetValue,
+      currentValue: goal.targetValue,
       isCompleted: true,
       completedAt: timestamp
     });
@@ -2039,7 +2129,9 @@ export class MemStorage implements IStorage {
     const entry: PointLedgerEntry = {
       ...transaction,
       id,
-      createdAt: timestamp
+      createdAt: timestamp,
+      milestoneId: transaction.milestoneId || null,
+      rewardId: transaction.rewardId || null
     };
     this.pointLedger.set(id, entry);
     return entry;
@@ -2120,39 +2212,30 @@ export class MemStorage implements IStorage {
       // Check if milestone conditions are met
       let isAchieved = false;
       
-      switch (milestone.category) {
+      switch (milestone.milestoneType) {
         case 'wordCount':
-          isAchieved = totalWordCount >= milestone.threshold;
+          isAchieved = totalWordCount >= milestone.targetValue;
           break;
         case 'streak':
-          isAchieved = currentStreak >= milestone.threshold;
+          isAchieved = currentStreak >= milestone.targetValue;
           break;
         case 'chapters':
-          isAchieved = totalChapters >= milestone.threshold;
+          isAchieved = totalChapters >= milestone.targetValue;
           break;
         case 'books':
-          isAchieved = totalBooks >= milestone.threshold;
+          isAchieved = totalBooks >= milestone.targetValue;
           break;
         case 'characters':
-          isAchieved = totalCharacters >= milestone.threshold;
+          isAchieved = totalCharacters >= milestone.targetValue;
           break;
         case 'locations':
-          isAchieved = totalLocations >= milestone.threshold;
+          isAchieved = totalLocations >= milestone.targetValue;
           break;
       }
       
       if (isAchieved) {
-        // Find appropriate reward type
-        const rewardTypes = await this.getRewardTypes();
-        let rewardType = rewardTypes.find(r => 
-          r.category === milestone.category && 
-          r.isUnlockable
-        );
-        
-        // Fallback to generic reward type if specific one not found
-        if (!rewardType) {
-          rewardType = rewardTypes.find(r => r.category === 'progress');
-        }
+        // Get the reward type for this milestone
+        const rewardType = await this.getRewardType(milestone.rewardTypeId);
         
         if (rewardType) {
           // Award the milestone reward
@@ -2160,15 +2243,17 @@ export class MemStorage implements IStorage {
             userId,
             rewardTypeId: rewardType.id,
             milestoneId: milestone.id,
-            awardedReason: `Achieved milestone: ${milestone.name}`
+            pointsAwarded: rewardType.points,
+            note: `Achieved milestone: ${milestone.name}`
           });
           
           // Add points transaction
           await this.addPointsTransaction({
             userId,
-            amount: milestone.rewardPoints,
+            points: rewardType.points,
             description: `Milestone achieved: ${milestone.name}`,
-            source: 'milestone'
+            transactionType: 'earned',
+            milestoneId: milestone.id
           });
           
           earnedRewards.push(reward);
