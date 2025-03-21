@@ -34,6 +34,8 @@ export default function Login() {
 
   // Form submission handler
   const onSubmit = async (values: LoginFormValues) => {
+    if (isLoading) return;
+    
     try {
       setIsLoading(true);
       setFormError(null);
@@ -55,16 +57,17 @@ export default function Login() {
         throw new Error(errorData.message || "Login failed");
       }
       
-      setIsLoading(false);
       navigate("/");
       
     } catch (error) {
-      setIsLoading(false);
+      console.error("Login error:", error);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
         setFormError("An unexpected error occurred");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,7 +133,7 @@ export default function Login() {
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={isLoading || !form.formState.isValid || form.formState.isSubmitting}
+                  disabled={isLoading}
                 >
                   {isLoading ? (
                     <>

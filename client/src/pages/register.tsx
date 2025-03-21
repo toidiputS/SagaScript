@@ -41,10 +41,12 @@ export default function Register() {
 
   // Form submission handler
   const onSubmit = async (values: RegisterFormValues) => {
+    if (isLoading) return;
+
     try {
       setIsLoading(true);
       setFormError(null);
-      
+
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
@@ -54,24 +56,26 @@ export default function Register() {
           username: values.username,
           password: values.password,
           displayName: values.displayName,
+          email: values.email,
         }),
-        credentials: "include",
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Registration failed");
       }
-      
-      setIsLoading(false);
-      navigate("/");
+
+      navigate("/login?registered=true");
+
     } catch (error) {
-      setIsLoading(false);
+      console.error("Registration error:", error);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
         setFormError("An unexpected error occurred");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,7 +85,7 @@ export default function Register() {
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      
+
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center">
