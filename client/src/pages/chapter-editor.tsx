@@ -179,7 +179,14 @@ export default function ChapterEditor() {
       return;
     }
     
-    saveMutation.mutate(chapter);
+    // Ensure bookId is provided as a number
+    const chapterToSave = {
+      ...chapter,
+      bookId: bookId ? Number(bookId) : null,
+      wordCount: wordCount || 0,
+    };
+    
+    saveMutation.mutate(chapterToSave);
   };
 
   // Handle back navigation

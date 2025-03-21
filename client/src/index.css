@@ -95,6 +95,36 @@
     --ring: 290 70% 60%;
   }
   
+  .sunset-theme {
+    --background: 30 30% 96%;
+    --foreground: 20 80% 15%;
+    
+    --card: 30 30% 97%;
+    --card-foreground: 20 80% 15%;
+    
+    --popover: 30 30% 96%;
+    --popover-foreground: 20 80% 15%;
+    
+    --primary: 12 80% 55%;
+    --primary-foreground: 30 30% 98%;
+    
+    --secondary: 30 20% 94%;
+    --secondary-foreground: 20 80% 15%;
+    
+    --muted: 30 20% 90%;
+    --muted-foreground: 20 50% 40%;
+    
+    --accent: 25 90% 92%;
+    --accent-foreground: 20 80% 15%;
+    
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 30 30% 98%;
+    
+    --border: 30 30% 85%;
+    --input: 30 30% 85%;
+    --ring: 12 80% 55%;
+  }
+  
   * {
     @apply border-border;
   }
@@ -111,6 +141,13 @@
   --card-text-dark: 210 40% 98%;
   --stats-card-bg: 217.2 32.6% 17.5%;
   --stats-card-text: 210 40% 98%;
+}
+
+.sunset-theme, .sunset, .sunset-mode, [data-theme="sunset"] {
+  --card-bg-sunset: 25 80% 95%;
+  --card-text-sunset: 20 80% 15%;
+  --stats-card-bg: 25 80% 95%;
+  --stats-card-text: 20 80% 15%;
 }
 
 /* Fix contrast for badges */

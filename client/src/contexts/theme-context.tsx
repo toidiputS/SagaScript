@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define available themes
-export type ThemeType = 'light' | 'dark' | 'spooky';
+export type ThemeType = 'light' | 'dark' | 'spooky' | 'sunset';
 
 // Theme context type
 interface ThemeContextType {
@@ -32,8 +32,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Toggle between themes
   const toggleTheme = () => {
     setTheme((prevTheme) => {
-      const newTheme = prevTheme === 'light' ? 'dark' : prevTheme === 'dark' ? 'spooky' : 'light';
-      return newTheme;
+      // Cycle through the themes: light -> dark -> spooky -> sunset -> light
+      if (prevTheme === 'light') return 'dark';
+      if (prevTheme === 'dark') return 'spooky';
+      if (prevTheme === 'spooky') return 'sunset';
+      return 'light';
     });
   };
 
@@ -43,14 +46,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const body = window.document.body;
     
     // Remove previous theme classes
-    root.classList.remove('light-theme', 'dark-theme', 'spooky-theme');
-    body.classList.remove('dark', 'spooky');
+    root.classList.remove('light-theme', 'dark-theme', 'spooky-theme', 'sunset-theme');
+    body.classList.remove('dark', 'spooky', 'sunset');
     
-    // For dark and spooky themes, add class to body for global styling
-    if (theme === 'dark') {
-      body.classList.add('dark');
-    } else if (theme === 'spooky') {
-      body.classList.add('spooky');
+    // Add class to body for global styling
+    if (theme !== 'light') {
+      body.classList.add(theme);
     }
     
     // Add current theme class to root for CSS variables
