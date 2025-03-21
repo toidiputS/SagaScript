@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 
 // Login schema
 const loginSchema = z.object({
@@ -49,6 +50,11 @@ export default function AuthPage() {
 
   return (
     <div className="flex min-h-screen">
+      {/* Theme switcher in top-right corner */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeSwitcher />
+      </div>
+
       {/* Auth form */}
       <div className="flex flex-col w-full md:w-1/2 px-6 py-12 justify-center">
         <div className="max-w-md w-full mx-auto">
