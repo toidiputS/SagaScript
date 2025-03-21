@@ -22,13 +22,14 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Initialize form
+  // Initialize form with validation mode onChange
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
       password: "",
     },
+    mode: "onChange",  // This will validate as the user types
   });
 
   // Form submission handler
@@ -126,7 +127,11 @@ export default function Login() {
                   )}
                 />
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading || !form.formState.isValid || form.formState.isSubmitting}
+                >
                   {isLoading ? (
                     <>
                       <span className="mr-2">Logging in</span>
