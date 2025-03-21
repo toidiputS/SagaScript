@@ -179,8 +179,8 @@ export default function AuthPage() {
 }
 
 function LoginForm() {
-  const { loginMutation } = useAuth();
-  const isPending = loginMutation?.isPending ?? false;
+  const auth = useAuth();
+  const isPending = auth.loginMutation?.isPending ?? false;
 
   // Initialize form
   const form = useForm<LoginFormValues>({
@@ -195,11 +195,7 @@ function LoginForm() {
   const onSubmit = (values: LoginFormValues) => {
     try {
       console.log("Submitting login for:", values.username);
-      if (loginMutation) {
-        loginMutation.mutate(values);
-      } else {
-        console.error("Login mutation is not available");
-      }
+      auth.loginMutation?.mutate(values);
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -268,8 +264,8 @@ function LoginForm() {
 }
 
 function RegisterForm() {
-  const { registerMutation } = useAuth();
-  const isPending = registerMutation?.isPending ?? false;
+  const auth = useAuth();
+  const isPending = auth.registerMutation?.isPending ?? false;
 
   // Initialize form
   const form = useForm<RegisterFormValues>({
@@ -296,11 +292,7 @@ function RegisterForm() {
       
       console.log("Submitting registration:", registerWithPlan);
       
-      if (registerMutation) {
-        registerMutation.mutate(registerWithPlan);
-      } else {
-        console.error("Register mutation is not available");
-      }
+      auth.registerMutation?.mutate(registerWithPlan);
     } catch (error) {
       console.error("Registration error:", error);
     }

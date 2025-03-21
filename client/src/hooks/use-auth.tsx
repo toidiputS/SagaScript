@@ -4,84 +4,121 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
+import { User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+type LoginData = {
+  username: string;
+  password: string;
+};
+
+type RegisterData = {
+  username: string;
+  displayName: string;
+  password: string;
+  plan: string;
+};
 
 type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
-  refreshUser: () => Promise<any>; // Using any to avoid complex typing issues
+  refreshUser: () => Promise<any>;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+  registerMutation: UseMutationResult<SelectUser, Error, RegisterData>;
+  isAuthenticated: boolean;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
-
 export const AuthContext = createContext<AuthContextType | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  
+  // User data query
   const {
     data: user,
     error,
     isLoading,
     refetch: refreshUser,
-  } = useQuery<SelectUser | undefined, Error>({
+  } = useQuery({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
     refetchOnWindowFocus: false,
   });
 
+  // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
+      console.log("Login mutation executing with:", credentials.username);
       const res = await apiRequest("POST", "/api/login", credentials);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
+      }
       return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: (userData: SelectUser) => {
+      console.log("Login successful for:", userData.username);
+      queryClient.setQueryData(["/api/user"], userData);
       toast({
         title: "Login successful",
-        description: `Welcome back, ${user.displayName || user.username}!`,
+        description: `Welcome back, ${userData.displayName || userData.username}!`,
       });
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: error.message,
+        description: error.message || "An error occurred during login",
         variant: "destructive",
       });
     },
   });
 
+  // Register mutation
   const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
+    mutationFn: async (data: RegisterData) => {
+      console.log("Register mutation executing with:", data.username);
+      const res = await apiRequest("POST", "/api/register", data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
       return await res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: (userData: SelectUser) => {
+      console.log("Registration successful for:", userData.username);
+      queryClient.setQueryData(["/api/user"], userData);
       toast({
         title: "Registration successful",
-        description: `Welcome to Saga Scribe, ${user.displayName || user.username}!`,
+        description: `Welcome to Saga Scribe, ${userData.displayName || userData.username}!`,
       });
     },
     onError: (error: Error) => {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: error.message || "An error occurred during registration",
         variant: "destructive",
       });
     },
   });
 
+  // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      console.log("Logout mutation executing");
+      const res = await apiRequest("POST", "/api/logout");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Logout failed");
+      }
     },
     onSuccess: () => {
+      console.log("Logout successful");
       queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "Logged out",
@@ -89,26 +126,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      console.error("Logout error:", error);
       toast({
         title: "Logout failed",
-        description: error.message,
+        description: error.message || "An error occurred during logout",
         variant: "destructive",
       });
     },
   });
 
+  // Make sure user is properly typed
+  const authUser = user as SelectUser | null;
+  
+  const value: AuthContextType = {
+    user: authUser,
+    isLoading,
+    error,
+    refreshUser,
+    loginMutation,
+    logoutMutation,
+    registerMutation,
+    isAuthenticated: !!authUser,
+  };
+
   return (
-    <AuthContext.Provider
-      value={{
-        user: user ?? null,
-        isLoading,
-        error,
-        refreshUser,
-        loginMutation,
-        logoutMutation,
-        registerMutation,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
@@ -119,10 +161,5 @@ export function useAuth() {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  
-  // Add isAuthenticated for backward compatibility
-  return {
-    ...context,
-    isAuthenticated: !!context.user
-  };
+  return context;
 }
