@@ -180,7 +180,7 @@ export default function AuthPage() {
 
 function LoginForm() {
   const { loginMutation } = useAuth();
-  const isPending = loginMutation?.isPending || false;
+  const isPending = loginMutation?.isPending ?? false;
 
   // Initialize form
   const form = useForm<LoginFormValues>({
@@ -235,18 +235,15 @@ function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button 
-              className="w-full" 
-              type="submit" 
+            <button 
+              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               disabled={isPending}
-              onClick={() => {
-                if (form.formState.isValid) {
-                  const values = form.getValues();
-                  if (loginMutation) {
-                    loginMutation.mutate(values);
-                  }
-                } else {
-                  form.trigger();
+              onClick={(e) => {
+                e.preventDefault();
+                const values = form.getValues();
+                console.log("Login clicked", values);
+                if (loginMutation) {
+                  loginMutation.mutate(values);
                 }
               }}
             >
@@ -258,7 +255,7 @@ function LoginForm() {
               ) : (
                 "Login"
               )}
-            </Button>
+            </button>
           </form>
         </Form>
       </CardContent>
@@ -268,7 +265,7 @@ function LoginForm() {
 
 function RegisterForm() {
   const { registerMutation } = useAuth();
-  const isPending = registerMutation?.isPending || false;
+  const isPending = registerMutation?.isPending ?? false;
 
   // Initialize form
   const form = useForm<RegisterFormValues>({
@@ -353,19 +350,16 @@ function RegisterForm() {
                 </FormItem>
               )}
             />
-            <Button 
-              className="w-full" 
-              type="submit" 
+            <button 
+              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
               disabled={isPending}
-              onClick={() => {
-                if (form.formState.isValid) {
-                  const values = form.getValues();
-                  const { confirmPassword, ...registerData } = values;
-                  if (registerMutation) {
-                    registerMutation.mutate(registerData);
-                  }
-                } else {
-                  form.trigger();
+              onClick={(e) => {
+                e.preventDefault();
+                const values = form.getValues();
+                console.log("Register clicked", values);
+                const { confirmPassword, ...registerData } = values;
+                if (registerMutation) {
+                  registerMutation.mutate(registerData);
                 }
               }}
             >
@@ -377,7 +371,7 @@ function RegisterForm() {
               ) : (
                 "Register"
               )}
-            </Button>
+            </button>
           </form>
         </Form>
       </CardContent>
