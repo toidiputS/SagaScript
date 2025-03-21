@@ -1395,13 +1395,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id!;
       const user = await storage.getUser(userId);
       
-      // Check if user has writing analysis access based on plan
-      if (user?.plan === 'free' || user?.plan === 'apprentice') {
-        return res.status(403).json({ 
-          message: "Writing analysis requires an upgraded plan",
-          requiredPlan: 'wordsmith' 
-        });
-      }
+      // All users now have access to writing analysis
+      // Permission check removed to make writing analysis available to all users including apprentice tier
       
       const { content, chapterId } = req.body;
       
@@ -1451,13 +1446,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user!.id!;
       const user = await storage.getUser(userId);
       
-      // Check if user has AI suggestions access based on plan
-      if (user?.plan === 'free' || user?.plan === 'apprentice') {
-        return res.status(403).json({ 
-          message: "AI suggestions require an upgraded plan",
-          requiredPlan: 'wordsmith' 
-        });
-      }
+      // All users now have access to AI suggestions
+      // Permission check removed to make AI suggestions available to all users including apprentice tier
       
       const { type, seriesId, bookId } = req.body;
       
