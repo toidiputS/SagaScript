@@ -24,7 +24,20 @@ import {
   type Subscription,
   type InsertSubscription,
   type TimelineEvent,
-  type InsertTimelineEvent
+  type InsertTimelineEvent,
+  // Reward system imports
+  type RewardType,
+  type InsertRewardType,
+  type WritingMilestone,
+  type InsertWritingMilestone,
+  type UserReward,
+  type InsertUserReward,
+  type WritingStreak,
+  type InsertWritingStreak,
+  type WritingGoal,
+  type InsertWritingGoal,
+  type PointLedgerEntry,
+  type InsertPointLedgerEntry
 } from "@shared/schema";
 
 export interface IStorage {
@@ -186,6 +199,14 @@ export class MemStorage implements IStorage {
   private subscriptions: Map<number, Subscription>;
   private timelineEvents: Map<number, TimelineEvent>;
   
+  // Reward system maps
+  private rewardTypes: Map<number, RewardType>;
+  private writingMilestones: Map<number, WritingMilestone>;
+  private userRewards: Map<number, UserReward>;
+  private writingStreaks: Map<number, WritingStreak>;
+  private writingGoals: Map<number, WritingGoal>;
+  private pointLedger: Map<number, PointLedgerEntry>;
+  
   private currentIds: {
     user: number;
     series: number;
@@ -200,6 +221,12 @@ export class MemStorage implements IStorage {
     subscriptionPlan: number;
     subscription: number;
     timelineEvent: number;
+    rewardType: number;
+    writingMilestone: number;
+    userReward: number;
+    writingStreak: number;
+    writingGoal: number;
+    pointLedger: number;
   };
 
   constructor() {
@@ -217,6 +244,14 @@ export class MemStorage implements IStorage {
     this.subscriptions = new Map();
     this.timelineEvents = new Map();
     
+    // Initialize reward system maps
+    this.rewardTypes = new Map();
+    this.writingMilestones = new Map();
+    this.userRewards = new Map();
+    this.writingStreaks = new Map();
+    this.writingGoals = new Map();
+    this.pointLedger = new Map();
+    
     this.currentIds = {
       user: 1,
       series: 1,
@@ -230,7 +265,13 @@ export class MemStorage implements IStorage {
       userAchievement: 1,
       subscriptionPlan: 1,
       subscription: 1,
-      timelineEvent: 1
+      timelineEvent: 1,
+      rewardType: 1,
+      writingMilestone: 1,
+      userReward: 1,
+      writingStreak: 1,
+      writingGoal: 1,
+      pointLedger: 1
     };
     
     // Initialize sample achievements
@@ -238,6 +279,9 @@ export class MemStorage implements IStorage {
     
     // Initialize subscription plans
     this.initializeSubscriptionPlans();
+    
+    // Initialize reward system
+    this.initializeRewardSystem();
   }
 
   // Initialize predefined achievements
@@ -1297,6 +1341,842 @@ export class MemStorage implements IStorage {
       }
     }
     return true;
+  }
+  
+  // === Micro Reward System ===
+  
+  // Initialize predefined reward types and milestones
+  private initializeRewardSystem() {
+    // Initialize reward types
+    this.initializeRewardTypes();
+    
+    // Initialize writing milestones
+    this.initializeWritingMilestones();
+  }
+  
+  // Initialize reward types
+  private initializeRewardTypes() {
+    const rewardTypes: InsertRewardType[] = [
+      {
+        name: "Word Count Badge",
+        description: "Badge awarded for reaching word count milestones",
+        category: "progress",
+        iconUrl: "ri-quill-pen-line",
+        pointValue: 50,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "wordCount", threshold: 5000 })
+      },
+      {
+        name: "Streak Badge",
+        description: "Badge awarded for maintaining writing streaks",
+        category: "consistency",
+        iconUrl: "ri-fire-line",
+        pointValue: 100,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "streak", threshold: 7 })
+      },
+      {
+        name: "Character Creator Badge",
+        description: "Badge awarded for creating detailed characters",
+        category: "worldbuilding",
+        iconUrl: "ri-user-star-line",
+        pointValue: 75,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "characters", threshold: 5 })
+      },
+      {
+        name: "World Builder Badge",
+        description: "Badge awarded for creating detailed locations",
+        category: "worldbuilding",
+        iconUrl: "ri-earth-line",
+        pointValue: 75,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "locations", threshold: 10 })
+      },
+      {
+        name: "Chapter Completer Badge",
+        description: "Badge awarded for completing chapters",
+        category: "progress",
+        iconUrl: "ri-book-mark-line",
+        pointValue: 25,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "chapters", threshold: 5 })
+      },
+      {
+        name: "Book Completer Badge",
+        description: "Badge awarded for completing books",
+        category: "achievement",
+        iconUrl: "ri-book-read-line",
+        pointValue: 200,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "books", threshold: 1 })
+      },
+      {
+        name: "Goal Achiever Badge",
+        description: "Badge awarded for completing writing goals",
+        category: "consistency",
+        iconUrl: "ri-target-line",
+        pointValue: 100,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "goals", threshold: 3 })
+      },
+      {
+        name: "Custom Theme",
+        description: "Unlock a custom theme for your dashboard",
+        category: "cosmetic",
+        iconUrl: "ri-palette-line",
+        pointValue: 500,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "points", threshold: 500 })
+      },
+      {
+        name: "Advanced Analytics",
+        description: "Unlock advanced writing analytics",
+        category: "feature",
+        iconUrl: "ri-line-chart-line",
+        pointValue: 750,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "points", threshold: 750 })
+      },
+      {
+        name: "AI Suggestion Boost",
+        description: "Temporary boost to AI suggestion quality",
+        category: "feature",
+        iconUrl: "ri-robot-line",
+        pointValue: 1000,
+        isUnlockable: true,
+        unlockCriteria: JSON.stringify({ type: "points", threshold: 1000 })
+      }
+    ];
+    
+    rewardTypes.forEach(rewardType => {
+      this.createRewardType(rewardType);
+    });
+  }
+  
+  // Initialize writing milestones
+  private initializeWritingMilestones() {
+    const milestones: InsertWritingMilestone[] = [
+      // Word count milestones - All Tiers
+      {
+        name: "First 1,000 Words",
+        description: "Write your first 1,000 words",
+        category: "wordCount",
+        threshold: 1000,
+        rewardPoints: 50,
+        iconUrl: "ri-quill-pen-line",
+        tier: "apprentice"
+      },
+      {
+        name: "5,000 Word Journey",
+        description: "Reach 5,000 total words written",
+        category: "wordCount",
+        threshold: 5000,
+        rewardPoints: 100,
+        iconUrl: "ri-quill-pen-line",
+        tier: "apprentice"
+      },
+      {
+        name: "10,000 Word Milestone",
+        description: "Reach 10,000 total words written",
+        category: "wordCount",
+        threshold: 10000,
+        rewardPoints: 150,
+        iconUrl: "ri-quill-pen-fill",
+        tier: "apprentice"
+      },
+      {
+        name: "25,000 Word Achievement",
+        description: "Write 25,000 words across all your works",
+        category: "wordCount",
+        threshold: 25000,
+        rewardPoints: 250,
+        iconUrl: "ri-quill-pen-fill",
+        tier: "wordsmith"
+      },
+      {
+        name: "50,000 Word Accomplishment",
+        description: "Complete 50,000 words - the length of a novel!",
+        category: "wordCount",
+        threshold: 50000,
+        rewardPoints: 500,
+        iconUrl: "ri-book-read-line",
+        tier: "wordsmith"
+      },
+      {
+        name: "100,000 Word Masterpiece",
+        description: "Write 100,000 words - you're a true wordsmith!",
+        category: "wordCount",
+        threshold: 100000,
+        rewardPoints: 1000,
+        iconUrl: "ri-book-read-fill",
+        tier: "loremaster"
+      },
+      
+      // Streak milestones
+      {
+        name: "7-Day Streak",
+        description: "Write every day for a week",
+        category: "streak",
+        threshold: 7,
+        rewardPoints: 100,
+        iconUrl: "ri-fire-line",
+        tier: "apprentice"
+      },
+      {
+        name: "14-Day Streak",
+        description: "Write every day for two weeks",
+        category: "streak",
+        threshold: 14,
+        rewardPoints: 150,
+        iconUrl: "ri-fire-line",
+        tier: "apprentice"
+      },
+      {
+        name: "30-Day Streak",
+        description: "Write every day for a month",
+        category: "streak",
+        threshold: 30,
+        rewardPoints: 300,
+        iconUrl: "ri-fire-fill",
+        tier: "apprentice"
+      },
+      {
+        name: "60-Day Streak",
+        description: "Write every day for two months",
+        category: "streak",
+        threshold: 60,
+        rewardPoints: 500,
+        iconUrl: "ri-flashlight-line",
+        tier: "wordsmith"
+      },
+      {
+        name: "100-Day Streak",
+        description: "Write every day for 100 days",
+        category: "streak",
+        threshold: 100,
+        rewardPoints: 1000,
+        iconUrl: "ri-flashlight-fill",
+        tier: "loremaster"
+      },
+      
+      // Chapter completion milestones
+      {
+        name: "First Chapter",
+        description: "Complete your first chapter",
+        category: "chapters",
+        threshold: 1,
+        rewardPoints: 50,
+        iconUrl: "ri-book-mark-line",
+        tier: "apprentice"
+      },
+      {
+        name: "Five Chapters",
+        description: "Complete five chapters",
+        category: "chapters",
+        threshold: 5,
+        rewardPoints: 100,
+        iconUrl: "ri-book-mark-line",
+        tier: "apprentice"
+      },
+      {
+        name: "Ten Chapters",
+        description: "Complete ten chapters",
+        category: "chapters",
+        threshold: 10,
+        rewardPoints: 200,
+        iconUrl: "ri-bookmark-line",
+        tier: "apprentice"
+      },
+      {
+        name: "Twenty Five Chapters",
+        description: "Complete twenty-five chapters",
+        category: "chapters",
+        threshold: 25,
+        rewardPoints: 300,
+        iconUrl: "ri-bookmark-fill",
+        tier: "wordsmith"
+      },
+      {
+        name: "Fifty Chapters",
+        description: "Complete fifty chapters",
+        category: "chapters",
+        threshold: 50,
+        rewardPoints: 500,
+        iconUrl: "ri-booklet-fill",
+        tier: "loremaster"
+      },
+      
+      // Book completion milestones
+      {
+        name: "First Book",
+        description: "Complete your first book",
+        category: "books",
+        threshold: 1,
+        rewardPoints: 250,
+        iconUrl: "ri-book-2-line",
+        tier: "apprentice"
+      },
+      {
+        name: "Trilogy",
+        description: "Complete three books in a series",
+        category: "books",
+        threshold: 3,
+        rewardPoints: 500,
+        iconUrl: "ri-book-read-line",
+        tier: "wordsmith"
+      },
+      {
+        name: "Epic Series",
+        description: "Complete five books in a series",
+        category: "books",
+        threshold: 5,
+        rewardPoints: 1000,
+        iconUrl: "ri-book-read-fill",
+        tier: "loremaster"
+      },
+      
+      // Character creation milestones
+      {
+        name: "Character Creator",
+        description: "Create your first five characters",
+        category: "characters",
+        threshold: 5,
+        rewardPoints: 100,
+        iconUrl: "ri-user-star-line",
+        tier: "apprentice"
+      },
+      {
+        name: "Character Ensemble",
+        description: "Create ten detailed characters",
+        category: "characters",
+        threshold: 10,
+        rewardPoints: 200,
+        iconUrl: "ri-team-line",
+        tier: "wordsmith"
+      },
+      {
+        name: "Character Universe",
+        description: "Create twenty-five characters",
+        category: "characters",
+        threshold: 25,
+        rewardPoints: 500,
+        iconUrl: "ri-team-fill",
+        tier: "loremaster"
+      },
+      
+      // Location creation milestones
+      {
+        name: "World Builder",
+        description: "Create five unique locations",
+        category: "locations",
+        threshold: 5,
+        rewardPoints: 100,
+        iconUrl: "ri-map-pin-line",
+        tier: "apprentice"
+      },
+      {
+        name: "World Explorer",
+        description: "Create ten distinctive locations",
+        category: "locations",
+        threshold: 10,
+        rewardPoints: 200,
+        iconUrl: "ri-earth-line",
+        tier: "wordsmith"
+      },
+      {
+        name: "World Architect",
+        description: "Create twenty-five mapped locations",
+        category: "locations",
+        threshold: 25,
+        rewardPoints: 500,
+        iconUrl: "ri-earth-fill",
+        tier: "loremaster"
+      }
+    ];
+    
+    milestones.forEach(milestone => {
+      this.createWritingMilestone(milestone);
+    });
+  }
+  
+  // Reward Types methods
+  async getRewardTypes(): Promise<RewardType[]> {
+    return Array.from(this.rewardTypes.values());
+  }
+  
+  async getRewardType(id: number): Promise<RewardType | undefined> {
+    return this.rewardTypes.get(id);
+  }
+  
+  async createRewardType(rewardType: InsertRewardType): Promise<RewardType> {
+    const id = this.currentIds.rewardType++;
+    const timestamp = new Date();
+    const newRewardType: RewardType = {
+      ...rewardType,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.rewardTypes.set(id, newRewardType);
+    return newRewardType;
+  }
+  
+  async updateRewardType(id: number, updates: Partial<RewardType>): Promise<RewardType | undefined> {
+    const existing = this.rewardTypes.get(id);
+    if (!existing) return undefined;
+    
+    const updated: RewardType = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.rewardTypes.set(id, updated);
+    return updated;
+  }
+  
+  async deleteRewardType(id: number): Promise<boolean> {
+    return this.rewardTypes.delete(id);
+  }
+  
+  // Writing Milestones methods
+  async getWritingMilestones(tier?: string): Promise<WritingMilestone[]> {
+    const milestones = Array.from(this.writingMilestones.values());
+    if (tier) {
+      return milestones.filter(m => m.tier === tier);
+    }
+    return milestones;
+  }
+  
+  async getWritingMilestone(id: number): Promise<WritingMilestone | undefined> {
+    return this.writingMilestones.get(id);
+  }
+  
+  async createWritingMilestone(milestone: InsertWritingMilestone): Promise<WritingMilestone> {
+    const id = this.currentIds.writingMilestone++;
+    const timestamp = new Date();
+    const newMilestone: WritingMilestone = {
+      ...milestone,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.writingMilestones.set(id, newMilestone);
+    return newMilestone;
+  }
+  
+  async updateWritingMilestone(id: number, updates: Partial<WritingMilestone>): Promise<WritingMilestone | undefined> {
+    const existing = this.writingMilestones.get(id);
+    if (!existing) return undefined;
+    
+    const updated: WritingMilestone = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.writingMilestones.set(id, updated);
+    return updated;
+  }
+  
+  async deleteWritingMilestone(id: number): Promise<boolean> {
+    return this.writingMilestones.delete(id);
+  }
+  
+  // User Rewards methods
+  async getUserRewards(userId: number): Promise<(UserReward & { rewardType: RewardType })[]> {
+    const userRewards = Array.from(this.userRewards.values())
+      .filter(r => r.userId === userId);
+      
+    return userRewards.map(reward => {
+      const rewardType = this.rewardTypes.get(reward.rewardTypeId);
+      if (!rewardType) {
+        throw new Error(`Reward type ${reward.rewardTypeId} not found for user reward ${reward.id}`);
+      }
+      return {
+        ...reward,
+        rewardType
+      };
+    });
+  }
+  
+  async getUserReward(id: number): Promise<UserReward | undefined> {
+    return this.userRewards.get(id);
+  }
+  
+  async createUserReward(reward: InsertUserReward): Promise<UserReward> {
+    const id = this.currentIds.userReward++;
+    const timestamp = new Date();
+    const newReward: UserReward = {
+      ...reward,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      redeemedAt: null
+    };
+    this.userRewards.set(id, newReward);
+    
+    // Add points to user's point ledger
+    const rewardType = await this.getRewardType(reward.rewardTypeId);
+    if (rewardType) {
+      await this.addPointsTransaction({
+        userId: reward.userId,
+        amount: rewardType.pointValue,
+        description: `Earned reward: ${rewardType.name}`,
+        source: 'reward'
+      });
+    }
+    
+    return newReward;
+  }
+  
+  async redeemUserReward(id: number): Promise<UserReward | undefined> {
+    const reward = this.userRewards.get(id);
+    if (!reward || reward.redeemedAt) return undefined;
+    
+    const updated: UserReward = {
+      ...reward,
+      redeemedAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    this.userRewards.set(id, updated);
+    return updated;
+  }
+  
+  // Writing Streaks methods
+  async getWritingStreak(userId: number): Promise<WritingStreak | undefined> {
+    return Array.from(this.writingStreaks.values())
+      .find(streak => streak.userId === userId);
+  }
+  
+  async createWritingStreak(streak: InsertWritingStreak): Promise<WritingStreak> {
+    const id = this.currentIds.writingStreak++;
+    const timestamp = new Date();
+    const newStreak: WritingStreak = {
+      ...streak,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      lastUpdatedAt: timestamp
+    };
+    this.writingStreaks.set(id, newStreak);
+    return newStreak;
+  }
+  
+  async updateWritingStreak(userId: number, updates: Partial<WritingStreak>): Promise<WritingStreak | undefined> {
+    const existing = Array.from(this.writingStreaks.values())
+      .find(streak => streak.userId === userId);
+      
+    if (!existing) return undefined;
+    
+    const updated: WritingStreak = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.writingStreaks.set(existing.id, updated);
+    return updated;
+  }
+  
+  async incrementWritingStreak(userId: number): Promise<WritingStreak | undefined> {
+    let streak = await this.getWritingStreak(userId);
+    const timestamp = new Date();
+    
+    if (!streak) {
+      // Create new streak
+      streak = await this.createWritingStreak({
+        userId,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastUpdatedAt: timestamp
+      });
+      return streak;
+    }
+    
+    // Check if streak is still active (updated within last 24-36 hours)
+    const lastUpdate = new Date(streak.lastUpdatedAt);
+    const daysSinceLastUpdate = (timestamp.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24);
+    
+    if (daysSinceLastUpdate > 1.5) {
+      // Streak broken, reset to 1
+      return this.updateWritingStreak(userId, {
+        currentStreak: 1,
+        lastUpdatedAt: timestamp
+      });
+    } else if (daysSinceLastUpdate < 0.5) {
+      // Already updated today, no change
+      return streak;
+    } else {
+      // Increment streak
+      const currentStreak = streak.currentStreak + 1;
+      const longestStreak = Math.max(currentStreak, streak.longestStreak);
+      
+      return this.updateWritingStreak(userId, {
+        currentStreak,
+        longestStreak,
+        lastUpdatedAt: timestamp
+      });
+    }
+  }
+  
+  async resetWritingStreak(userId: number): Promise<WritingStreak | undefined> {
+    const streak = await this.getWritingStreak(userId);
+    if (!streak) return undefined;
+    
+    return this.updateWritingStreak(userId, {
+      currentStreak: 0,
+      lastUpdatedAt: new Date()
+    });
+  }
+  
+  // Writing Goals methods
+  async getUserWritingGoals(userId: number): Promise<WritingGoal[]> {
+    return Array.from(this.writingGoals.values())
+      .filter(goal => goal.userId === userId);
+  }
+  
+  async getWritingGoal(id: number): Promise<WritingGoal | undefined> {
+    return this.writingGoals.get(id);
+  }
+  
+  async createWritingGoal(goal: InsertWritingGoal): Promise<WritingGoal> {
+    const id = this.currentIds.writingGoal++;
+    const timestamp = new Date();
+    const newGoal: WritingGoal = {
+      ...goal,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      currentProgress: 0,
+      isCompleted: false,
+      completedAt: null
+    };
+    this.writingGoals.set(id, newGoal);
+    return newGoal;
+  }
+  
+  async updateWritingGoal(id: number, updates: Partial<WritingGoal>): Promise<WritingGoal | undefined> {
+    const existing = this.writingGoals.get(id);
+    if (!existing) return undefined;
+    
+    const updated: WritingGoal = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.writingGoals.set(id, updated);
+    return updated;
+  }
+  
+  async deleteWritingGoal(id: number): Promise<boolean> {
+    return this.writingGoals.delete(id);
+  }
+  
+  async incrementGoalProgress(id: number, amount: number): Promise<WritingGoal | undefined> {
+    const goal = this.writingGoals.get(id);
+    if (!goal || goal.isCompleted) return undefined;
+    
+    const newProgress = goal.currentProgress + amount;
+    const isCompleted = newProgress >= goal.targetValue;
+    
+    const updates: Partial<WritingGoal> = {
+      currentProgress: newProgress,
+      updatedAt: new Date()
+    };
+    
+    if (isCompleted) {
+      updates.isCompleted = true;
+      updates.completedAt = updates.updatedAt;
+      
+      // Add points to user ledger for completing goal
+      await this.addPointsTransaction({
+        userId: goal.userId,
+        amount: Math.ceil(goal.targetValue / 100), // 1 point per 100 units of target
+        description: `Completed writing goal: ${goal.title}`,
+        source: 'goal'
+      });
+    }
+    
+    return this.updateWritingGoal(id, updates);
+  }
+  
+  async completeWritingGoal(id: number): Promise<WritingGoal | undefined> {
+    const goal = this.writingGoals.get(id);
+    if (!goal || goal.isCompleted) return undefined;
+    
+    const timestamp = new Date();
+    
+    // Add points to user ledger for completing goal
+    await this.addPointsTransaction({
+      userId: goal.userId,
+      amount: Math.ceil(goal.targetValue / 100), // 1 point per 100 units of target
+      description: `Completed writing goal: ${goal.title}`,
+      source: 'goal'
+    });
+    
+    return this.updateWritingGoal(id, {
+      currentProgress: goal.targetValue,
+      isCompleted: true,
+      completedAt: timestamp
+    });
+  }
+  
+  // Points System methods
+  async getUserPoints(userId: number): Promise<number> {
+    const entries = Array.from(this.pointLedger.values())
+      .filter(entry => entry.userId === userId);
+      
+    return entries.reduce((total, entry) => total + entry.amount, 0);
+  }
+  
+  async addPointsTransaction(transaction: InsertPointLedgerEntry): Promise<PointLedgerEntry> {
+    const id = this.currentIds.pointLedger++;
+    const timestamp = new Date();
+    const entry: PointLedgerEntry = {
+      ...transaction,
+      id,
+      createdAt: timestamp
+    };
+    this.pointLedger.set(id, entry);
+    return entry;
+  }
+  
+  async getPointsLedger(userId: number, limit?: number): Promise<PointLedgerEntry[]> {
+    let entries = Array.from(this.pointLedger.values())
+      .filter(entry => entry.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      
+    if (limit && limit > 0) {
+      entries = entries.slice(0, limit);
+    }
+    
+    return entries;
+  }
+  
+  // Milestone Tracking
+  async checkAndAwardMilestones(userId: number, context?: {
+    wordCount?: number;
+    chapterId?: number;
+    bookId?: number;
+    seriesId?: number;
+  }): Promise<UserReward[]> {
+    const user = await this.getUser(userId);
+    if (!user) return [];
+    
+    const earnedRewards: UserReward[] = [];
+    const milestones = await this.getWritingMilestones(user.plan);
+    
+    // Get user's current stats
+    const streak = await this.getWritingStreak(userId);
+    const currentStreak = streak?.currentStreak || 0;
+    
+    let totalWordCount = 0;
+    let totalChapters = 0;
+    let totalBooks = 0;
+    let totalCharacters = 0;
+    let totalLocations = 0;
+    
+    if (context?.wordCount) {
+      totalWordCount = context.wordCount;
+    } else {
+      // Calculate total words written by this user
+      const stats = await this.getWritingStatsByUser(userId);
+      totalWordCount = stats.reduce((sum, stat) => sum + stat.wordsWritten, 0);
+    }
+    
+    // Get all series by this user
+    const userSeries = await this.getAllSeriesByUser(userId);
+    
+    // Count books, chapters, characters and locations
+    for (const series of userSeries) {
+      const books = await this.getBooksBySeries(series.id);
+      totalBooks += books.length;
+      
+      for (const book of books) {
+        const chapters = await this.getChaptersByBook(book.id);
+        totalChapters += chapters.length;
+      }
+      
+      const characters = await this.getCharactersBySeries(series.id);
+      totalCharacters += characters.length;
+      
+      const locations = await this.getLocationsBySeries(series.id);
+      totalLocations += locations.length;
+    }
+    
+    // Get already earned rewards to avoid duplicates
+    const userRewards = await this.getUserRewards(userId);
+    const earnedMilestoneIds = userRewards.map(r => r.milestoneId).filter(id => id !== null) as number[];
+    
+    // Check each milestone that matches the user's plan level
+    for (const milestone of milestones) {
+      // Skip if already earned
+      if (earnedMilestoneIds.includes(milestone.id)) continue;
+      
+      // Check if milestone conditions are met
+      let isAchieved = false;
+      
+      switch (milestone.category) {
+        case 'wordCount':
+          isAchieved = totalWordCount >= milestone.threshold;
+          break;
+        case 'streak':
+          isAchieved = currentStreak >= milestone.threshold;
+          break;
+        case 'chapters':
+          isAchieved = totalChapters >= milestone.threshold;
+          break;
+        case 'books':
+          isAchieved = totalBooks >= milestone.threshold;
+          break;
+        case 'characters':
+          isAchieved = totalCharacters >= milestone.threshold;
+          break;
+        case 'locations':
+          isAchieved = totalLocations >= milestone.threshold;
+          break;
+      }
+      
+      if (isAchieved) {
+        // Find appropriate reward type
+        const rewardTypes = await this.getRewardTypes();
+        let rewardType = rewardTypes.find(r => 
+          r.category === milestone.category && 
+          r.isUnlockable
+        );
+        
+        // Fallback to generic reward type if specific one not found
+        if (!rewardType) {
+          rewardType = rewardTypes.find(r => r.category === 'progress');
+        }
+        
+        if (rewardType) {
+          // Award the milestone reward
+          const reward = await this.createUserReward({
+            userId,
+            rewardTypeId: rewardType.id,
+            milestoneId: milestone.id,
+            awardedReason: `Achieved milestone: ${milestone.name}`
+          });
+          
+          // Add points transaction
+          await this.addPointsTransaction({
+            userId,
+            amount: milestone.rewardPoints,
+            description: `Milestone achieved: ${milestone.name}`,
+            source: 'milestone'
+          });
+          
+          earnedRewards.push(reward);
+        }
+      }
+    }
+    
+    return earnedRewards;
   }
 }
 
