@@ -1506,5 +1506,237 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Writing Suggestions routes
+  app.get("/api/ai/suggestions", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
+      
+      // Check if user has AI suggestions access based on plan
+      if (user?.plan === 'free' || user?.plan === 'apprentice') {
+        return res.status(403).json({ 
+          message: "AI suggestions require an upgraded plan",
+          requiredPlan: 'wordsmith' 
+        });
+      }
+      
+      // Get request parameters with defaults
+      const seriesId = req.query.seriesId ? parseInt(req.query.seriesId as string) : undefined;
+      const bookId = req.query.bookId ? parseInt(req.query.bookId as string) : undefined;
+      const types = req.query.types 
+        ? (req.query.types as string).split(',') as SuggestionType[]
+        : ['plotIdea', 'characterDevelopment', 'dialogue', 'consistency', 'worldBuilding'];
+      const count = req.query.count ? parseInt(req.query.count as string) : 3;
+      
+      // Validate seriesId if provided
+      if (seriesId) {
+        const series = await storage.getSeries(seriesId);
+        if (!series) {
+          return res.status(404).json({ message: "Series not found" });
+        }
+        
+        // Check ownership
+        if (series.userId !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+      }
+      
+      // Validate bookId if provided
+      if (bookId) {
+        const book = await storage.getBook(bookId);
+        if (!book) {
+          return res.status(404).json({ message: "Book not found" });
+        }
+        
+        // Check ownership via series
+        const series = await storage.getSeries(book.seriesId);
+        if (series?.userId !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+      }
+      
+      // Prepare context for AI service
+      const context: any = {};
+      
+      if (seriesId) {
+        context.series = await storage.getSeries(seriesId);
+        context.characters = await storage.getCharactersBySeries(seriesId);
+        context.locations = await storage.getLocationsBySeries(seriesId);
+        context.books = await storage.getBooksBySeries(seriesId);
+        
+        // Get current book if bookId is provided, otherwise use series.currentBook
+        if (bookId) {
+          context.currentBook = await storage.getBook(bookId);
+        } else if (context.series?.currentBook) {
+          const currentBookByPosition = context.books.find(
+            (b: any) => b.position === context.series.currentBook
+          );
+          if (currentBookByPosition) {
+            context.currentBook = currentBookByPosition;
+          }
+        }
+        
+        // Get current chapter if a current book is determined
+        if (context.currentBook) {
+          const chapters = await storage.getChaptersByBook(context.currentBook.id);
+          if (chapters.length > 0) {
+            context.recentChapters = chapters.slice(0, 3);
+            
+            // Try to find the current chapter based on book.currentChapter
+            // The book schema might not have currentChapter property explicitly defined
+            if ('currentChapter' in context.currentBook && context.currentBook.currentChapter) {
+              const currentChapterByPosition = chapters.find(
+                (c: any) => c.position === (context.currentBook as any).currentChapter
+              );
+              if (currentChapterByPosition) {
+                context.currentChapter = currentChapterByPosition;
+              }
+            }
+          }
+        }
+      }
+      
+      // Generate suggestions with AI
+      const validTypes = types.filter((type): type is SuggestionType => 
+        ['plotIdea', 'characterDevelopment', 'dialogue', 'consistency', 'worldBuilding', 'sceneDescription', 'conflict'].includes(type)
+      );
+      const suggestions = await generateWritingSuggestions(context, validTypes, count);
+      
+      res.status(200).json(suggestions);
+    } catch (error) {
+      console.error("Error generating AI suggestions:", error);
+      res.status(500).json({ message: "Error generating AI suggestions" });
+    }
+  });
+
+  app.post("/api/ai/analyze", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
+      
+      // Check if user has writing analysis access based on plan
+      if (user?.plan === 'free' || user?.plan === 'apprentice') {
+        return res.status(403).json({ 
+          message: "Writing analysis requires an upgraded plan",
+          requiredPlan: 'wordsmith' 
+        });
+      }
+      
+      const { content, chapterId } = req.body;
+      
+      if (!content && !chapterId) {
+        return res.status(400).json({ message: "Either content or chapterId is required" });
+      }
+      
+      let textToAnalyze = content;
+      
+      // If chapterId is provided, get chapter content
+      if (chapterId) {
+        const chapter = await storage.getChapter(parseInt(chapterId));
+        if (!chapter) {
+          return res.status(404).json({ message: "Chapter not found" });
+        }
+        
+        // Check ownership via book and series
+        const book = await storage.getBook(chapter.bookId);
+        if (!book) {
+          return res.status(404).json({ message: "Book not found" });
+        }
+        
+        const series = await storage.getSeries(book.seriesId);
+        if (series?.userId !== userId) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+        
+        textToAnalyze = chapter.content || "";
+      }
+      
+      if (!textToAnalyze || textToAnalyze.length < 100) {
+        return res.status(400).json({ message: "Insufficient content for analysis (minimum 100 characters)" });
+      }
+      
+      // Analyze writing with AI
+      const analysis = await analyzeWriting(textToAnalyze);
+      
+      res.status(200).json({ analysis });
+    } catch (error) {
+      console.error("Error analyzing writing:", error);
+      res.status(500).json({ message: "Error analyzing writing" });
+    }
+  });
+
+  app.post("/api/ai/suggestion", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
+      
+      // Check if user has AI suggestions access based on plan
+      if (user?.plan === 'free' || user?.plan === 'apprentice') {
+        return res.status(403).json({ 
+          message: "AI suggestions require an upgraded plan",
+          requiredPlan: 'wordsmith' 
+        });
+      }
+      
+      const { type, seriesId, bookId } = req.body;
+      
+      if (!type || !seriesId) {
+        return res.status(400).json({ message: "Type and seriesId are required" });
+      }
+      
+      // Validate seriesId
+      const series = await storage.getSeries(parseInt(seriesId));
+      if (!series) {
+        return res.status(404).json({ message: "Series not found" });
+      }
+      
+      // Check ownership
+      if (series.userId !== userId) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      // Prepare context
+      const context: any = {
+        series,
+        characters: await storage.getCharactersBySeries(series.id),
+        locations: await storage.getLocationsBySeries(series.id),
+        books: await storage.getBooksBySeries(series.id),
+      };
+      
+      // Get current book
+      if (bookId) {
+        const book = await storage.getBook(parseInt(bookId));
+        if (book) {
+          context.currentBook = book;
+          
+          // Get chapters for the book
+          const chapters = await storage.getChaptersByBook(book.id);
+          if (chapters.length > 0) {
+            context.recentChapters = chapters.slice(0, 3);
+            
+            // Try to find the current chapter
+            // The book schema might not have currentChapter property explicitly defined
+            if ('currentChapter' in book && book.currentChapter) {
+              const currentChapterByPosition = chapters.find(
+                c => c.position === (book as any).currentChapter
+              );
+              if (currentChapterByPosition) {
+                context.currentChapter = currentChapterByPosition;
+              }
+            }
+          }
+        }
+      }
+      
+      // Generate a single suggestion
+      const suggestion = await generateSingleSuggestion(context, type as SuggestionType);
+      
+      res.status(200).json(suggestion);
+    } catch (error) {
+      console.error("Error generating AI suggestion:", error);
+      res.status(500).json({ message: "Error generating AI suggestion" });
+    }
+  });
+
   return httpServer;
 }
