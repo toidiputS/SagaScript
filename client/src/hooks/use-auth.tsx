@@ -48,10 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
-    refetchOnWindowFocus: false,
-    onError: (err) => {
-      console.error("User query error:", err);
-    }
+    refetchOnWindowFocus: false
   });
 
   // Login mutation

@@ -40,8 +40,19 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const { loginMutation, registerMutation, user, isLoading } = useAuth();
+  const auth = useAuth();
+  const { loginMutation, registerMutation, user, isLoading } = auth;
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  
+  console.log("Auth Page - Auth state:", {
+    isAuthenticated: auth.isAuthenticated,
+    isLoading: auth.isLoading,
+    hasMutations: {
+      login: !!loginMutation,
+      register: !!registerMutation,
+      logout: !!auth.logoutMutation
+    }
+  });
 
   // Redirect if already logged in
   if (user) {

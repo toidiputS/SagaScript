@@ -112,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   
   const refreshUser = async (): Promise<User | null> => {
     try {
-      const response = await apiRequest("GET", "/api/auth/me");
+      const response = await apiRequest("GET", "/api/user");
       const userData = await response.json();
       setUser(userData);
       return userData;
