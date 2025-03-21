@@ -20,6 +20,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   displayName: true,
   email: true,
+  plan: true,
 });
 
 // Series

@@ -584,13 +584,20 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id, 
-      plan: 'apprentice',
+      plan: insertUser.plan || 'apprentice',
       email: insertUser.email || null,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
       createdAt: timestamp 
     };
+    
+    // Store user in memory
     this.users.set(id, user);
+    
+    // Save data to disk to persist between server restarts
+    console.log(`[Storage] Saving new user (ID: ${id}, Username: ${user.username}) to disk`);
+    this.saveToDisk();
+    
     return user;
   }
   
@@ -604,6 +611,7 @@ export class MemStorage implements IStorage {
     };
     
     this.users.set(userId, updatedUser);
+    this.saveToDisk(); // Save changes to disk
     return updatedUser;
   }
   
@@ -618,6 +626,7 @@ export class MemStorage implements IStorage {
     };
     
     this.users.set(userId, updatedUser);
+    this.saveToDisk(); // Save changes to disk
     return updatedUser;
   }
 
@@ -638,10 +647,15 @@ export class MemStorage implements IStorage {
     const series: Series = {
       ...insertSeries,
       id,
+      description: insertSeries.description || null,
+      totalBooks: insertSeries.totalBooks || 1,
+      currentBook: insertSeries.currentBook || 1,
+      coverImage: insertSeries.coverImage || null,
       createdAt: timestamp,
       updatedAt: timestamp
     };
     this.series.set(id, series);
+    this.saveToDisk(); // Save changes to disk
     return series;
   }
 
@@ -656,6 +670,7 @@ export class MemStorage implements IStorage {
     };
     
     this.series.set(id, updatedSeries);
+    this.saveToDisk(); // Save changes to disk
     return updatedSeries;
   }
 
@@ -680,10 +695,16 @@ export class MemStorage implements IStorage {
     const book: Book = {
       ...insertBook,
       id,
+      status: insertBook.status || 'in_progress',
+      description: insertBook.description || null,
+      coverImage: insertBook.coverImage || null,
+      position: insertBook.position || 1,
+      wordCount: insertBook.wordCount || 0,
       createdAt: timestamp,
       updatedAt: timestamp
     };
     this.books.set(id, book);
+    this.saveToDisk(); // Save changes to disk
     return book;
   }
 
@@ -698,6 +719,7 @@ export class MemStorage implements IStorage {
     };
     
     this.books.set(id, updatedBook);
+    this.saveToDisk(); // Save changes to disk
     return updatedBook;
   }
 
@@ -732,10 +754,15 @@ export class MemStorage implements IStorage {
     const chapter: Chapter = {
       ...insertChapter,
       id,
+      status: insertChapter.status || 'in_progress',
+      position: insertChapter.position || 1,
+      wordCount: insertChapter.wordCount || 0,
+      content: insertChapter.content || null,
       createdAt: timestamp,
       updatedAt: timestamp
     };
     this.chapters.set(id, chapter);
+    this.saveToDisk(); // Save changes to disk
     return chapter;
   }
 
