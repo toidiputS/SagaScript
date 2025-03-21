@@ -169,7 +169,7 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <p className="text-sm text-neutral-600 mt-2">
+            <p className="text-sm text-foreground mt-2">
               {book.description || "No description provided"}
             </p>
           </>
@@ -180,23 +180,23 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
           <Badge variant={book.status === "completed" ? "default" : "outline"}>
             {book.status ? book.status.charAt(0).toUpperCase() + book.status.slice(1).replace("_", " ") : "In Progress"}
           </Badge>
-          <span className="text-sm text-neutral-500">
+          <span className="text-sm text-foreground opacity-80">
             {(book.wordCount || 0).toLocaleString()} words
           </span>
         </div>
 
         <div className="mt-4">
-          <div className="flex justify-between text-xs text-neutral-500 mb-1">
-            <span>Progress</span>
-            <span>{completionPercentage}%</span>
+          <div className="flex justify-between text-xs font-medium mb-1">
+            <span className="text-foreground">Progress</span>
+            <span className="text-foreground">{completionPercentage}%</span>
           </div>
           <Progress value={completionPercentage} />
         </div>
 
         <div className="mt-4">
           <div className="flex justify-between items-center">
-            <h4 className="text-sm font-medium text-neutral-700">Chapters</h4>
-            <span className="text-xs text-neutral-500">
+            <h4 className="text-sm font-medium text-foreground">Chapters</h4>
+            <span className="text-xs text-foreground opacity-75">
               {chapters.length} total
             </span>
           </div>
@@ -212,7 +212,7 @@ export default function BookCard({ book, seriesId }: BookCardProps) {
                 </div>
               ))
             ) : (
-              <p className="text-xs text-neutral-500 italic">No chapters yet</p>
+              <p className="text-xs text-foreground opacity-70 italic">No chapters yet</p>
             )}
           </div>
         </div>
