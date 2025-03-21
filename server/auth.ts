@@ -86,21 +86,57 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      console.log("[AUTH] Register request received:", req.body.username);
+      console.log("[AUTH] Register request received:", req.body);
+      
+      // Validate required fields
+      if (!req.body.username || !req.body.password || !req.body.displayName) {
+        console.log("[AUTH] Registration failed: Missing required fields");
+        return res.status(400).json({ 
+          message: "Missing required fields. Please provide username, password, and displayName."
+        });
+      }
+      
+      // Check username length
+      if (req.body.username.length < 3) {
+        console.log("[AUTH] Registration failed: Username too short");
+        return res.status(400).json({ 
+          message: "Username must be at least 3 characters long"
+        });
+      }
+      
+      // Check password length
+      if (req.body.password.length < 6) {
+        console.log("[AUTH] Registration failed: Password too short");
+        return res.status(400).json({ 
+          message: "Password must be at least 6 characters long"
+        });
+      }
       
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         console.log("[AUTH] Registration failed: Username already exists");
         return res.status(400).json({ message: "Username already exists" });
       }
-
-      const hashedPassword = await hashPassword(req.body.password);
-      const user = await storage.createUser({
+      
+      // Default plan to apprentice if not provided
+      const userData = {
         ...req.body,
+        plan: req.body.plan || "apprentice",
+      };
+
+      const hashedPassword = await hashPassword(userData.password);
+      
+      console.log("[AUTH] Creating user with data:", { 
+        ...userData, 
+        password: "[REDACTED]" 
+      });
+      
+      const user = await storage.createUser({
+        ...userData,
         password: hashedPassword,
       });
       
-      console.log("[AUTH] User created:", user.id);
+      console.log("[AUTH] User created successfully, ID:", user.id);
 
       req.login(user, (err) => {
         if (err) {
@@ -113,37 +149,57 @@ export function setupAuth(app: Express) {
         console.log("[AUTH] Registration successful, user logged in");
         res.status(201).json(userWithoutPassword);
       });
-    } catch (error) {
-      console.log("[AUTH] Registration error:", error);
-      next(error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      // Using JSON.stringify to safely log the unknown error
+      console.log("[AUTH] Registration error:", 
+        error instanceof Error ? error.message : JSON.stringify(error));
+      res.status(500).json({ message: "Registration failed: " + errorMessage });
     }
   });
 
   app.post("/api/login", (req, res, next) => {
-    console.log("[AUTH] Login attempt for:", req.body.username);
-    
-    passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) {
-        console.log("[AUTH] Login error:", err);
-        return next(err);
-      }
-      if (!user) {
-        console.log("[AUTH] Login failed:", info?.message || "Authentication failed");
-        return res.status(401).json({ message: info?.message || "Authentication failed" });
+    try {
+      console.log("[AUTH] Login attempt for:", req.body.username);
+      
+      // Validate required fields
+      if (!req.body.username || !req.body.password) {
+        console.log("[AUTH] Login failed: Missing required fields");
+        return res.status(400).json({ 
+          message: "Missing required fields. Please provide username and password."
+        });
       }
       
-      req.login(user, (err: any) => {
+      passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
-          console.log("[AUTH] Login session error:", err);
-          return next(err);
+          console.log("[AUTH] Login error:", err);
+          return res.status(500).json({ message: "Login error: " + err.message });
         }
         
-        // Remove password from response
-        const { password, ...userWithoutPassword } = user;
-        console.log("[AUTH] Login successful for user:", user.id);
-        res.status(200).json(userWithoutPassword);
-      });
-    })(req, res, next);
+        if (!user) {
+          console.log("[AUTH] Login failed:", info?.message || "Authentication failed");
+          return res.status(401).json({ message: info?.message || "Invalid username or password" });
+        }
+        
+        req.login(user, (err: any) => {
+          if (err) {
+            console.log("[AUTH] Login session error:", err);
+            return res.status(500).json({ message: "Session creation failed: " + err.message });
+          }
+          
+          // Remove password from response
+          const { password, ...userWithoutPassword } = user;
+          console.log("[AUTH] Login successful for user:", user.id);
+          res.status(200).json(userWithoutPassword);
+        });
+      })(req, res, next);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      // Using JSON.stringify to safely log the unknown error
+      console.log("[AUTH] Unexpected login error:", 
+        error instanceof Error ? error.message : JSON.stringify(error));
+      res.status(500).json({ message: "Login failed: " + errorMessage });
+    }
   });
 
   app.post("/api/logout", (req, res) => {

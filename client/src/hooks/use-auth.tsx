@@ -62,27 +62,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify(credentials)
         });
         
-        const res = await apiRequest("POST", "/api/login", credentials);
+        // Use direct fetch for more control over the response handling
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
+          credentials: "include"
+        });
+        
         console.log("Login response status:", res.status, res.statusText);
         
-        // Always log the response body for debugging purposes
-        const responseText = await res.text();
-        console.log("Login response body:", responseText);
+        let responseText;
+        try {
+          responseText = await res.text();
+          console.log("Login response body:", responseText);
+        } catch (e) {
+          console.error("Error reading response text:", e);
+          throw new Error("Failed to read response");
+        }
         
-        // If not OK status, throw an error
+        // Handle non-200 responses
         if (!res.ok) {
           let errorMessage = "Login failed";
           try {
-            const errorData = JSON.parse(responseText);
-            errorMessage = errorData.message || errorMessage;
+            if (responseText) {
+              const errorData = JSON.parse(responseText);
+              errorMessage = errorData.message || errorMessage;
+            }
           } catch (e) {
             console.error("Failed to parse error response:", e);
           }
           throw new Error(errorMessage);
         }
         
-        // Parse the response as JSON
+        // Parse the successful response as JSON
         try {
+          if (!responseText) {
+            throw new Error("Empty response received");
+          }
           const userData = JSON.parse(responseText);
           console.log("Parsed user data:", userData);
           return userData;
@@ -198,10 +215,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       console.log("Logout mutation executing");
-      const res = await apiRequest("POST", "/api/logout");
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Logout failed");
+      
+      try {
+        // Use direct fetch
+        const res = await fetch("/api/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+        
+        console.log("Logout response status:", res.status, res.statusText);
+        
+        let responseText;
+        try {
+          responseText = await res.text();
+          console.log("Logout response body:", responseText);
+        } catch (e) {
+          console.error("Error reading response text:", e);
+          throw new Error("Failed to read response");
+        }
+        
+        // Handle non-200 responses
+        if (!res.ok) {
+          let errorMessage = "Logout failed";
+          try {
+            if (responseText) {
+              const errorData = JSON.parse(responseText);
+              errorMessage = errorData.message || errorMessage;
+            }
+          } catch (e) {
+            console.error("Failed to parse error response:", e);
+          }
+          throw new Error(errorMessage);
+        }
+      } catch (error) {
+        console.error("Logout request failed:", error);
+        throw error;
       }
     },
     onSuccess: () => {
