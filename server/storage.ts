@@ -25,6 +25,19 @@ import {
   type InsertSubscription,
   type TimelineEvent,
   type InsertTimelineEvent,
+  // Collaboration features imports
+  type CollaborativeSeries,
+  type InsertCollaborativeSeries,
+  type Collaborator,
+  type InsertCollaborator,
+  type CollaborationInvite,
+  type InsertCollaborationInvite,
+  type Comment,
+  type InsertComment,
+  type FeedbackRequest,
+  type InsertFeedbackRequest,
+  type FeedbackResponse,
+  type InsertFeedbackResponse,
   // Reward system imports
   type RewardType,
   type InsertRewardType,
@@ -190,6 +203,66 @@ export interface IStorage {
     bookId?: number;
     seriesId?: number;
   }): Promise<UserReward[]>;
+  
+  // === Collaboration Feature Methods ===
+  
+  // Collaborative Series
+  createCollaborativeSeries(seriesData: InsertCollaborativeSeries): Promise<CollaborativeSeries>;
+  getCollaborativeSeries(id: number): Promise<CollaborativeSeries | undefined>;
+  getCollaborativeSeriesByUser(userId: number): Promise<CollaborativeSeries[]>;
+  updateCollaborativeSeries(id: number, updates: Partial<CollaborativeSeries>): Promise<CollaborativeSeries | undefined>;
+  deleteCollaborativeSeries(id: number): Promise<boolean>;
+  userHasAccessToCollaborativeSeries(userId: number, collaborativeSeriesId: number): Promise<boolean>;
+  userHasAccessToSeries(userId: number, seriesId: number): Promise<boolean>;
+  
+  // Collaborators
+  createCollaborator(collaboratorData: InsertCollaborator): Promise<Collaborator>;
+  getCollaborator(collaborativeSeriesId: number, userId: number): Promise<Collaborator | undefined>;
+  getCollaboratorById(id: number): Promise<Collaborator | undefined>;
+  getCollaboratorsBySeriesId(collaborativeSeriesId: number): Promise<(Collaborator & { user: { username: string, displayName: string } })[]>;
+  updateCollaborator(id: number, updates: Partial<Collaborator>): Promise<Collaborator | undefined>;
+  deleteCollaborator(id: number): Promise<boolean>;
+  
+  // Collaboration Invites
+  createCollaborationInvite(inviteData: InsertCollaborationInvite): Promise<CollaborationInvite>;
+  getCollaborationInvite(id: number): Promise<CollaborationInvite | undefined>;
+  getCollaborationInviteByCode(code: string): Promise<CollaborationInvite | undefined>;
+  getCollaborationInvitesBySeriesId(collaborativeSeriesId: number): Promise<CollaborationInvite[]>;
+  updateCollaborationInvite(id: number, updates: Partial<CollaborationInvite>): Promise<CollaborationInvite | undefined>;
+  deleteCollaborationInvite(id: number): Promise<boolean>;
+  
+  // Comments
+  createComment(commentData: InsertComment): Promise<Comment>;
+  getComment(id: number): Promise<Comment | undefined>;
+  getComments(filters: {
+    bookId?: number;
+    chapterId?: number;
+    characterId?: number;
+    locationId?: number;
+    timelineEventId?: number;
+    parentCommentId?: number;
+  }): Promise<(Comment & { user: { username: string, displayName: string } })[]>;
+  updateComment(id: number, updates: Partial<Comment>): Promise<Comment | undefined>;
+  deleteComment(id: number): Promise<boolean>;
+  
+  // Feedback Requests
+  createFeedbackRequest(requestData: InsertFeedbackRequest): Promise<FeedbackRequest>;
+  getFeedbackRequest(id: number): Promise<FeedbackRequest | undefined>;
+  getFeedbackRequests(filters: {
+    userId: number;
+    bookId?: number;
+    chapterId?: number;
+    isPublic?: boolean;
+  }): Promise<FeedbackRequest[]>;
+  updateFeedbackRequest(id: number, updates: Partial<FeedbackRequest>): Promise<FeedbackRequest | undefined>;
+  deleteFeedbackRequest(id: number): Promise<boolean>;
+  
+  // Feedback Responses
+  createFeedbackResponse(responseData: InsertFeedbackResponse): Promise<FeedbackResponse>;
+  getFeedbackResponse(id: number): Promise<FeedbackResponse | undefined>;
+  getFeedbackResponses(feedbackRequestId: number): Promise<(FeedbackResponse & { user: { username: string, displayName: string } })[]>;
+  updateFeedbackResponse(id: number, updates: Partial<FeedbackResponse>): Promise<FeedbackResponse | undefined>;
+  deleteFeedbackResponse(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
