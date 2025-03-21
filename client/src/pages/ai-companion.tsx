@@ -5,28 +5,45 @@ import { useAuth } from "@/hooks/use-auth";
 
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
+import WriterCompanion from "@/components/dashboard/writer-companion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Sparkles, RefreshCw, Lightbulb, CheckCircle, ExternalLink } from "lucide-react";
+import { AlertCircle, Sparkles, RefreshCw, Lightbulb, CheckCircle, ExternalLink, Brain } from "lucide-react";
+import { FeatureGate } from "@/components/ui/feature-gate";
 
 export default function AICompanion() {
   const { user } = useAuth();
   const [selectedSeries, setSelectedSeries] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState("suggestions");
+  const [selectedBook, setSelectedBook] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState("writer-companion");
   const [prompt, setPrompt] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch all series
-  const { data: series, isLoading: isLoadingSeries } = useQuery({
+  const { data: series, isLoading: isLoadingSeries } = useQuery<any[]>({
     queryKey: ['/api/series'],
+    retry: false
+  });
+  
+  // Fetch books when a series is selected
+  const { data: books, isLoading: isLoadingBooks } = useQuery<any[]>({
+    queryKey: ['/api/series', selectedSeries, 'books'],
+    queryFn: async () => {
+      if (!selectedSeries) return [];
+      const response = await fetch(`/api/series/${selectedSeries}/books`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: !!selectedSeries,
+    retry: false
   });
 
-  // Mock AI suggestions - in a real implementation, these would come from an API
+  // Mock AI suggestions for backwards compatibility - real ones now come from API
   const plotSuggestions = [
     {
       id: 1,
@@ -127,7 +144,10 @@ export default function AICompanion() {
                   Select Series
                 </label>
                 <Select 
-                  onValueChange={(value) => setSelectedSeries(parseInt(value))}
+                  onValueChange={(value) => {
+                    setSelectedSeries(parseInt(value));
+                    setSelectedBook(null); // Reset book when series changes
+                  }}
                   value={selectedSeries?.toString()}
                 >
                   <SelectTrigger id="series-select" className="w-full">
@@ -136,7 +156,7 @@ export default function AICompanion() {
                   <SelectContent>
                     {isLoadingSeries ? (
                       <SelectItem value="loading" disabled>Loading series...</SelectItem>
-                    ) : series && series.length > 0 ? (
+                    ) : series && Array.isArray(series) && series.length > 0 ? (
                       series.map((s: any) => (
                         <SelectItem key={s.id} value={s.id.toString()}>
                           {s.title}
@@ -148,17 +168,54 @@ export default function AICompanion() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="md:col-span-2 flex items-end">
+              
+              <div>
+                <label htmlFor="book-select" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Select Book (Optional)
+                </label>
+                <Select 
+                  onValueChange={(value) => setSelectedBook(parseInt(value))}
+                  value={selectedBook?.toString()}
+                  disabled={!selectedSeries || isLoadingBooks}
+                >
+                  <SelectTrigger id="book-select" className="w-full">
+                    <SelectValue placeholder="Choose a book" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isLoadingBooks ? (
+                      <SelectItem value="loading" disabled>Loading books...</SelectItem>
+                    ) : books && Array.isArray(books) && books.length > 0 ? (
+                      books.map((b: any) => (
+                        <SelectItem key={b.id} value={b.id.toString()}>
+                          {b.title}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>No books available</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-end">
                 <Tabs 
-                  defaultValue="suggestions" 
                   className="w-full" 
                   value={activeTab} 
                   onValueChange={setActiveTab}
                 >
                   <TabsList className="grid grid-cols-3 w-full">
-                    <TabsTrigger value="suggestions">Suggestions</TabsTrigger>
-                    <TabsTrigger value="consistency">Consistency Checker</TabsTrigger>
-                    <TabsTrigger value="chat">AI Chat</TabsTrigger>
+                    <TabsTrigger value="writer-companion">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Writer Assistant
+                    </TabsTrigger>
+                    <TabsTrigger value="suggestions">
+                      <Lightbulb className="w-4 h-4 mr-2" />
+                      Ideas
+                    </TabsTrigger>
+                    <TabsTrigger value="consistency">
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      Consistency
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
@@ -166,6 +223,13 @@ export default function AICompanion() {
           </div>
 
           {/* Main content area */}
+          <TabsContent value="writer-companion" className="mt-0">
+            <WriterCompanion 
+              seriesId={selectedSeries || undefined} 
+              bookId={selectedBook || undefined}
+            />
+          </TabsContent>
+          
           <TabsContent value="suggestions" className="mt-0" hidden={activeTab !== "suggestions"}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Plot Suggestions */}
