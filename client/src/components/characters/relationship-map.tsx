@@ -52,6 +52,8 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
   const { toast } = useToast();
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isAddRelationshipOpen, setIsAddRelationshipOpen] = useState(false);
+  const [isCharacterDialogOpen, setIsCharacterDialogOpen] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [newRelationship, setNewRelationship] = useState<ConnectionData>({
     source: 0,
     target: 0,
@@ -128,6 +130,12 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
   const handleZoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 0.2, 0.5));
   };
+  
+  // Handle character click to show details
+  const handleCharacterClick = (character: Character) => {
+    setSelectedCharacter(character);
+    setIsCharacterDialogOpen(true);
+  };
 
   return (
     <div className="relative">
@@ -173,7 +181,12 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
             const isProtagonist = character.isProtagonist;
             
             return (
-              <g key={character.id}>
+              <g 
+                key={character.id}
+                onClick={() => handleCharacterClick(character)}
+                style={{ cursor: "pointer" }}
+                className="character-node"
+              >
                 <circle
                   cx={pos.x}
                   cy={pos.y}
@@ -327,6 +340,59 @@ export default function RelationshipMap({ characters, seriesId }: RelationshipMa
           </DialogContent>
         </Dialog>
       </div>
+      
+      {/* Character Details Dialog */}
+      <Dialog open={isCharacterDialogOpen} onOpenChange={setIsCharacterDialogOpen}>
+        <DialogContent className="max-w-md">
+          {selectedCharacter && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl">{selectedCharacter.name}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="font-medium text-neutral-500">Role</div>
+                  <div className="col-span-2">{selectedCharacter.role || "Not specified"}</div>
+                  
+                  <div className="font-medium text-neutral-500">Status</div>
+                  <div className="col-span-2">{selectedCharacter.status || "Not specified"}</div>
+                  
+                  <div className="font-medium text-neutral-500">Age</div>
+                  <div className="col-span-2">{selectedCharacter.age || "Not specified"}</div>
+                  
+                  <div className="font-medium text-neutral-500">Occupation</div>
+                  <div className="col-span-2">{selectedCharacter.occupation || "Not specified"}</div>
+                </div>
+                
+                {selectedCharacter.description && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Biography</h4>
+                    <p className="text-sm">{selectedCharacter.description}</p>
+                  </div>
+                )}
+                
+                {selectedCharacter.background && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Background</h4>
+                    <p className="text-sm">{selectedCharacter.background}</p>
+                  </div>
+                )}
+                
+                {selectedCharacter.motivation && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-neutral-500 mb-1">Motivation</h4>
+                    <p className="text-sm">{selectedCharacter.motivation}</p>
+                  </div>
+                )}
+                
+                <div className="flex justify-end pt-4">
+                  <Button onClick={() => setIsCharacterDialogOpen(false)}>Close</Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

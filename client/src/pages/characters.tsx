@@ -24,6 +24,7 @@ export default function CharactersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddCharacterDialogOpen, setIsAddCharacterDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("main");
+  const [relationshipMapZoom, setRelationshipMapZoom] = useState(1);
   
   // Use characters hook with current series ID
   const { 
