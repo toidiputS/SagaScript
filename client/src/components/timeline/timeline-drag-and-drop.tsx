@@ -6,7 +6,9 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -40,15 +42,24 @@ function SortableItem({ id, event, onEdit, onDelete }: SortableItemProps) {
     listeners,
     setNodeRef,
     transform,
-    transition
+    transition,
+    isDragging,
+    isOver
   } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    cursor: 'grab',
+    cursor: isDragging ? 'grabbing' : 'grab',
     marginBottom: '1rem',
-    position: 'relative' as const
+    position: 'relative' as const,
+    zIndex: isDragging ? 10 : 1,
+    opacity: isDragging ? 0.8 : 1,
+    boxShadow: isDragging ? '0 8px 16px rgba(0,0,0,0.12)' : (isOver ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'),
+    background: isOver ? 'rgba(249, 250, 251, 0.8)' : 'transparent',
+    borderRadius: '0.375rem',
+    padding: isOver ? '0.25rem' : '0',
+    margin: isOver ? '-0.25rem' : '0'
   };
 
   return (
@@ -69,6 +80,10 @@ export default function TimelineDragAndDrop({
   onDelete
 }: TimelineDragAndDropProps) {
   const [items, setItems] = useState(events);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  
+  // Find the active event
+  const activeEvent = activeId ? items.find(item => item.id === activeId) : null;
 
   // Configure sensors for drag detection
   const sensors = useSensors(
@@ -82,9 +97,16 @@ export default function TimelineDragAndDrop({
     })
   );
 
+  // Handle start of drag event
+  const handleDragStart = (event: DragStartEvent) => {
+    const id = event.active.id;
+    setActiveId(Number(id));
+  };
+
   // Handle the end of a drag event
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
     
     if (over && active.id !== over.id) {
       setItems((currentItems) => {
@@ -120,12 +142,14 @@ export default function TimelineDragAndDrop({
       </div>
     );
   }
-
+  
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveId(null)}
     >
       <SortableContext
         items={items.map(item => item.id)}
@@ -143,6 +167,24 @@ export default function TimelineDragAndDrop({
           ))}
         </div>
       </SortableContext>
+      
+      {/* Overlay to show while dragging */}
+      <DragOverlay adjustScale={true}>
+        {activeId && activeEvent ? (
+          <div style={{ 
+            opacity: 0.8, 
+            transform: 'scale(1.05)',
+            pointerEvents: 'none',
+            width: '100%'
+          }}>
+            <TimelineEventCard
+              event={activeEvent}
+              onEdit={() => {}}
+              onDelete={() => {}}
+            />
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }
