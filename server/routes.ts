@@ -51,21 +51,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Middleware to check if user is authenticated
   const isAuthenticated = (req: Request, res: Response, next: Function) => {
+    console.log("[Auth Middleware] User authenticated:", req.isAuthenticated());
     if (req.isAuthenticated()) {
+      console.log("[Auth Middleware] User ID:", req.user?.id);
       return next();
     }
-    return res.status(401).json({ message: "Unauthorized" });
+    console.log("[Auth Middleware] Authentication failed - no valid session");
+    return res.status(401).json({ message: "Unauthorized - Please log in" });
   };
 
   // Authentication routes are now handled in auth.ts
   // We still keep the /api/me endpoint for backward compatibility
   app.get("/api/me", (req, res) => {
+    console.log("[API /api/me] Authentication check:", req.isAuthenticated());
+    
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Not authenticated" });
+      console.log("[API /api/me] User not authenticated");
+      return res.status(401).json({ message: "Not authenticated - Please log in" });
     }
+    
+    console.log("[API /api/me] User authenticated, ID:", req.user?.id);
     
     // Remove password from response
     const { password, ...userWithoutPassword } = req.user;
+    console.log("[API /api/me] Returning user data");
     res.status(200).json(userWithoutPassword);
   });
 

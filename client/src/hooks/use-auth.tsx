@@ -53,12 +53,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       console.log("Login mutation executing with:", credentials.username);
-      const res = await apiRequest("POST", "/api/login", credentials);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Login failed");
+      
+      try {
+        // Log the exact request details
+        console.log("Login request details:", {
+          url: "/api/login",
+          method: "POST",
+          body: JSON.stringify(credentials)
+        });
+        
+        const res = await apiRequest("POST", "/api/login", credentials);
+        console.log("Login response status:", res.status, res.statusText);
+        
+        // Always log the response body for debugging purposes
+        const responseText = await res.text();
+        console.log("Login response body:", responseText);
+        
+        // If not OK status, throw an error
+        if (!res.ok) {
+          let errorMessage = "Login failed";
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            console.error("Failed to parse error response:", e);
+          }
+          throw new Error(errorMessage);
+        }
+        
+        // Parse the response as JSON
+        try {
+          const userData = JSON.parse(responseText);
+          console.log("Parsed user data:", userData);
+          return userData;
+        } catch (e) {
+          console.error("Failed to parse response as JSON:", e);
+          throw new Error("Invalid response format");
+        }
+      } catch (error) {
+        console.error("Login request failed:", error);
+        throw error;
       }
-      return await res.json();
     },
     onSuccess: (userData: SelectUser) => {
       console.log("Login successful for:", userData.username);
@@ -82,12 +117,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
       console.log("Register mutation executing with:", data.username);
-      const res = await apiRequest("POST", "/api/register", data);
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Registration failed");
+      
+      try {
+        // Log the exact request details
+        console.log("Register request details:", {
+          url: "/api/register",
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+        
+        const res = await apiRequest("POST", "/api/register", data);
+        console.log("Register response status:", res.status, res.statusText);
+        
+        // Always log the response body for debugging purposes
+        const responseText = await res.text();
+        console.log("Register response body:", responseText);
+        
+        // If not OK status, throw an error
+        if (!res.ok) {
+          let errorMessage = "Registration failed";
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            console.error("Failed to parse error response:", e);
+          }
+          throw new Error(errorMessage);
+        }
+        
+        // Parse the response as JSON
+        try {
+          const userData = JSON.parse(responseText);
+          console.log("Parsed user data:", userData);
+          return userData;
+        } catch (e) {
+          console.error("Failed to parse response as JSON:", e);
+          throw new Error("Invalid response format");
+        }
+      } catch (error) {
+        console.error("Registration request failed:", error);
+        throw error;
       }
-      return await res.json();
     },
     onSuccess: (userData: SelectUser) => {
       console.log("Registration successful for:", userData.username);
