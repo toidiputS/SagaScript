@@ -179,7 +179,8 @@ export default function AuthPage() {
 }
 
 function LoginForm() {
-  const { loginMutation } = useAuth();
+  const auth = useAuth();
+  const loginMutation = auth?.loginMutation;
   const isPending = loginMutation?.isPending ?? false;
 
   // Initialize form
@@ -200,6 +201,11 @@ function LoginForm() {
     }
   };
 
+  // Create a button click handler to prevent button click issues
+  const handleLoginClick = () => {
+    form.handleSubmit(onSubmit)();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -208,7 +214,7 @@ function LoginForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-4">
             <FormField
               control={form.control}
               name="username"
@@ -235,10 +241,11 @@ function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button 
-              type="submit"
-              className="w-full"
+            <button
+              type="button"
+              className="w-full rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center font-medium"
               disabled={isPending}
+              onClick={handleLoginClick}
             >
               {isPending ? (
                 <>
@@ -248,8 +255,8 @@ function LoginForm() {
               ) : (
                 "Login"
               )}
-            </Button>
-          </form>
+            </button>
+          </div>
         </Form>
       </CardContent>
     </Card>
@@ -257,7 +264,8 @@ function LoginForm() {
 }
 
 function RegisterForm() {
-  const { registerMutation } = useAuth();
+  const auth = useAuth();
+  const registerMutation = auth?.registerMutation;
   const isPending = registerMutation?.isPending ?? false;
 
   // Initialize form
@@ -282,6 +290,11 @@ function RegisterForm() {
     }
   };
 
+  // Create a button click handler to prevent button click issues
+  const handleRegisterClick = () => {
+    form.handleSubmit(onSubmit)();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -290,7 +303,7 @@ function RegisterForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-4">
             <FormField
               control={form.control}
               name="username"
@@ -343,10 +356,11 @@ function RegisterForm() {
                 </FormItem>
               )}
             />
-            <Button 
-              type="submit"
-              className="w-full"
+            <button
+              type="button"
+              className="w-full rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center font-medium"
               disabled={isPending}
+              onClick={handleRegisterClick}
             >
               {isPending ? (
                 <>
@@ -356,8 +370,8 @@ function RegisterForm() {
               ) : (
                 "Register"
               )}
-            </Button>
-          </form>
+            </button>
+          </div>
         </Form>
       </CardContent>
     </Card>
