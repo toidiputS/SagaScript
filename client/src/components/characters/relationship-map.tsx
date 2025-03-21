@@ -55,6 +55,7 @@ export default function RelationshipMap({ characters, seriesId, initialZoom = 1 
   const [isAddRelationshipOpen, setIsAddRelationshipOpen] = useState(false);
   const [isCharacterDialogOpen, setIsCharacterDialogOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [hoveredRelationship, setHoveredRelationship] = useState<CharacterRelationship | null>(null);
   const [newRelationship, setNewRelationship] = useState<ConnectionData>({
     source: 0,
     target: 0,
@@ -169,17 +170,75 @@ export default function RelationshipMap({ characters, seriesId, initialZoom = 1 
             const sourcePos = getCharacterPosition(sourceIndex, characters.length, 120, 400, 175);
             const targetPos = getCharacterPosition(targetIndex, characters.length, 120, 400, 175);
             
+            // Find relationship type display name
+            const relationshipType = relationshipTypes.find(r => r.value === relationship.relationshipType);
+            
             return (
-              <line 
-                key={relationship.id}
-                x1={sourcePos.x}
-                y1={sourcePos.y}
-                x2={targetPos.x}
-                y2={targetPos.y}
-                stroke={getRelationshipColor(relationship.relationshipType)}
-                strokeWidth="3"
-                strokeDasharray={relationship.relationshipType === "conflict" || relationship.relationshipType === "romantic" ? "5,5" : "none"}
-              />
+              <g key={relationship.id}>
+                <line 
+                  x1={sourcePos.x}
+                  y1={sourcePos.y}
+                  x2={targetPos.x}
+                  y2={targetPos.y}
+                  stroke={getRelationshipColor(relationship.relationshipType)}
+                  strokeWidth="3"
+                  strokeDasharray={relationship.relationshipType === "conflict" || relationship.relationshipType === "romantic" ? "5,5" : "none"}
+                  className="cursor-pointer hover:stroke-[5px] transition-all duration-200"
+                  onMouseEnter={() => setHoveredRelationship(relationship)}
+                  onMouseLeave={() => setHoveredRelationship(null)}
+                />
+                
+                {hoveredRelationship && hoveredRelationship.id === relationship.id && (
+                  <g>
+                    {/* Relationship tooltip background with shadow */}
+                    <filter id={`shadow-${relationship.id}`} x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#000000" floodOpacity="0.15" />
+                    </filter>
+                    <rect
+                      x={(sourcePos.x + targetPos.x) / 2 - 80}
+                      y={(sourcePos.y + targetPos.y) / 2 - 30}
+                      width="160"
+                      height={relationship.description ? "60" : "30"}
+                      rx="4"
+                      fill="white"
+                      stroke="#e5e7eb"
+                      filter={`url(#shadow-${relationship.id})`}
+                    />
+                    <text
+                      x={(sourcePos.x + targetPos.x) / 2}
+                      y={(sourcePos.y + targetPos.y) / 2 - 10}
+                      textAnchor="middle"
+                      fill="#374151"
+                      fontSize="12"
+                      fontWeight="bold"
+                    >
+                      {sourceChar.name} → {targetChar.name}
+                    </text>
+                    <text
+                      x={(sourcePos.x + targetPos.x) / 2}
+                      y={(sourcePos.y + targetPos.y) / 2 + 10}
+                      textAnchor="middle"
+                      fill="#4b5563"
+                      fontSize="11"
+                    >
+                      {relationshipType?.label || relationship.relationshipType}
+                    </text>
+                    {relationship.description && (
+                      <text
+                        x={(sourcePos.x + targetPos.x) / 2}
+                        y={(sourcePos.y + targetPos.y) / 2 + 30}
+                        textAnchor="middle"
+                        fill="#6b7280"
+                        fontSize="10"
+                      >
+                        {relationship.description.length > 30 
+                          ? relationship.description.substring(0, 30) + "..." 
+                          : relationship.description}
+                      </text>
+                    )}
+                  </g>
+                )}
+              </g>
             );
           })}
           
