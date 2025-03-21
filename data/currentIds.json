@@ -1,0 +1,21 @@
+{
+  "user": 2,
+  "series": 1,
+  "book": 1,
+  "chapter": 1,
+  "character": 1,
+  "characterRelationship": 1,
+  "location": 1,
+  "writingStat": 1,
+  "achievement": 23,
+  "userAchievement": 1,
+  "subscriptionPlan": 5,
+  "subscription": 1,
+  "timelineEvent": 1,
+  "rewardType": 11,
+  "writingMilestone": 26,
+  "userReward": 1,
+  "writingStreak": 1,
+  "writingGoal": 1,
+  "pointLedger": 1
+}

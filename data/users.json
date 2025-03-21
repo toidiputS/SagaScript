@@ -1,0 +1,13 @@
+[
+  {
+    "username": "SeanTrader",
+    "displayName": "SeanTrader",
+    "password": "c305c08d04d99e16be2fb135e0b9a76ad9906baa7b5a3fa3cd5d1f047e50169d95a45d3aaa7dfff2b8ca99f9e9764791fb76f1d94f9c55bb73ad47a22ba3145a.12c21d71ded6d14ea44d9b58ab4228f7",
+    "plan": "apprentice",
+    "id": 1,
+    "email": null,
+    "stripeCustomerId": null,
+    "stripeSubscriptionId": null,
+    "createdAt": "2025-03-21T14:44:57.840Z"
+  }
+]

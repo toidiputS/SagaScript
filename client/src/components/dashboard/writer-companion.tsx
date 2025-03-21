@@ -190,7 +190,7 @@ export default function WriterCompanion({
           <CardDescription>Intelligent writing assistance</CardDescription>
         </CardHeader>
         <CardContent>
-          <FeatureGate feature="aiSuggestions" requiredTier="wordsmith">
+          <FeatureGate feature="aiSuggestions" requiredTier="apprentice">
             <div className="p-4 bg-destructive/10 rounded-md text-center">
               <p className="text-destructive font-medium mb-2">
                 {(suggestionsError as Error).message || 'Failed to load AI suggestions'}
@@ -215,7 +215,7 @@ export default function WriterCompanion({
         <CardDescription>AI-powered writing assistance</CardDescription>
       </CardHeader>
       
-      <FeatureGate feature="aiSuggestions" requiredTier="wordsmith">
+      <FeatureGate feature="aiSuggestions" requiredTier="apprentice">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'suggestions' | 'analysis')} className="w-full">
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="suggestions">
