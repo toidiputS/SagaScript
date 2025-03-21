@@ -777,6 +777,7 @@ export class MemStorage implements IStorage {
     };
     
     this.chapters.set(id, updatedChapter);
+    this.saveToDisk(); // Save changes to disk
     return updatedChapter;
   }
 
@@ -810,10 +811,23 @@ export class MemStorage implements IStorage {
     const character: Character = {
       ...insertCharacter,
       id,
+      status: insertCharacter.status || null,
+      description: insertCharacter.description || null,
+      role: insertCharacter.role || null,
+      age: insertCharacter.age || null,
+      occupation: insertCharacter.occupation || null,
+      appearance: insertCharacter.appearance || null,
+      personality: insertCharacter.personality || null,
+      goals: insertCharacter.goals || null,
+      backstory: insertCharacter.backstory || null,
+      bookAppearances: insertCharacter.bookAppearances || [],
+      isProtagonist: insertCharacter.isProtagonist || false,
+      avatar: insertCharacter.avatar || null,
       createdAt: timestamp,
       updatedAt: timestamp
     };
     this.characters.set(id, character);
+    this.saveToDisk(); // Save changes to disk
     return character;
   }
 
@@ -828,6 +842,7 @@ export class MemStorage implements IStorage {
     };
     
     this.characters.set(id, updatedCharacter);
+    this.saveToDisk(); // Save changes to disk
     return updatedCharacter;
   }
 
@@ -905,10 +920,17 @@ export class MemStorage implements IStorage {
     const location: Location = {
       ...insertLocation,
       id,
+      description: insertLocation.description || null,
+      locationType: insertLocation.locationType || null,
+      importance: insertLocation.importance || "secondary",
+      mapCoordinates: insertLocation.mapCoordinates || {},
+      bookAppearances: insertLocation.bookAppearances || [],
+      image: insertLocation.image || null,
       createdAt: timestamp,
       updatedAt: timestamp
     };
     this.locations.set(id, location);
+    this.saveToDisk(); // Save changes to disk
     return location;
   }
 
