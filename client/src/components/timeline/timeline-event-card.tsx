@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Bookmark, Edit2, Trash2, Flag } from "lucide-react";
+import { Clock, Bookmark, Edit2, Trash2, Flag, GripVertical } from "lucide-react";
 import { TimelineEvent } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 
@@ -36,8 +36,12 @@ export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineE
   };
 
   return (
-    <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-l-4" 
+    <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-l-4 relative group" 
       style={{ borderLeftColor: event.color || "#6366f1" }}>
+      {/* Drag handle indicator */}
+      <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 bg-neutral-100 hover:bg-neutral-200 rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm cursor-grab">
+        <GripVertical className="h-4 w-4 text-neutral-500" />
+      </div>
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
         <div>
           <CardTitle className="text-lg font-semibold text-foreground">

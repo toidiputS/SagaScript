@@ -65,13 +65,13 @@ export default function CharactersPage() {
       return;
     }
 
-    // Make sure bookAppearances is an array of numbers
+    // Properly cast bookAppearances to number[] to fix type error
     addCharacter({
       ...characterData,
       seriesId: currentSeries.id,
-      bookAppearances: Array.isArray(characterData.bookAppearances) 
+      bookAppearances: (Array.isArray(characterData.bookAppearances) 
         ? characterData.bookAppearances 
-        : []
+        : []) as number[]
     });
     
     setIsAddCharacterDialogOpen(false);

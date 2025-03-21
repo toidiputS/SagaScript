@@ -47,7 +47,8 @@ function SortableItem({ id, event, onEdit, onDelete }: SortableItemProps) {
     transform: CSS.Transform.toString(transform),
     transition,
     cursor: 'grab',
-    marginBottom: '1rem'
+    marginBottom: '1rem',
+    position: 'relative' as const
   };
 
   return (
@@ -110,6 +111,15 @@ export default function TimelineDragAndDrop({
   React.useEffect(() => {
     setItems(events);
   }, [events]);
+
+  // If there are no events, show a message
+  if (items.length === 0) {
+    return (
+      <div className="px-4 py-6 bg-gray-50 border border-gray-200 rounded-md text-center">
+        <p className="text-sm text-gray-500">No events yet. Add an event to start building your timeline.</p>
+      </div>
+    );
+  }
 
   return (
     <DndContext

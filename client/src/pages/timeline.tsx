@@ -373,6 +373,15 @@ export default function TimelinePage() {
             {/* Narrative view (grouped by book) */}
             {viewMode === "narrative" && (
               <div className="relative">
+                {/* Drag-and-drop instructions for narrative view */}
+                <div className="text-sm bg-amber-50 border border-amber-200 rounded-md p-3 mb-6 flex items-center">
+                  <GripVertical className="h-5 w-5 mr-2 text-amber-500" />
+                  <div>
+                    <span className="font-medium">Drag & Drop Enabled:</span> In Narrative view, you can reorder events by dragging them to arrange your story's flow.
+                    Events will maintain their positions when you return to this view.
+                  </div>
+                </div>
+                
                 {/* Timeline line */}
                 <div className="absolute left-[150px] top-0 bottom-0 w-0.5 bg-neutral-200 z-0"></div>
 
