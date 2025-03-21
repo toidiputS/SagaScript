@@ -2497,6 +2497,415 @@ export class MemStorage implements IStorage {
     
     return earnedRewards;
   }
+
+  // Collaboration methods
+  
+  // Collaborative Series methods
+  async createCollaborativeSeries(seriesData: InsertCollaborativeSeries): Promise<CollaborativeSeries> {
+    const id = this.currentIds.collaborativeSeries++;
+    const timestamp = new Date();
+    const collaborativeSeries: CollaborativeSeries = {
+      ...seriesData,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.collaborativeSeries.set(id, collaborativeSeries);
+    this.saveToDisk();
+    return collaborativeSeries;
+  }
+  
+  async getCollaborativeSeries(id: number): Promise<CollaborativeSeries | undefined> {
+    return this.collaborativeSeries.get(id);
+  }
+  
+  async getCollaborativeSeriesByUser(userId: number): Promise<CollaborativeSeries[]> {
+    const collaboratorEntries = Array.from(this.collaborators.values())
+      .filter(col => col.userId === userId)
+      .map(col => col.collaborativeSeriesId);
+      
+    return Array.from(this.collaborativeSeries.values())
+      .filter(cs => cs.ownerId === userId || collaboratorEntries.includes(cs.id));
+  }
+  
+  async updateCollaborativeSeries(id: number, updates: Partial<CollaborativeSeries>): Promise<CollaborativeSeries | undefined> {
+    const existingSeries = this.collaborativeSeries.get(id);
+    if (!existingSeries) return undefined;
+    
+    const updatedSeries: CollaborativeSeries = {
+      ...existingSeries,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.collaborativeSeries.set(id, updatedSeries);
+    this.saveToDisk();
+    return updatedSeries;
+  }
+  
+  async deleteCollaborativeSeries(id: number): Promise<boolean> {
+    const deleted = this.collaborativeSeries.delete(id);
+    if (deleted) this.saveToDisk();
+    return deleted;
+  }
+  
+  async userHasAccessToCollaborativeSeries(userId: number, collaborativeSeriesId: number): Promise<boolean> {
+    const series = this.collaborativeSeries.get(collaborativeSeriesId);
+    if (!series) return false;
+    
+    if (series.ownerId === userId) return true;
+    
+    const collaborator = Array.from(this.collaborators.values())
+      .find(c => c.collaborativeSeriesId === collaborativeSeriesId && c.userId === userId);
+      
+    return !!collaborator;
+  }
+  
+  async userHasAccessToSeries(userId: number, seriesId: number): Promise<boolean> {
+    const series = this.series.get(seriesId);
+    if (!series) return false;
+    
+    return series.userId === userId;
+  }
+  
+  // Collaborator methods
+  async createCollaborator(collaboratorData: InsertCollaborator): Promise<Collaborator> {
+    const id = this.currentIds.collaborator++;
+    const timestamp = new Date();
+    const collaborator: Collaborator = {
+      ...collaboratorData,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.collaborators.set(id, collaborator);
+    this.saveToDisk();
+    return collaborator;
+  }
+  
+  async getCollaborator(collaborativeSeriesId: number, userId: number): Promise<Collaborator | undefined> {
+    return Array.from(this.collaborators.values())
+      .find(c => c.collaborativeSeriesId === collaborativeSeriesId && c.userId === userId);
+  }
+  
+  async getCollaboratorById(id: number): Promise<Collaborator | undefined> {
+    return this.collaborators.get(id);
+  }
+  
+  async getCollaboratorsBySeriesId(collaborativeSeriesId: number): Promise<(Collaborator & { user: { username: string, displayName: string } })[]> {
+    const collaborators = Array.from(this.collaborators.values())
+      .filter(c => c.collaborativeSeriesId === collaborativeSeriesId);
+      
+    return Promise.all(collaborators.map(async c => {
+      const user = await this.getUser(c.userId);
+      return {
+        ...c,
+        user: {
+          username: user?.username || 'Unknown',
+          displayName: user?.displayName || 'Unknown User'
+        }
+      };
+    }));
+  }
+  
+  async updateCollaborator(id: number, updates: Partial<Collaborator>): Promise<Collaborator | undefined> {
+    const existingCollaborator = this.collaborators.get(id);
+    if (!existingCollaborator) return undefined;
+    
+    const updatedCollaborator: Collaborator = {
+      ...existingCollaborator,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.collaborators.set(id, updatedCollaborator);
+    this.saveToDisk();
+    return updatedCollaborator;
+  }
+  
+  async deleteCollaborator(id: number): Promise<boolean> {
+    const deleted = this.collaborators.delete(id);
+    if (deleted) this.saveToDisk();
+    return deleted;
+  }
+  
+  // Collaboration Invite methods
+  async createCollaborationInvite(inviteData: InsertCollaborationInvite): Promise<CollaborationInvite> {
+    const id = this.currentIds.collaborationInvite++;
+    const timestamp = new Date();
+    const invite: CollaborationInvite = {
+      ...inviteData,
+      id,
+      status: inviteData.status || 'pending',
+      expiresAt: inviteData.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days default
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.collaborationInvites.set(id, invite);
+    this.saveToDisk();
+    return invite;
+  }
+  
+  async getCollaborationInvite(id: number): Promise<CollaborationInvite | undefined> {
+    return this.collaborationInvites.get(id);
+  }
+  
+  async getCollaborationInviteByCode(code: string): Promise<CollaborationInvite | undefined> {
+    return Array.from(this.collaborationInvites.values())
+      .find(invite => invite.inviteCode === code);
+  }
+  
+  async getCollaborationInvitesBySeriesId(collaborativeSeriesId: number): Promise<CollaborationInvite[]> {
+    return Array.from(this.collaborationInvites.values())
+      .filter(invite => invite.collaborativeSeriesId === collaborativeSeriesId);
+  }
+  
+  async updateCollaborationInvite(id: number, updates: Partial<CollaborationInvite>): Promise<CollaborationInvite | undefined> {
+    const existingInvite = this.collaborationInvites.get(id);
+    if (!existingInvite) return undefined;
+    
+    const updatedInvite: CollaborationInvite = {
+      ...existingInvite,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.collaborationInvites.set(id, updatedInvite);
+    this.saveToDisk();
+    return updatedInvite;
+  }
+  
+  async deleteCollaborationInvite(id: number): Promise<boolean> {
+    const deleted = this.collaborationInvites.delete(id);
+    if (deleted) this.saveToDisk();
+    return deleted;
+  }
+  
+  // Comment methods
+  async createComment(commentData: InsertComment): Promise<Comment> {
+    const id = this.currentIds.comment++;
+    const timestamp = new Date();
+    const comment: Comment = {
+      ...commentData,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.comments.set(id, comment);
+    this.saveToDisk();
+    return comment;
+  }
+  
+  async getComment(id: number): Promise<Comment | undefined> {
+    return this.comments.get(id);
+  }
+  
+  async getComments(filters: {
+    seriesId?: number;
+    bookId?: number;
+    chapterId?: number;
+    characterId?: number;
+    locationId?: number;
+    userId?: number;
+    commentType?: string;
+    parentCommentId?: number | null;
+  }): Promise<(Comment & { user: { username: string, displayName: string } })[]> {
+    let filteredComments = Array.from(this.comments.values());
+    
+    if (filters.seriesId !== undefined) {
+      filteredComments = filteredComments.filter(c => c.seriesId === filters.seriesId);
+    }
+    
+    if (filters.bookId !== undefined) {
+      filteredComments = filteredComments.filter(c => c.bookId === filters.bookId);
+    }
+    
+    if (filters.chapterId !== undefined) {
+      filteredComments = filteredComments.filter(c => c.chapterId === filters.chapterId);
+    }
+    
+    if (filters.characterId !== undefined) {
+      filteredComments = filteredComments.filter(c => c.characterId === filters.characterId);
+    }
+    
+    if (filters.locationId !== undefined) {
+      filteredComments = filteredComments.filter(c => c.locationId === filters.locationId);
+    }
+    
+    if (filters.userId !== undefined) {
+      filteredComments = filteredComments.filter(c => c.userId === filters.userId);
+    }
+    
+    if (filters.commentType !== undefined) {
+      filteredComments = filteredComments.filter(c => c.commentType === filters.commentType);
+    }
+    
+    if (filters.parentCommentId !== undefined) {
+      filteredComments = filteredComments.filter(c => c.parentCommentId === filters.parentCommentId);
+    }
+    
+    return Promise.all(filteredComments.map(async c => {
+      const user = await this.getUser(c.userId);
+      return {
+        ...c,
+        user: {
+          username: user?.username || 'Unknown',
+          displayName: user?.displayName || 'Unknown User'
+        }
+      };
+    }));
+  }
+  
+  async updateComment(id: number, updates: Partial<Comment>): Promise<Comment | undefined> {
+    const existingComment = this.comments.get(id);
+    if (!existingComment) return undefined;
+    
+    const updatedComment: Comment = {
+      ...existingComment,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.comments.set(id, updatedComment);
+    this.saveToDisk();
+    return updatedComment;
+  }
+  
+  async deleteComment(id: number): Promise<boolean> {
+    const deleted = this.comments.delete(id);
+    if (deleted) this.saveToDisk();
+    return deleted;
+  }
+  
+  // Feedback Request methods
+  async createFeedbackRequest(requestData: InsertFeedbackRequest): Promise<FeedbackRequest> {
+    const id = this.currentIds.feedbackRequest++;
+    const timestamp = new Date();
+    const request: FeedbackRequest = {
+      ...requestData,
+      id,
+      status: requestData.status || 'open',
+      closedAt: null,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.feedbackRequests.set(id, request);
+    this.saveToDisk();
+    return request;
+  }
+  
+  async getFeedbackRequest(id: number): Promise<FeedbackRequest | undefined> {
+    return this.feedbackRequests.get(id);
+  }
+  
+  async getFeedbackRequests(filters: {
+    userId?: number;
+    seriesId?: number;
+    bookId?: number;
+    chapterId?: number;
+    status?: string;
+  }): Promise<FeedbackRequest[]> {
+    let filteredRequests = Array.from(this.feedbackRequests.values());
+    
+    if (filters.userId !== undefined) {
+      filteredRequests = filteredRequests.filter(r => r.userId === filters.userId);
+    }
+    
+    if (filters.seriesId !== undefined) {
+      filteredRequests = filteredRequests.filter(r => r.seriesId === filters.seriesId);
+    }
+    
+    if (filters.bookId !== undefined) {
+      filteredRequests = filteredRequests.filter(r => r.bookId === filters.bookId);
+    }
+    
+    if (filters.chapterId !== undefined) {
+      filteredRequests = filteredRequests.filter(r => r.chapterId === filters.chapterId);
+    }
+    
+    if (filters.status !== undefined) {
+      filteredRequests = filteredRequests.filter(r => r.status === filters.status);
+    }
+    
+    return filteredRequests;
+  }
+  
+  async updateFeedbackRequest(id: number, updates: Partial<FeedbackRequest>): Promise<FeedbackRequest | undefined> {
+    const existingRequest = this.feedbackRequests.get(id);
+    if (!existingRequest) return undefined;
+    
+    const updatedRequest: FeedbackRequest = {
+      ...existingRequest,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.feedbackRequests.set(id, updatedRequest);
+    this.saveToDisk();
+    return updatedRequest;
+  }
+  
+  async deleteFeedbackRequest(id: number): Promise<boolean> {
+    const deleted = this.feedbackRequests.delete(id);
+    if (deleted) this.saveToDisk();
+    return deleted;
+  }
+  
+  // Feedback Response methods
+  async createFeedbackResponse(responseData: InsertFeedbackResponse): Promise<FeedbackResponse> {
+    const id = this.currentIds.feedbackResponse++;
+    const timestamp = new Date();
+    const response: FeedbackResponse = {
+      ...responseData,
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.feedbackResponses.set(id, response);
+    this.saveToDisk();
+    return response;
+  }
+  
+  async getFeedbackResponse(id: number): Promise<FeedbackResponse | undefined> {
+    return this.feedbackResponses.get(id);
+  }
+  
+  async getFeedbackResponses(feedbackRequestId: number): Promise<(FeedbackResponse & { user: { username: string, displayName: string } })[]> {
+    const responses = Array.from(this.feedbackResponses.values())
+      .filter(r => r.feedbackRequestId === feedbackRequestId);
+      
+    return Promise.all(responses.map(async r => {
+      const user = await this.getUser(r.userId);
+      return {
+        ...r,
+        user: {
+          username: user?.username || 'Unknown',
+          displayName: user?.displayName || 'Unknown User'
+        }
+      };
+    }));
+  }
+  
+  async updateFeedbackResponse(id: number, updates: Partial<FeedbackResponse>): Promise<FeedbackResponse | undefined> {
+    const existingResponse = this.feedbackResponses.get(id);
+    if (!existingResponse) return undefined;
+    
+    const updatedResponse: FeedbackResponse = {
+      ...existingResponse,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.feedbackResponses.set(id, updatedResponse);
+    this.saveToDisk();
+    return updatedResponse;
+  }
+  
+  async deleteFeedbackResponse(id: number): Promise<boolean> {
+    const deleted = this.feedbackResponses.delete(id);
+    if (deleted) this.saveToDisk();
+    return deleted;
+  }
 }
 
 // Choose which storage implementation to use
