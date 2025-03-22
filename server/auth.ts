@@ -30,20 +30,18 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Configure session store
-  const MemoryStoreSession = MemoryStore(session);
-  
+  // Use the storage's session store which is either MemoryStore or PostgreSQLStore
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "saga-scribe-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Set to false for local development, true in production
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      httpOnly: true,
+      sameSite: 'lax',
     },
-    store: new MemoryStoreSession({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    }),
+    store: storage.sessionStore, // Use the storage implementation's session store
   };
 
   app.set("trust proxy", 1);

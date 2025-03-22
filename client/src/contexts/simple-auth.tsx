@@ -36,18 +36,25 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("[Auth] Checking current session...");
         const res = await fetch("/api/user", {
-          credentials: "include"
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          }
         });
         
         if (res.ok) {
           const userData = await res.json();
+          console.log("[Auth] Session found, user:", userData);
           setUser(userData);
         } else {
+          console.log("[Auth] No active session found");
           setUser(null);
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        console.error("[Auth] Auth check error:", error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -61,12 +68,27 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
-      console.log("Login attempt with:", data.username);
+      console.log("[Auth] Login attempt with:", data.username);
       
-      const res = await apiRequest("POST", "/api/login", data);
+      // Make a direct fetch call with proper credentials and headers
+      const res = await fetch("/api/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Login failed");
+      }
+      
       const userData = await res.json();
       
-      console.log("Login successful:", userData);
+      console.log("[Auth] Login successful:", userData);
       setUser(userData);
       
       toast({
@@ -76,7 +98,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       
       return userData;
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("[Auth] Login error:", error);
       
       toast({
         title: "Login failed",
@@ -94,12 +116,27 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
-      console.log("Registration attempt with:", data.username);
+      console.log("[Auth] Registration attempt with:", data.username);
       
-      const res = await apiRequest("POST", "/api/register", data);
+      // Make a direct fetch call with proper credentials and headers
+      const res = await fetch("/api/register", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Registration failed");
+      }
+      
       const userData = await res.json();
       
-      console.log("Registration successful:", userData);
+      console.log("[Auth] Registration successful:", userData);
       setUser(userData);
       
       toast({
@@ -109,7 +146,7 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
       
       return userData;
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("[Auth] Registration error:", error);
       
       toast({
         title: "Registration failed",
@@ -127,18 +164,31 @@ export function SimpleAuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
-      await apiRequest("POST", "/api/logout");
+      console.log("[Auth] Logging out user");
+      
+      // Make a direct fetch call with proper credentials and headers
+      const res = await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        }
+      });
+      
       setUser(null);
       
       // Clear query cache
       queryClient.clear();
+      
+      console.log("[Auth] Logout successful");
       
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
       });
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("[Auth] Logout error:", error);
       
       toast({
         title: "Logout failed",
