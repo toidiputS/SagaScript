@@ -6,125 +6,125 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    
+
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    
+
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
-    
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    
+
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-    
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    
+
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
-    
+
     --radius: 0.5rem;
   }
-  
+
   .dark-theme {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    
+
     --card: 217.2 32.6% 12%;
     --card-foreground: 210 40% 98%;
-    
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    
+
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 75%;
-    
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-    
+
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 210 40% 98%;
-    
+
     --border: 217.2 32.6% 22%;
     --input: 217.2 32.6% 22%;
     --ring: 224.3 76.3% 55%;
   }
-  
+
   .spooky-theme {
     --background: 280 25% 8%;
     --foreground: 300 6% 95%;
-    
+
     --card: 280 20% 12%;
     --card-foreground: 300 6% 95%;
-    
+
     --popover: 280 25% 9%;
     --popover-foreground: 300 6% 95%;
-    
+
     --primary: 290 70% 55%;
     --primary-foreground: 300 6% 100%;
-    
+
     --secondary: 280 16% 20%;
     --secondary-foreground: 300 6% 100%;
-    
+
     --muted: 280 16% 25%;
     --muted-foreground: 300 6% 80%;
-    
+
     --accent: 290 50% 25%;
     --accent-foreground: 300 6% 100%;
-    
+
     --destructive: 350 80% 50%;
     --destructive-foreground: 300 6% 100%;
-    
+
     --border: 280 16% 30%;
     --input: 280 16% 30%;
     --ring: 290 70% 60%;
   }
-  
+
   .sunset-theme {
     --background: 30 30% 96%;
     --foreground: 20 80% 15%;
-    
+
     --card: 30 30% 97%;
     --card-foreground: 20 80% 15%;
-    
+
     --popover: 30 30% 96%;
     --popover-foreground: 20 80% 15%;
-    
+
     --primary: 12 80% 55%;
     --primary-foreground: 30 30% 98%;
-    
+
     --secondary: 30 20% 94%;
     --secondary-foreground: 20 80% 15%;
-    
+
     --muted: 30 20% 90%;
     --muted-foreground: 20 50% 40%;
-    
+
     --accent: 25 90% 92%;
     --accent-foreground: 20 80% 15%;
-    
+
     --destructive: 0 85% 60%;
     --destructive-foreground: 30 30% 98%;
-    
+
     --border: 30 30% 85%;
     --input: 30 30% 85%;
     --ring: 12 80% 55%;
   }
-  
+
   * {
     @apply border-border;
   }
@@ -353,11 +353,28 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* Broader approach for all content-editable in book structure */
-.dark-theme .book-structure input,
-.spooky-theme .book-structure input,
-.sunset-theme .book-structure input,
 .dark .book-structure input,
 .spooky .book-structure input,
-.sunset .book-structure input {
-  color: hsl(var(--foreground)) !important;
+.spooky-theme .book-structure input,
+.dark-theme .book-structure input,
+.dark [contenteditable="true"],
+.spooky [contenteditable="true"],
+.dark-theme [contenteditable="true"],
+.spooky-theme [contenteditable="true"] {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* World Map specific styling */
+.dark div[title="World Map"] input,
+.spooky div[title="World Map"] input,
+.dark-theme div[title="World Map"] input,
+.spooky-theme div[title="World Map"] input,
+.dark .world-map input,
+.spooky .world-map input,
+.dark-theme .world-map input,
+.spooky-theme .world-map input {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
