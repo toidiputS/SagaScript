@@ -14,6 +14,7 @@ import Register from "@/pages/register";
 import Products from "@/pages/products";
 import Checkout from "@/pages/checkout";
 import ChapterEditor from "@/pages/chapter-editor";
+import Collaboration from "@/pages/collaboration";
 import Sidebar from "@/components/layout/sidebar";
 import MobileMenu from "@/components/layout/mobile-menu";
 import { useState } from "react";
@@ -70,6 +71,7 @@ function Router() {
           <ProtectedRoute path="/world" component={() => <World />} />
           <ProtectedRoute path="/timeline" component={() => <Timeline />} />
           <ProtectedRoute path="/achievements" component={() => <Achievements />} />
+          <ProtectedRoute path="/collaboration" component={() => <Collaboration />} />
           <ProtectedRoute path="/products" component={() => <Products />} />
           <ProtectedRoute path="/checkout" component={() => <Checkout />} />
           <ProtectedRoute path="/chapter-editor" component={() => {
