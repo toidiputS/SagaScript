@@ -183,8 +183,80 @@ export default function Dashboard() {
     navigate('/timeline');
   };
 
+  // Edit Series form submit handler
+  const onSubmit = (values: z.infer<typeof seriesSchema>) => {
+    updateSeriesMutation.mutate(values);
+  };
+
   return (
     <div className="p-6">
+      {/* Edit Series Dialog */}
+      <Dialog open={isEditSeriesDialogOpen} onOpenChange={setIsEditSeriesDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Series</DialogTitle>
+            <DialogDescription>
+              Make changes to your series details here. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Series Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter series name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Enter a brief description of your series" 
+                        className="resize-none" 
+                        {...field} 
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditSeriesDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={updateSeriesMutation.isPending}
+                >
+                  {updateSeriesMutation.isPending ? 
+                    <span className="flex items-center">
+                      <i className="ri-loader-4-line animate-spin mr-2"></i> Saving
+                    </span> : 
+                    'Save Changes'
+                  }
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
       <div className="max-w-7xl mx-auto">
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
