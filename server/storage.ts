@@ -228,6 +228,7 @@ export interface IStorage {
   getCollaborationInvite(id: number): Promise<CollaborationInvite | undefined>;
   getCollaborationInviteByCode(code: string): Promise<CollaborationInvite | undefined>;
   getCollaborationInvitesBySeriesId(collaborativeSeriesId: number): Promise<CollaborationInvite[]>;
+  getPendingInvitesForUser(userId: number, userEmail: string): Promise<CollaborationInvite[]>;
   updateCollaborationInvite(id: number, updates: Partial<CollaborationInvite>): Promise<CollaborationInvite | undefined>;
   deleteCollaborationInvite(id: number): Promise<boolean>;
   
@@ -2658,6 +2659,14 @@ export class MemStorage implements IStorage {
   async getCollaborationInvitesBySeriesId(collaborativeSeriesId: number): Promise<CollaborationInvite[]> {
     return Array.from(this.collaborationInvites.values())
       .filter(invite => invite.collaborativeSeriesId === collaborativeSeriesId);
+  }
+  
+  async getPendingInvitesForUser(userId: number, userEmail: string): Promise<CollaborationInvite[]> {
+    return Array.from(this.collaborationInvites.values())
+      .filter(invite => 
+        invite.inviteeEmail === userEmail && 
+        invite.status === 'pending'
+      );
   }
   
   async updateCollaborationInvite(id: number, updates: Partial<CollaborationInvite>): Promise<CollaborationInvite | undefined> {

@@ -406,6 +406,34 @@ router.post('/invites/:code/accept', isAuthenticated, async (req, res) => {
   }
 });
 
+// Get all pending invites for the current user
+router.get('/invites/pending', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userEmail = req.user.email || '';
+    
+    // Query for invites based on email match and pending status
+    const pendingInvites = await storage.getPendingInvitesForUser(userId, userEmail);
+    
+    // Enhance invite data with series name and inviter info
+    const enhancedInvites = await Promise.all(pendingInvites.map(async (invite) => {
+      const series = await storage.getCollaborativeSeries(invite.collaborativeSeriesId);
+      const inviter = await storage.getUser(invite.inviterId);
+      
+      return {
+        ...invite,
+        seriesName: series?.name,
+        inviterName: inviter?.displayName || inviter?.username
+      };
+    }));
+    
+    res.json(enhancedInvites);
+  } catch (error) {
+    console.error('Error getting pending invites:', error);
+    res.status(500).json({ message: 'Failed to get pending invites' });
+  }
+});
+
 // Decline an invite by code
 router.post('/invites/:code/decline', isAuthenticated, async (req, res) => {
   try {

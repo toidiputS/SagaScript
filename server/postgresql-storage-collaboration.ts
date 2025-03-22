@@ -411,6 +411,25 @@ export const collaborationMethods = {
     }
   },
   
+  async getPendingInvitesForUser(userId: number, userEmail: string): Promise<CollaborationInvite[]> {
+    try {
+      // Get invites that match the user's email and are pending
+      return await db
+        .select()
+        .from(collaborationInvites)
+        .where(
+          and(
+            eq(collaborationInvites.inviteeEmail, userEmail),
+            eq(collaborationInvites.status, 'pending')
+          )
+        )
+        .orderBy(desc(collaborationInvites.createdAt));
+    } catch (error) {
+      console.error('Error getting pending invites for user:', error);
+      return [];
+    }
+  },
+  
   async updateCollaborationInvite(id: number, updates: Partial<CollaborationInvite>): Promise<CollaborationInvite | undefined> {
     try {
       const results = await db
