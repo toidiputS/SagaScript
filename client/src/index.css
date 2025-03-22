@@ -267,3 +267,97 @@ h1, h2, h3, h4, h5, h6,
   background-color: hsl(var(--accent)) !important;
   color: hsl(var(--accent-foreground)) !important;
 }
+
+/* Fix input text color in dark themes */
+.dark-theme input, 
+.spooky-theme input, 
+.sunset-theme input,
+.dark input, 
+.spooky input, 
+.sunset input {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix text areas in dark themes */
+.dark-theme textarea, 
+.spooky-theme textarea, 
+.sunset-theme textarea,
+.dark textarea, 
+.spooky textarea, 
+.sunset textarea {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix select in dark themes */
+.dark-theme select, 
+.spooky-theme select, 
+.sunset-theme select,
+.dark select, 
+.spooky select, 
+.sunset select,
+.dark-theme .select-value,
+.spooky-theme .select-value,
+.sunset-theme .select-value {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix specific shadcn select components */
+.dark-theme [data-radix-select-trigger],
+.spooky-theme [data-radix-select-trigger],
+.sunset-theme [data-radix-select-trigger],
+.dark [data-radix-select-trigger],
+.spooky [data-radix-select-trigger],
+.sunset [data-radix-select-trigger] {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark-theme [data-radix-select-value],
+.spooky-theme [data-radix-select-value],
+.sunset-theme [data-radix-select-value],
+.dark [data-radix-select-value], 
+.spooky [data-radix-select-value], 
+.sunset [data-radix-select-value] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix chapter content inputs in dark themes */
+.dark #chapter-content,
+.spooky #chapter-content,
+.dark-theme #chapter-content,
+.spooky-theme #chapter-content,
+.dark .chapter-content,
+.spooky .chapter-content,
+.dark-theme .chapter-content,
+.spooky-theme .chapter-content {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Additional specific fixes for book structure inputs */
+.dark-theme [contenteditable="true"],
+.spooky-theme [contenteditable="true"],
+.sunset-theme [contenteditable="true"],
+.dark [contenteditable="true"],
+.spooky [contenteditable="true"],
+.sunset [contenteditable="true"] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Fix book structure inputs */
+.dark-theme div[data-component="book-structure"] input,
+.spooky-theme div[data-component="book-structure"] input,
+.sunset-theme div[data-component="book-structure"] input,
+.dark div[data-component="book-structure"] input,
+.spooky div[data-component="book-structure"] input,
+.sunset div[data-component="book-structure"] input {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Broader approach for all content-editable in book structure */
+.dark-theme .book-structure input,
+.spooky-theme .book-structure input,
+.sunset-theme .book-structure input,
+.dark .book-structure input,
+.spooky .book-structure input,
+.sunset .book-structure input {
+  color: hsl(var(--foreground)) !important;
+}
