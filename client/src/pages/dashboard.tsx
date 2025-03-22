@@ -7,14 +7,101 @@ import BadgeProgression from "@/components/dashboard/badge-progression";
 import BadgeShowcase from "@/components/dashboard/badge-showcase";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter 
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useLocation } from "wouter";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { currentSeries, fetchCurrentBook } = useSeries();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
+  
+  // State for dialog management
+  const [isEditSeriesDialogOpen, setIsEditSeriesDialogOpen] = useState(false);
+  const [isSeriesMenuOpen, setIsSeriesMenuOpen] = useState(false);
+  
+  // Form schema for editing series
+  const seriesSchema = z.object({
+    name: z.string().min(1, "Series name is required"),
+    description: z.string().optional(),
+  });
+  
+  // Form for editing series
+  const form = useForm({
+    resolver: zodResolver(seriesSchema),
+    defaultValues: {
+      name: currentSeries?.name || "",
+      description: currentSeries?.description || "",
+    }
+  });
+  
+  // Keep form values in sync with currentSeries
+  useEffect(() => {
+    if (currentSeries) {
+      form.reset({
+        name: currentSeries.name,
+        description: currentSeries.description || "",
+      });
+    }
+  }, [currentSeries, form]);
+  
+  // Update series mutation
+  const updateSeriesMutation = useMutation({
+    mutationFn: async (data: { name: string; description: string }) => {
+      if (!currentSeries) return null;
+      const res = await apiRequest("PUT", `/api/series/${currentSeries.id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/series'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/current-series'] });
+      setIsEditSeriesDialogOpen(false);
+      toast({
+        title: "Series updated",
+        description: "Your series has been updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
   
   // Fetch writing stats for today
   const { data: todayStats } = useQuery({
@@ -56,6 +143,44 @@ export default function Dashboard() {
       title: "Ready to write",
       description: "Opening your current chapter",
     });
+  };
+  
+  // Series action handlers
+  const handleEditSeries = () => {
+    if (!currentSeries) {
+      toast({
+        title: "No active series",
+        description: "Please create or select a series first",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsEditSeriesDialogOpen(true);
+  };
+  
+  const handleViewAllBooks = () => {
+    if (!currentSeries) return;
+    navigate(`/series/${currentSeries.id}`);
+  };
+  
+  const handleCreateNewBook = () => {
+    if (!currentSeries) return;
+    navigate(`/series/${currentSeries.id}/books/new`);
+  };
+  
+  const handleManageCharacters = () => {
+    if (!currentSeries) return;
+    navigate('/characters');
+  };
+  
+  const handleManageLocations = () => {
+    if (!currentSeries) return;
+    navigate('/world');
+  };
+  
+  const handleViewTimeline = () => {
+    if (!currentSeries) return;
+    navigate('/timeline');
   };
 
   return (
@@ -126,14 +251,47 @@ export default function Dashboard() {
           <div className="lg:col-span-2 bg-white dark:bg-gray-800 spooky:bg-gray-800/90 rounded-lg shadow-sm border border-neutral-200 dark:border-gray-700 spooky:border-gray-700/70 overflow-hidden">
             <div className="border-b border-neutral-200 dark:border-gray-700 spooky:border-gray-700/70 px-5 py-4 flex justify-between items-center">
               <h2 className="font-serif font-bold text-lg text-foreground">Current Project</h2>
-              <div className="flex space-x-2">
-                <button className="p-1.5 rounded hover:bg-neutral-100 dark:hover:bg-gray-700 spooky:hover:bg-gray-700/80 text-neutral-500">
-                  <i className="ri-edit-line"></i>
-                </button>
-                <button className="p-1.5 rounded hover:bg-neutral-100 dark:hover:bg-gray-700 spooky:hover:bg-gray-700/80 text-neutral-500">
-                  <i className="ri-more-2-fill"></i>
-                </button>
-              </div>
+              {currentSeries && (
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="p-1.5 rounded hover:bg-neutral-100 dark:hover:bg-gray-700 spooky:hover:bg-gray-700/80 text-neutral-500 h-auto"
+                    onClick={handleEditSeries}
+                  >
+                    <i className="ri-edit-line"></i>
+                  </Button>
+                  <DropdownMenu open={isSeriesMenuOpen} onOpenChange={setIsSeriesMenuOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-1.5 rounded hover:bg-neutral-100 dark:hover:bg-gray-700 spooky:hover:bg-gray-700/80 text-neutral-500 h-auto"
+                      >
+                        <i className="ri-more-2-fill"></i>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleViewAllBooks}>
+                        <i className="ri-book-line mr-2"></i> View All Books
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleCreateNewBook}>
+                        <i className="ri-add-line mr-2"></i> Add New Book
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleManageCharacters}>
+                        <i className="ri-user-line mr-2"></i> Manage Characters
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleManageLocations}>
+                        <i className="ri-map-pin-line mr-2"></i> Manage Locations
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleViewTimeline}>
+                        <i className="ri-timeline-line mr-2"></i> View Timeline
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
             
             {currentSeries ? (
@@ -142,7 +300,7 @@ export default function Dashboard() {
               <div className="p-5 text-center">
                 <p className="text-muted-foreground">No active series selected</p>
                 <button 
-                  onClick={() => window.location.href = '/series'}
+                  onClick={() => navigate('/series')}
                   className="mt-4 text-primary hover:text-primary-dark flex items-center justify-center text-sm font-medium mx-auto"
                 >
                   <i className="ri-add-line mr-1"></i> Create New Series
