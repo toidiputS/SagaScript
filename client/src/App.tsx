@@ -72,7 +72,26 @@ function Router() {
           <ProtectedRoute path="/achievements" component={() => <Achievements />} />
           <ProtectedRoute path="/products" component={() => <Products />} />
           <ProtectedRoute path="/checkout" component={() => <Checkout />} />
-          <ProtectedRoute path="/chapter-editor" component={() => <ChapterEditor />} />
+          <ProtectedRoute path="/chapter-editor" component={() => {
+            // Extract bookId from URL
+            const params = new URLSearchParams(window.location.search);
+            const bookId = params.get("bookId");
+            const seriesId = params.get("seriesId");
+            
+            // If no bookId is provided, redirect to series page or home
+            if (!bookId) {
+              // If seriesId is available, redirect to that series
+              if (seriesId) {
+                window.location.href = `/series?id=${seriesId}`;
+                return <div>Redirecting...</div>;
+              }
+              // Otherwise redirect to home
+              window.location.href = "/";
+              return <div>Redirecting...</div>;
+            }
+            
+            return <ChapterEditor />;
+          }} />
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />

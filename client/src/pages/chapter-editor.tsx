@@ -179,10 +179,19 @@ export default function ChapterEditor() {
       return;
     }
     
+    if (!bookId) {
+      toast({
+        title: "Book required",
+        description: "A chapter must be associated with a book. Please select a book first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Ensure bookId is provided as a number
     const chapterToSave = {
       ...chapter,
-      bookId: bookId ? Number(bookId) : undefined,
+      bookId: Number(bookId), // Always include bookId as a number
       wordCount: wordCount || 0,
     };
     
