@@ -43,12 +43,14 @@ import {
   LockIcon, 
   Loader2, 
   MessageSquare,
-  Share2
+  Share2,
+  AlertCircle,
+  UserCircle,
+  Calendar
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
 
 // Types
 interface CollaborativeSeries {
@@ -522,7 +524,7 @@ export default function CollaborationPage() {
                   <CardContent className="flex-grow">
                     <div className="space-y-2">
                       <div className="flex items-center">
-                        <UserCircle2 className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <UserCircle className="h-4 w-4 mr-2 text-muted-foreground" />
                         <span className="text-sm">From: User #{invite.inviterId}</span>
                       </div>
                       <div className="flex items-center">
@@ -530,7 +532,7 @@ export default function CollaborationPage() {
                         <span className="text-sm">Series ID: {invite.collaborativeSeriesId}</span>
                       </div>
                       <div className="flex items-center">
-                        <CalendarClock className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                         <span className="text-sm">
                           Expires: {new Date(invite.expiresAt).toLocaleDateString()}
                         </span>
@@ -538,11 +540,34 @@ export default function CollaborationPage() {
                     </div>
                   </CardContent>
                   <CardFooter className="border-t pt-4 flex justify-between">
-                    <Button variant="outline" size="sm">
-                      Decline
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => declineInviteMutation.mutate(invite.id)}
+                      disabled={declineInviteMutation.isPending}
+                    >
+                      {declineInviteMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Declining...
+                        </>
+                      ) : (
+                        "Decline"
+                      )}
                     </Button>
-                    <Button size="sm">
-                      Accept
+                    <Button 
+                      size="sm"
+                      onClick={() => acceptInviteMutation.mutate(invite.id)}
+                      disabled={acceptInviteMutation.isPending}
+                    >
+                      {acceptInviteMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Accepting...
+                        </>
+                      ) : (
+                        "Accept"
+                      )}
                     </Button>
                   </CardFooter>
                 </Card>
