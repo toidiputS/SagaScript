@@ -124,10 +124,20 @@ export default function CollaborationPage() {
   // Define queries
   const { 
     data: collaborativeSeries = [], 
-    isLoading,
-    error 
+    isLoading: seriesLoading,
+    error: seriesError 
   } = useQuery<CollaborativeSeries[]>({
     queryKey: ['/api/collaboration/series'],
+    enabled: canAccess('communityCollaboration')
+  });
+  
+  // Fetch pending invites for the current user
+  const {
+    data: pendingInvites = [],
+    isLoading: invitesLoading,
+    error: invitesError
+  } = useQuery<CollaborationInvite[]>({
+    queryKey: ['/api/collaboration/pending-invites'],
     enabled: canAccess('communityCollaboration')
   });
 
@@ -171,6 +181,45 @@ export default function CollaborationPage() {
       toast({
         title: "Error sending invitation",
         description: error.message || "Failed to send invitation.",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const acceptInviteMutation = useMutation({
+    mutationFn: (inviteId: number) => 
+      apiRequest('POST', `/api/collaboration/invites/${inviteId}/accept`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/collaboration/pending-invites'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/collaboration/series'] });
+      toast({
+        title: "Invitation accepted",
+        description: "You have joined the collaborative series.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error accepting invitation",
+        description: error.message || "Failed to accept invitation.",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const declineInviteMutation = useMutation({
+    mutationFn: (inviteId: number) => 
+      apiRequest('POST', `/api/collaboration/invites/${inviteId}/decline`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/collaboration/pending-invites'] });
+      toast({
+        title: "Invitation declined",
+        description: "The invitation has been declined.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error declining invitation",
+        description: error.message || "Failed to decline invitation.",
         variant: "destructive"
       });
     }
@@ -278,6 +327,9 @@ export default function CollaborationPage() {
     );
   }
 
+  const isLoading = seriesLoading || invitesLoading;
+  const error = seriesError || invitesError;
+  
   if (isLoading) {
     return (
       <div className="container mx-auto py-10 flex justify-center">
@@ -333,7 +385,7 @@ export default function CollaborationPage() {
           <TabsTrigger value="invites" className="flex items-center">
             <Mail className="mr-2 h-4 w-4" />
             <span>Invites</span>
-            <Badge className="ml-2" variant="secondary">0</Badge>
+            <Badge className="ml-2" variant="secondary">{pendingInvites.length}</Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -444,13 +496,59 @@ export default function CollaborationPage() {
         </TabsContent>
 
         <TabsContent value="invites" className="space-y-4">
-          <div className="text-center py-12 border rounded-lg bg-muted/10">
-            <Mail className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No pending invites</h3>
-            <p className="text-muted-foreground">
-              You don't have any pending collaboration invites
-            </p>
-          </div>
+          {pendingInvites.length === 0 ? (
+            <div className="text-center py-12 border rounded-lg bg-muted/10">
+              <Mail className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No pending invites</h3>
+              <p className="text-muted-foreground">
+                You don't have any pending collaboration invites
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {pendingInvites.map(invite => (
+                <Card key={invite.id} className="flex flex-col">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <CardTitle>Collaboration Invite</CardTitle>
+                      <Badge>{invite.role}</Badge>
+                    </div>
+                    {invite.message && (
+                      <CardDescription className="mt-2">
+                        "{invite.message}"
+                      </CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <UserCircle2 className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm">From: User #{invite.inviterId}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm">Series ID: {invite.collaborativeSeriesId}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <CalendarClock className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm">
+                          Expires: {new Date(invite.expiresAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="border-t pt-4 flex justify-between">
+                    <Button variant="outline" size="sm">
+                      Decline
+                    </Button>
+                    <Button size="sm">
+                      Accept
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
