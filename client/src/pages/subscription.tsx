@@ -303,7 +303,7 @@ export default function SubscriptionPage() {
           return (
             <Card 
               key={tier} 
-              className={`flex flex-col ${isCurrentTier ? 'border-2 border-primary shadow-lg' : ''}`}
+              className={`flex flex-col subscription-tier-card ${isCurrentTier ? 'border-2 border-primary shadow-lg' : ''}`}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
