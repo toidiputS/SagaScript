@@ -1,0 +1,39 @@
+plans.map is not a function
+plans.map is not a function
+The above error occurred in the <SubscriptionsPage> component:
+
+    at SubscriptionsPage (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/pages/subscriptions.tsx:29:21)
+    at component
+    at Route (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=34c96d30:323:16)
+    at ProtectedRoute (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/lib/protected-route.tsx:22:3)
+    at Switch (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=34c96d30:379:17)
+    at main
+    at div
+    at Router (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/App.tsx?v=YMpo2jptu64r2fulIl2K2:45:51)
+    at ThemeProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/theme-context.tsx:20:33)
+    at SimpleAuthProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/simple-auth.tsx:22:38)
+    at QueryClientProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=34c96d30:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+at SubscriptionsPage (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/pages/subscriptions.tsx:29:21)
+at component
+at Route (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=34c96d30:323:16)
+at ProtectedRoute (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/lib/protected-route.tsx:22:3)
+at Switch (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=34c96d30:379:17)
+at main
+at div
+at Router (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/App.tsx?v=YMpo2jptu64r2fulIl2K2:45:51)
+at ThemeProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/theme-context.tsx:20:33)
+at SimpleAuthProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/simple-auth.tsx:22:38)
+at QueryClientProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=34c96d30:2805:3)
+at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+at t.value (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
