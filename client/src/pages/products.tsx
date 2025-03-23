@@ -109,17 +109,7 @@ export default function ProductsPage() {
         </p>
       </div>
 
-      {!user && (
-        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-8 flex items-start">
-          <Info className="text-blue-600 dark:text-blue-400 mr-3 mt-0.5 shrink-0" />
-          <div>
-            <h3 className="font-medium text-blue-800 dark:text-blue-300">Browse Products</h3>
-            <p className="text-blue-700 dark:text-blue-400 text-sm">
-              You can browse all products without logging in. You'll be prompted to log in or register when you proceed to checkout. <Button variant="link" className="h-auto p-0 text-blue-800 dark:text-blue-300 underline" onClick={() => setLocation('/login')}>Login now</Button>
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Notification banner removed since users are already logged in */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
