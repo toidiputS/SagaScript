@@ -245,7 +245,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             </div>
             <span className="text-sm">Placing: {selectedLocation?.name}</span>
             <button 
-              className="ml-2 p-1 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
+              className="ml-2 p-1 hover:bg-neutral-100 rounded map-control-button" 
               onClick={cancelPlacingMarker}
             >
               <i className="ri-close-line"></i>
