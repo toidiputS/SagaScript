@@ -274,7 +274,8 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             </div>
             <div className="flex justify-end space-x-2">
               <Button 
-                variant="secondary" className="place-button" {/* Added class for styling */}
+                variant="secondary" 
+                className="place-button" /* Added class for styling */
                 onClick={() => startPlacingMarker(selectedLocation!)}
               >
                 <i className="ri-map-pin-line mr-2"></i> Place on Map
@@ -288,7 +289,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-md p-2 shadow-sm max-w-xs">
         <p className="text-xs text-neutral-600 mb-2">Place locations on the map:</p>
         <select 
-          className="w-full text-sm border border-neutral-200 rounded p-1 location-selector" {/* Added class for styling */}
+          className="w-full text-sm border border-neutral-200 rounded p-1 location-selector" /* Added class for styling */
           value=""
           onChange={(e) => {
             const locId = parseInt(e.target.value);
@@ -304,7 +305,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
           {locations
             .filter(loc => !loc.mapCoordinates)
             .map(loc => (
-              <option key={loc.id} value={loc.id} className="location-selector"> {/* Added class for styling */}
+              <option key={loc.id} value={loc.id} className="location-selector"> /* Added class for styling */
                 {loc.name}
               </option>
             ))}
