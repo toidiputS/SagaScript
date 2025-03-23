@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useConversation } from '@11labs/react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -13,9 +12,12 @@ export default function VoiceChat() {
   const [inputText, setInputText] = useState('');
   const [hasMicrophonePermission, setHasMicrophonePermission] = useState(false);
   const { canAccess } = useFeatureAccess();
-  
+
   const [selectedVoice, setSelectedVoice] = useState("21m00Tcm4TlvDq8ikWAM"); // Default voice ID
-  
+
+  const conversation = useConversation();
+  const [conversationSessionId, setConversationSessionId] = useState(null);
+
   const {
     history,
     isGenerating,
@@ -38,7 +40,7 @@ export default function VoiceChat() {
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
-    
+
     await generate(inputText);
     setInputText('');
   };
@@ -57,9 +59,14 @@ export default function VoiceChat() {
         <CardTitle>AI Voice Assistant</CardTitle>
         <CardDescription>
           Chat with your writing assistant using voice or text
+          {conversationSessionId && (
+            <span className="block mt-1 text-sm text-primary">
+              Session active with context URL
+            </span>
+          )}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {!hasMicrophonePermission && (
           <FeatureGate feature="customVoices" requiredTier="wordsmith">
@@ -68,7 +75,7 @@ export default function VoiceChat() {
             />
           </FeatureGate>
         )}
-        
+
         <div className="h-64 overflow-y-auto bg-muted p-4 rounded-md">
           {history.map((message, index) => (
             <div 
@@ -91,7 +98,7 @@ export default function VoiceChat() {
             </div>
           )}
         </div>
-        
+
         <div className="flex items-end gap-2">
           <Textarea
             value={inputText}
@@ -117,7 +124,7 @@ export default function VoiceChat() {
                 {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
             )}
-            
+
             {isGenerating ? (
               <Button variant="destructive" size="icon" onClick={abort}>
                 <Square className="h-4 w-4" />
@@ -130,7 +137,7 @@ export default function VoiceChat() {
           </div>
         </div>
       </CardContent>
-      
+
       <CardFooter className="flex justify-between items-center">
         <p className="text-xs text-muted-foreground">Powered by Eleven Labs</p>
         <div className="flex items-center gap-2">
