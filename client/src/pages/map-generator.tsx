@@ -107,9 +107,28 @@ export default function MapGenerator() {
   // Generate map mutation
   const generateMapMutation = useMutation({
     mutationFn: async (data: MapGenerationFormValues) => {
-      const response = await apiRequest('POST', '/api/ai/generate-map', data);
-      const result = await response.json();
-      return result as MapGenerationResult;
+      try {
+        const response = await apiRequest('POST', '/api/ai/generate-map', data);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || 
+            'There was an error generating your map.'
+          );
+        }
+        const result = await response.json();
+        return result as MapGenerationResult;
+      } catch (error: any) {
+        // Add additional context to the error if needed
+        if (error.message.includes('content_policy_violation') || 
+            error.message.includes('content that violates')) {
+          throw new Error(
+            'Your map description may contain content that can\'t be generated. ' +
+            'Try using simpler language or different terms.'
+          );
+        }
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setGeneratedMap(data);
@@ -120,9 +139,15 @@ export default function MapGenerator() {
       });
     },
     onError: (error: any) => {
+      console.error('Map generation error:', error);
+      
+      // Extract helpful information from the error
+      let errorMessage = error.message;
+      
+      // Show a more user-friendly toast
       toast({
         title: 'Map Generation Failed',
-        description: error.message || 'There was an error generating your map.',
+        description: errorMessage || 'There was an error generating your map. Try a different description.',
         variant: 'destructive',
       });
     },

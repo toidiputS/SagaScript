@@ -134,7 +134,11 @@ router.post('/generate-map', async (req: Request, res: Response) => {
     
     // Check if OpenAI API key is available
     if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ message: 'OpenAI API key is not configured' });
+      console.error('OpenAI API key is missing');
+      return res.status(500).json({ 
+        message: 'OpenAI API key is not configured',
+        solution: 'Please ask an administrator to configure the OpenAI API key'
+      });
     }
     
     // Validate request data
@@ -148,6 +152,16 @@ router.post('/generate-map', async (req: Request, res: Response) => {
     }
     
     const options: MapGenerationOptions = parsedData.data;
+    
+    // Check if description contains potentially problematic content
+    const filteredDescription = options.description
+      .replace(/\bdestroy\b|\bdestruction\b|\bviolence\b|\bbattle\b|\bweapon\b|\bcombat\b|\bfight\b/gi, 'area')
+      .trim();
+      
+    if (filteredDescription !== options.description) {
+      console.log('Description was filtered for problematic content');
+      options.description = filteredDescription;
+    }
     
     // Generate the map image
     const result = await generateMapImage(options);
@@ -165,9 +179,25 @@ router.post('/generate-map', async (req: Request, res: Response) => {
     }
     
     return res.status(200).json(result);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating map:', error);
-    return res.status(500).json({ message: 'Failed to generate map image' });
+    
+    // Extract detailed error message if available
+    let errorMessage = 'Failed to generate map image';
+    
+    if (error.message) {
+      if (error.message.includes('content_policy_violation') || 
+          error.message.includes('safety system')) {
+        errorMessage = 'Your map description contains content that violates OpenAI\'s content policy. Please revise your description.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
+    return res.status(500).json({ 
+      message: errorMessage,
+      suggestion: 'Try using simpler language or avoid descriptions that might trigger content filters.'
+    });
   }
 });
 

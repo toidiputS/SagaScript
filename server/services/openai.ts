@@ -263,46 +263,47 @@ export interface MapGenerationResult {
  * Generate a detailed map prompt based on the user's description and style preferences
  */
 function generateMapPrompt(options: MapGenerationOptions): string {
-  let basePrompt = "Create a highly detailed fantasy map with the following description: ";
+  // Create a safer base prompt that focuses on cartography
+  let basePrompt = "Create a beautiful cartographic map illustration based on this description: ";
   basePrompt += options.description;
   
-  // Add style-specific elements
+  // Add style-specific elements with safer language
   switch (options.style) {
     case 'fantasy':
-      basePrompt += " The map should have fantasy elements like dragons, castles, and magical forests.";
+      basePrompt += " Include fantasy-inspired elements such as forests, mountains, and medieval settlements.";
       break;
     case 'sci-fi':
-      basePrompt += " The map should have sci-fi elements like futuristic cities, space stations, and advanced technology.";
+      basePrompt += " Include science fiction inspired elements such as futuristic settlements and technology.";
       break;
     case 'historical':
-      basePrompt += " The map should have historical elements reminiscent of ancient civilizations and traditional cartography.";
+      basePrompt += " Include elements inspired by historical maps and traditional cartography techniques.";
       break;
     case 'modern':
-      basePrompt += " The map should have modern elements like cities, highways, and contemporary landmarks.";
+      basePrompt += " Include modern geographical elements like urban areas, roads, and contemporary landmarks.";
       break;
     case 'post-apocalyptic':
-      basePrompt += " The map should have post-apocalyptic elements showing ruins, wasteland, and nature reclaiming civilization.";
+      basePrompt += " Include elements showing abandoned structures and nature reclaiming settled areas.";
       break;
   }
   
-  // Add art style-specific elements
+  // Add art style-specific elements with safer language
   switch (options.artStyle) {
     case 'ink-and-parchment':
-      basePrompt += " Render the map in an ink and parchment style like ancient manuscripts, with hand-drawn details and aged paper texture.";
+      basePrompt += " Use an ink drawing style on parchment texture with hand-drawn details.";
       break;
     case 'watercolor':
-      basePrompt += " Render the map in a beautiful watercolor painting style with soft color transitions and artistic brush strokes.";
+      basePrompt += " Use a watercolor painting style with soft color transitions and artistic brush strokes.";
       break;
     case 'isometric':
-      basePrompt += " Render the map in an isometric perspective with 3D-like elements that pop up from the surface.";
+      basePrompt += " Use an isometric perspective that shows height and depth.";
       break;
     case 'topographical':
-      basePrompt += " Render the map in a topographical style with contour lines indicating elevation, mountains, and valleys.";
+      basePrompt += " Use topographical style with contour lines showing elevation changes.";
       break;
   }
 
-  // General map quality instructions
-  basePrompt += " Make sure all locations are clearly labeled. Include a compass rose, scale bar, and decorative border. The map should look professional and highly detailed.";
+  // General map quality instructions with safer language
+  basePrompt += " Include labels for locations, a compass rose, and a decorative border. Make it detailed and visually appealing.";
   
   return basePrompt;
 }
@@ -316,22 +317,58 @@ export async function generateMapImage(options: MapGenerationOptions): Promise<M
     
     console.log(`Generating map image with prompt: ${prompt}`);
     
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: prompt,
-      n: 1,
-      size: "1024x1024",
-      quality: "hd",
-      style: "vivid",
-    });
+    // Add a retry mechanism in case of content filter issues
+    let retryCount = 0;
+    const maxRetries = 2;
+    let response;
+    let lastError;
     
-    const imageUrl = response.data[0].url || '';
+    while (retryCount <= maxRetries) {
+      try {
+        let currentPrompt = prompt;
+        
+        // On retry, simplify the prompt further
+        if (retryCount > 0) {
+          currentPrompt = `Create a simple map illustration of ${options.description} in ${options.artStyle} style.`;
+          console.log(`Retry ${retryCount} with simplified prompt: ${currentPrompt}`);
+        }
+        
+        response = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: currentPrompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard", // Changed from "hd" to "standard" to reduce potential issues
+          style: "natural",    // Changed from "vivid" to "natural" to reduce potential issues
+        });
+        
+        // If we got a successful response, break out of the retry loop
+        break;
+      } catch (err) {
+        lastError = err;
+        retryCount++;
+        
+        // If we've exhausted retries, throw the last error
+        if (retryCount > maxRetries) {
+          throw err;
+        }
+        
+        // Wait a short time before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    
+    if (!response || !response.data[0].url) {
+      throw new Error("Generated image URL is missing");
+    }
+    
+    const imageUrl = response.data[0].url;
     
     // Create the result object
     const result: MapGenerationResult = {
       id: `map-${Date.now()}`,
       imageUrl,
-      prompt,
+      prompt, // Store the original prompt
       description: options.description,
       style: options.style,
       artStyle: options.artStyle,
@@ -341,9 +378,17 @@ export async function generateMapImage(options: MapGenerationOptions): Promise<M
     };
     
     return result;
-  } catch (error) {
+  } catch (error: any) {
+    // Extract more detailed error information if available
+    let errorMessage = "Failed to generate map image";
+    if (error.error?.message) {
+      errorMessage = `Map generation failed: ${error.error.message}`;
+    } else if (error.message) {
+      errorMessage = `Map generation failed: ${error.message}`;
+    }
+    
     console.error("Error generating map image:", error);
-    throw new Error("Failed to generate map image");
+    throw new Error(errorMessage);
   }
 }
 
