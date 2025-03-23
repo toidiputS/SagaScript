@@ -32,7 +32,6 @@ export default function SubscriptionsPage() {
     </MainLayout>
   );
 }
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
