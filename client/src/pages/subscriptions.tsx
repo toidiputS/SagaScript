@@ -14,8 +14,8 @@ export default function SubscriptionsPage() {
   const { user } = useAuth();
 
   const { data: plans, isLoading } = useQuery({
-    queryKey: ['/api/subscription-plans'],
-    queryFn: () => apiRequest('/api/subscription-plans'),
+    queryKey: ['subscription-plans'],
+    queryFn: () => apiRequest('GET', '/api/subscription-plans', {}),
     onError: () => {
       toast({
         title: "Error",
@@ -92,8 +92,8 @@ export function SubscriptionPlansAlternative() {
   const { user } = useAuth();
 
   const { data: plans, isLoading } = useQuery({
-    queryKey: ['/api/subscription-plans'],
-    queryFn: () => apiRequest('/api/subscription-plans'),
+    queryKey: ['subscription-plans'],
+    queryFn: () => apiRequest('GET', '/api/subscription-plans', {}),
   });
 
   return (
