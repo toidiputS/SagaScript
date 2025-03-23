@@ -43,9 +43,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-export default function SubscriptionsPage() {
-  const { toast } = useToast();
-  const { user } = useAuth();
+// Component implementation continues here
 
   const { data: plans, isLoading } = useQuery({
     queryKey: ['/api/subscriptions/plans'],
