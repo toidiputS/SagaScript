@@ -7,6 +7,7 @@ import { Mic, MicOff, Play, Square } from 'lucide-react';
 import MicrophonePermission from './microphone-permission';
 import { useFeatureAccess } from '@/lib/subscription';
 import { FeatureGate } from '@/components/ui/feature-gate';
+import VoiceAssistantHelp from './help-menu';
 
 export default function VoiceChat() {
   const [inputText, setInputText] = useState('');
@@ -120,7 +121,8 @@ export default function VoiceChat() {
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <Card className="w-full max-w-3xl mx-auto relative">
+      <VoiceAssistantHelp />
       <CardHeader>
         <CardTitle>AI Voice Assistant</CardTitle>
         <CardDescription>
@@ -235,7 +237,8 @@ export default function VoiceChat() {
               </span>
             </span>
             {isSpeaking && (
-              <span className="ml-2 animate-pulse text-blue-500">
+              <span className="ml-2 animate-pulse text-blue-500 inline-flex items-center">
+                <span className="h-2 w-2 rounded-full bg-blue-500 mr-1 animate-ping"></span>
                 Speaking...
               </span>
             )}
