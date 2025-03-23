@@ -221,7 +221,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             <i className="ri-zoom-in-line"></i>
           </button>
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
+            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" 
             onClick={handleZoomOut}
           >
             <i className="ri-zoom-out-line"></i>
