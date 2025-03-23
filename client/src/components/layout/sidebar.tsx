@@ -8,7 +8,7 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 export default function Sidebar() {
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user, logout } = useAuth(); // Corrected: Using logout function
+  const { user, logoutMutation } = useAuth();
   const { currentSeries } = useSeries();
   const { theme } = useTheme();
 
@@ -19,10 +19,11 @@ export default function Sidebar() {
     { name: "Characters", path: "/characters", icon: "ri-user-star-line" },
     { name: "World", path: "/world", icon: "ri-earth-line" },
     { name: "Timeline", path: "/timeline", icon: "ri-time-line" },
+    { name: "Map Generator", path: "/map-generator", icon: "ri-map-pin-line" },
     { name: "Collaboration", path: "/collaboration", icon: "ri-team-line" },
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
     { name: "Products", path: "/products", icon: "ri-shopping-bag-3-line" },
-    { name: "Subscriptions", path: "/subscriptions", icon: "ri-vip-crown-line" }, // Added subscription link
+    { name: "Subscriptions", path: "/subscriptions", icon: "ri-vip-crown-line" },
   ];
 
   return (
@@ -127,7 +128,7 @@ export default function Sidebar() {
               </div>
               <div className="ml-auto">
                 <button
-                  onClick={() => logout()} // Corrected: Calling logout function
+                  onClick={() => logoutMutation.mutate()}
                   className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
                 >
                   <i className="ri-logout-box-line"></i>
@@ -137,7 +138,7 @@ export default function Sidebar() {
           ) : (
             <div className="flex justify-center">
               <button
-                onClick={() => logout()} // Corrected: Calling logout function
+                onClick={() => logoutMutation.mutate()}
                 className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
               >
                 <i className="ri-logout-box-line"></i>

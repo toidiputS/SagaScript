@@ -22,7 +22,8 @@ import { SimpleAuthProvider } from "@/contexts/simple-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
-import SubscriptionsPage from '@/pages/subscriptions'; // Added import for SubscriptionsPage
+import SubscriptionsPage from '@/pages/subscriptions'; 
+import MapGenerator from '@/pages/map-generator';
 
 
 function Router() {
@@ -96,7 +97,8 @@ function Router() {
 
             return <ChapterEditor />;
           }} />
-          <ProtectedRoute path="/subscriptions" component={() => <SubscriptionsPage />} /> {/* Added subscription route */}
+          <ProtectedRoute path="/subscriptions" component={() => <SubscriptionsPage />} />
+          <ProtectedRoute path="/map-generator" component={() => <MapGenerator />} />
 
           {/* Fallback to 404 */}
           <Route component={NotFound} />
