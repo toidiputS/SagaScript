@@ -8,7 +8,7 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 export default function Sidebar() {
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user, logoutMutation } = useAuth();
+  const { user, logout } = useAuth(); // Corrected: Using logout function
   const { currentSeries } = useSeries();
   const { theme } = useTheme();
 
@@ -127,7 +127,7 @@ export default function Sidebar() {
               </div>
               <div className="ml-auto">
                 <button
-                  onClick={() => logoutMutation.mutate()}
+                  onClick={() => logout()} // Corrected: Calling logout function
                   className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
                 >
                   <i className="ri-logout-box-line"></i>
@@ -137,7 +137,7 @@ export default function Sidebar() {
           ) : (
             <div className="flex justify-center">
               <button
-                onClick={() => logoutMutation.mutate()}
+                onClick={() => logout()} // Corrected: Calling logout function
                 className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
               >
                 <i className="ri-logout-box-line"></i>
