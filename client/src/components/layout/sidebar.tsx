@@ -22,6 +22,7 @@ export default function Sidebar() {
     { name: "Collaboration", path: "/collaboration", icon: "ri-team-line" },
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
     { name: "Products", path: "/products", icon: "ri-shopping-bag-3-line" },
+    { name: "Subscriptions", path: "/subscriptions", icon: "ri-vip-crown-line" }, // Added subscription link
   ];
 
   return (

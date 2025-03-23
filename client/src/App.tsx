@@ -22,6 +22,8 @@ import { SimpleAuthProvider } from "@/contexts/simple-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
+import SubscriptionsPage from '@/pages/subscriptions'; // Added import for SubscriptionsPage
+
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -94,6 +96,7 @@ function Router() {
 
             return <ChapterEditor />;
           }} />
+          <ProtectedRoute path="/subscriptions" component={() => <SubscriptionsPage />} /> {/* Added subscription route */}
 
           {/* Fallback to 404 */}
           <Route component={NotFound} />
