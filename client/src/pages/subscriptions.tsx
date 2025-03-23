@@ -77,7 +77,8 @@ export default function SubscriptionsPage() {
                     </Button>
                   </CardContent>
                 </Card>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </main>
