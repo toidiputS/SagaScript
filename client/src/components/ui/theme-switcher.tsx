@@ -40,21 +40,24 @@ export function ThemeSwitcher() {
         <Button 
           variant="outline" 
           size="icon" 
-          className="rounded-full"
+          className="rounded-full border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
           aria-label="Change theme"
         >
           {theme && themeIcons[theme as ThemeOption]}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-background border-input">
         {(Object.keys(themeNames) as ThemeOption[]).map((themeOption) => (
           <DropdownMenuItem
             key={themeOption}
             onClick={() => handleThemeChange(themeOption)}
-            className={theme === themeOption ? "bg-accent text-accent-foreground" : ""}
+            className={theme === themeOption 
+              ? "bg-accent text-accent-foreground" 
+              : "text-foreground hover:bg-accent/50 hover:text-accent-foreground"
+            }
           >
             <div className="flex items-center gap-2">
-              {themeIcons[themeOption]}
+              <span className="text-foreground">{themeIcons[themeOption]}</span>
               <span>{themeNames[themeOption]}</span>
             </div>
           </DropdownMenuItem>

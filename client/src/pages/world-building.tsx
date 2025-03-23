@@ -39,26 +39,49 @@ export default function WorldBuilding() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("atlas");
 
+  // Define types for data
+  interface Series {
+    id: number;
+    title: string;
+    description?: string;
+  }
+
+  interface Book {
+    id: number;
+    title: string;
+    seriesId: number;
+  }
+
+  interface Location {
+    id: number;
+    name: string;
+    description?: string;
+    type?: string;
+    seriesId: number;
+    bookAppearances?: string[];
+    keyScenes?: number;
+  }
+
   // Fetch all series for the dropdown
-  const { data: series, isLoading: isLoadingSeries } = useQuery({
+  const { data: series, isLoading: isLoadingSeries } = useQuery<Series[]>({
     queryKey: ['/api/series'],
   });
 
   // Get books for the selected series
-  const { data: books } = useQuery({
+  const { data: books } = useQuery<Book[]>({
     queryKey: ['/api/series', selectedSeries, 'books'],
     enabled: !!selectedSeries,
   });
 
   // Fetch locations
-  const { data: allLocations, isLoading: isLoadingLocations } = useQuery({
+  const { data: allLocations, isLoading: isLoadingLocations } = useQuery<Location[]>({
     queryKey: ['/api/series', selectedSeries, 'locations'],
     enabled: !!selectedSeries,
   });
 
   // Filter locations based on search and type filter
   const locations = allLocations
-    ? allLocations.filter((location: any) => {
+    ? allLocations.filter((location) => {
         const matchesSearch = searchQuery === "" || 
           location.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
           (location.description && location.description.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -69,7 +92,11 @@ export default function WorldBuilding() {
 
   // Extract unique location types for filtering
   const locationTypes = allLocations
-    ? [...new Set(allLocations.map((loc: any) => loc.type).filter(Boolean))]
+    ? Array.from(new Set(
+        allLocations
+          .filter(loc => loc.type)
+          .map(loc => loc.type as string)
+      ))
     : [];
 
   // Create location mutation
@@ -294,7 +321,7 @@ export default function WorldBuilding() {
                     {isLoadingSeries ? (
                       <SelectItem value="loading" disabled>Loading series...</SelectItem>
                     ) : series && series.length > 0 ? (
-                      series.map((s: any) => (
+                      series.map((s) => (
                         <SelectItem key={s.id} value={s.id.toString()}>
                           {s.title}
                         </SelectItem>
