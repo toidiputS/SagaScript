@@ -1,12 +1,10 @@
 import React from 'react';
-import MainLayout from '@/components/layout/main-layout';
-import SubscriptionTiers from '@/components/subscription/SubscriptionTiers';
-import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/simple-auth';
 import Sidebar from '@/components/layout/sidebar';
-import MobileNav from '@/components/layout/mobile-nav';
+import MobileNav from '@/components/layout/mobile-menu';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,34 +15,73 @@ export default function SubscriptionsPage() {
 
   const { data: plans, isLoading } = useQuery({
     queryKey: ['/api/subscriptions/plans'],
-    queryFn: () => apiRequest('GET', '/api/subscriptions/plans', {}),
+    queryFn: () => apiRequest('/api/subscriptions/plans'),
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to load subscription plans",
+        variant: "destructive"
+      });
+    }
   });
 
   return (
-    <MainLayout>
-      <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-6">SagaScript Subscriptions</h1>
+    <div className="bg-neutral-50 text-neutral-800 font-sans min-h-screen flex">
+      <Sidebar />
 
-        {user ? (
-          <>
-            <div className="mb-8 p-4 bg-muted rounded-lg">
-              <h2 className="text-xl font-semibold mb-2">Your Current Plan: {user.plan || 'Free'}</h2>
-              <p className="text-muted-foreground">
-                Manage your subscription and explore other plans below.
-              </p>
+      <main className="flex-1 md:ml-64 pt-4 md:pt-0">
+        <div className="p-4 md:p-6 max-w-7xl mx-auto">
+          <MobileNav />
+
+          {/* Page header */}
+          <header className="md:flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-heading font-bold text-neutral-900">Subscription Plans</h1>
+              <p className="text-neutral-600 mt-1">Choose the plan that best fits your writing journey</p>
             </div>
+          </header>
 
-            <SubscriptionTiers />
-          </>
-        ) : (
-          <div className="text-center p-8 bg-muted rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Sign in to manage subscriptions</h2>
-            <p className="mb-6">Please sign in to view and manage your subscription options.</p>
-            <Button>Sign In</Button>
+          {/* Subscription Plans */}
+          <div className="grid gap-6 md:grid-cols-3 my-8">
+            {isLoading ? (
+              <p>Loading subscription plans...</p>
+            ) : (
+              plans && plans.map((plan) => (
+                <Card key={plan.id} className={`border ${user?.plan === plan.name.toLowerCase() ? 'border-primary' : 'border-border'}`}>
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle>{plan.name}</CardTitle>
+                      {user?.plan === plan.name.toLowerCase() && (
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
+                          Current Plan
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription>${plan.price}/month</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 mb-6">
+                      {plan.features.map((feature, i) => (
+                        <li key={i} className="flex items-start">
+                          <span className="text-green-500 mr-2">✓</span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button 
+                      className="w-full"
+                      variant={user?.plan === plan.name.toLowerCase() ? "outline" : "default"}
+                      disabled={user?.plan === plan.name.toLowerCase()}
+                    >
+                      {user?.plan === plan.name.toLowerCase() ? 'Current Plan' : 'Select Plan'}
+                    </Button>
+                  </CardContent>
+                </Card>
+            ))}
           </div>
-        )}
-      </div>
-    </MainLayout>
+        </div>
+      </main>
+    </div>
   );
 }
 
