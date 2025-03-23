@@ -1,24 +1,35 @@
 
 import React, { useState } from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Search, HelpCircle, ChevronDown, Play, VideoIcon, Lightbulb, MessageSquare } from 'lucide-react';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search, HelpCircle } from 'lucide-react';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetDescription, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetTrigger 
+} from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExternalLink } from 'lucide-react';
 
 const VoiceAssistantHelp = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Filter content based on search query
+  const filterContent = (content: string) => {
+    if (!searchQuery) return true;
+    return content.toLowerCase().includes(searchQuery.toLowerCase());
+  };
   
   return (
     <Sheet>
@@ -56,190 +67,192 @@ const VoiceAssistantHelp = () => {
           
           <ScrollArea className="h-[60vh]">
             <TabsContent value="getting-started" className="space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Welcome to Voice Assistant</h3>
-                <p className="text-sm text-muted-foreground">
-                  The AI Voice Assistant helps you brainstorm ideas, develop characters, and create dialogue through natural conversation.
-                </p>
-                
-                <div className="rounded-md bg-muted p-4 mt-4">
-                  <h4 className="font-medium mb-2 flex items-center gap-2">
-                    <Play className="h-4 w-4 text-primary" />
-                    Quick Start Guide
-                  </h4>
-                  <ol className="list-decimal pl-5 space-y-2 text-sm">
-                    <li>Click the "Start Session" button to begin a new conversation</li>
-                    <li>Use the microphone button to speak to the assistant, or type your query</li>
-                    <li>Adjust the voice and volume using the controls in the bottom right</li>
-                    <li>End the session when you're finished</li>
-                  </ol>
-                </div>
-                
-                <Collapsible className="w-full mt-4 border rounded-md p-2">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-2">
-                    <div className="flex items-center gap-2">
-                      <VideoIcon className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Watch Tutorial Video</span>
-                    </div>
-                    <ChevronDown className="h-4 w-4" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="p-2">
-                    <div className="rounded-md bg-muted p-4 flex items-center justify-center h-24">
-                      <span className="text-muted-foreground">Tutorial video placeholder</span>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Welcome to Saga Scribe</CardTitle>
+                  <CardDescription>Your AI-powered writing assistant for series authors</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <section>
+                    <h3 className="font-semibold mb-2">What is the Voice Assistant?</h3>
+                    <p>The Voice Assistant is an AI-powered tool that allows you to interact with Saga Scribe using your voice. You can give commands, ask questions, and receive suggestions without typing.</p>
+                  </section>
+                  
+                  <section>
+                    <h3 className="font-semibold mb-2">Getting Started</h3>
+                    <ol className="list-decimal pl-5 space-y-2">
+                      <li>Click the microphone icon in the voice chat interface</li>
+                      <li>Allow microphone access when prompted by your browser</li>
+                      <li>Speak your command or question clearly</li>
+                      <li>Wait for the AI to process and respond to your request</li>
+                    </ol>
+                  </section>
+                  
+                  <section className="border-t pt-4">
+                    <h3 className="font-semibold mb-2">Key Features</h3>
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li>Voice-to-text transcription</li>
+                      <li>Natural language commands</li>
+                      <li>Real-time response generation</li>
+                      <li>Creative writing suggestions</li>
+                      <li>Character and plot development assistance</li>
+                    </ul>
+                  </section>
+                </CardContent>
+              </Card>
             </TabsContent>
             
             <TabsContent value="voice-commands" className="space-y-4">
-              <h3 className="text-lg font-medium">Voice Commands</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Here are some useful voice commands you can use with the assistant:
-              </p>
-              
-              <div className="space-y-3">
-                <div className="border rounded-md p-3">
-                  <h4 className="font-medium mb-1 flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4 text-amber-500" />
-                    Plot Ideas
-                  </h4>
-                  <p className="text-sm text-muted-foreground">Try saying:</p>
-                  <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
-                    <li>"Give me a plot idea for a fantasy novel"</li>
-                    <li>"Help me develop the central conflict in my story"</li>
-                    <li>"Suggest a plot twist for my thriller"</li>
-                  </ul>
-                </div>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="writing-commands">
+                  <AccordionTrigger>Writing Commands</AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li><strong>"Generate a plot idea for [book title]"</strong> - Creates a new plot suggestion</li>
+                      <li><strong>"Help me develop [character name]"</strong> - Provides character development suggestions</li>
+                      <li><strong>"What's a good setting for [scene type]"</strong> - Offers setting ideas</li>
+                      <li><strong>"Write a description of [location/character/object]"</strong> - Creates descriptive text</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
                 
-                <div className="border rounded-md p-3">
-                  <h4 className="font-medium mb-1 flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-indigo-500" />
-                    Dialogue
-                  </h4>
-                  <p className="text-sm text-muted-foreground">Try saying:</p>
-                  <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
-                    <li>"Write dialogue between two characters who are arguing"</li>
-                    <li>"Help me create realistic dialogue for a teenager"</li>
-                    <li>"Generate dialogue for a first-date scene"</li>
-                  </ul>
-                </div>
-              </div>
+                <AccordionItem value="navigation-commands">
+                  <AccordionTrigger>Navigation Commands</AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li><strong>"Go to [dashboard/characters/timeline]"</strong> - Navigates to specific section</li>
+                      <li><strong>"Open [book/chapter] [name/number]"</strong> - Opens specified content</li>
+                      <li><strong>"Show me my progress stats"</strong> - Displays writing analytics</li>
+                      <li><strong>"Create new [book/chapter/character]"</strong> - Initiates creation process</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="editing-commands">
+                  <AccordionTrigger>Editing Commands</AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="list-disc pl-5 space-y-2">
+                      <li><strong>"Check grammar in this chapter"</strong> - Runs grammar checking</li>
+                      <li><strong>"Find consistency issues in [character name]"</strong> - Identifies continuity problems</li>
+                      <li><strong>"How can I improve this dialog?"</strong> - Suggests dialog enhancements</li>
+                      <li><strong>"Make this paragraph more [descriptive/emotional/tense]"</strong> - Style adjustments</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </TabsContent>
             
             <TabsContent value="troubleshooting" className="space-y-4">
-              <h3 className="text-lg font-medium">Troubleshooting</h3>
-              
-              <Collapsible className="w-full border rounded-md">
-                <CollapsibleTrigger className="flex w-full items-center justify-between p-4">
-                  <span className="font-medium">Microphone not working</span>
-                  <ChevronDown className="h-4 w-4" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="p-4 pt-0 text-sm">
-                  <ol className="list-decimal pl-5 space-y-2">
-                    <li>Check that you've granted microphone permissions in your browser</li>
-                    <li>Ensure no other application is using the microphone</li>
-                    <li>Try refreshing the page</li>
-                    <li>If the issue persists, try using a different browser</li>
-                  </ol>
-                </CollapsibleContent>
-              </Collapsible>
-              
-              <Collapsible className="w-full border rounded-md">
-                <CollapsibleTrigger className="flex w-full items-center justify-between p-4">
-                  <span className="font-medium">No sound from the assistant</span>
-                  <ChevronDown className="h-4 w-4" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="p-4 pt-0 text-sm">
-                  <ol className="list-decimal pl-5 space-y-2">
-                    <li>Check your device volume and ensure it's not muted</li>
-                    <li>Verify that the volume slider in the app is not set to 0%</li>
-                    <li>Ensure your browser has permission to play audio</li>
-                    <li>Try ending and starting a new session</li>
-                  </ol>
-                </CollapsibleContent>
-              </Collapsible>
-              
-              <Collapsible className="w-full border rounded-md">
-                <CollapsibleTrigger className="flex w-full items-center justify-between p-4">
-                  <span className="font-medium">Session won't start</span>
-                  <ChevronDown className="h-4 w-4" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="p-4 pt-0 text-sm">
-                  <ol className="list-decimal pl-5 space-y-2">
-                    <li>Check your internet connection</li>
-                    <li>Verify that you're logged in</li>
-                    <li>Try refreshing the page</li>
-                    <li>If you're using a VPN, try disabling it temporarily</li>
-                  </ol>
-                </CollapsibleContent>
-              </Collapsible>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="mic-issues">
+                  <AccordionTrigger>Microphone Not Working</AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="list-decimal pl-5 space-y-2">
+                      <li>Check that your browser has permission to access your microphone</li>
+                      <li>Ensure your microphone is connected and selected as the input device</li>
+                      <li>Try refreshing the page</li>
+                      <li>Restart your browser</li>
+                      <li>If issues persist, try a different browser</li>
+                    </ol>
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="assistant-not-responding">
+                  <AccordionTrigger>Assistant Not Responding</AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="list-decimal pl-5 space-y-2">
+                      <li>Check your internet connection</li>
+                      <li>Ensure you're speaking clearly and at a normal volume</li>
+                      <li>Try using shorter, more direct commands</li>
+                      <li>Refresh the page and try again</li>
+                      <li>If you're on a free plan, check if you've reached your daily usage limit</li>
+                    </ol>
+                  </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="incorrect-transcription">
+                  <AccordionTrigger>Incorrect Voice Transcription</AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="list-decimal pl-5 space-y-2">
+                      <li>Speak more slowly and clearly</li>
+                      <li>Reduce background noise</li>
+                      <li>Position your microphone closer</li>
+                      <li>Try rephrasing your command</li>
+                      <li>For character or location names, try spelling them out</li>
+                    </ol>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </TabsContent>
             
             <TabsContent value="faq" className="space-y-4">
-              <h3 className="text-lg font-medium">Frequently Asked Questions</h3>
-              
-              <div className="space-y-3">
-                <Collapsible className="w-full border rounded-md">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-4">
-                    <span className="font-medium">What voices are available?</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="p-4 pt-0">
-                    <p className="text-sm">
-                      The voice assistant offers several high-quality voices powered by Eleven Labs, including Rachel, Domi, Bella, Antoni, and Elli. You can select your preferred voice from the dropdown menu.
-                    </p>
-                  </CollapsibleContent>
-                </Collapsible>
-                
-                <Collapsible className="w-full border rounded-md">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-4">
-                    <span className="font-medium">How are my conversations stored?</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="p-4 pt-0">
-                    <p className="text-sm">
-                      Conversations are maintained for the duration of your session. When you end a session, the conversation history is cleared. We don't permanently store the audio recordings of your conversations.
-                    </p>
-                  </CollapsibleContent>
-                </Collapsible>
-                
-                <Collapsible className="w-full border rounded-md">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-4">
-                    <span className="font-medium">Is there a time limit for sessions?</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="p-4 pt-0">
-                    <p className="text-sm">
-                      Sessions can remain active as long as you need them. However, if your session is inactive for an extended period, it may automatically disconnect. Simply start a new session to continue.
-                    </p>
-                  </CollapsibleContent>
-                </Collapsible>
-                
-                <Collapsible className="w-full border rounded-md">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-4">
-                    <span className="font-medium">Can I save the assistant's responses to my project?</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="p-4 pt-0">
-                    <p className="text-sm">
-                      Currently, you need to manually copy the responses you want to save. We're working on a feature that will allow you to directly save valuable responses to your project notebooks or character sheets.
-                    </p>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
+              <Accordion type="single" collapsible className="w-full">
+                {[
+                  {
+                    id: "voice-limits",
+                    question: "Are there limits to voice assistant usage?",
+                    answer: "Usage limits depend on your subscription plan. Free users have access to 20 voice commands per day, while paid plans have higher or unlimited access."
+                  },
+                  {
+                    id: "voice-privacy",
+                    question: "Is my voice data stored or shared?",
+                    answer: "Your voice recordings are not stored permanently. They are processed in real-time, converted to text, and then discarded. The text transcriptions are stored only to provide you with a history of your interactions."
+                  },
+                  {
+                    id: "languages",
+                    question: "What languages are supported?",
+                    answer: "Currently, the voice assistant supports English only. We plan to add support for additional languages in future updates."
+                  },
+                  {
+                    id: "offline-use",
+                    question: "Can I use the voice assistant offline?",
+                    answer: "No, the voice assistant requires an internet connection to function as the voice processing and AI responses are handled by our cloud servers."
+                  },
+                  {
+                    id: "learning",
+                    question: "Does the assistant learn from my writing?",
+                    answer: "The assistant can adapt to your writing style and preferences over time, offering more personalized suggestions. However, your content is never used to train the general AI model."
+                  }
+                ].filter(item => filterContent(item.question + item.answer)).map(item => (
+                  <AccordionItem key={item.id} value={item.id}>
+                    <AccordionTrigger>{item.question}</AccordionTrigger>
+                    <AccordionContent>{item.answer}</AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </TabsContent>
           </ScrollArea>
         </Tabs>
         
-        <SheetFooter className="mt-6 flex-col sm:justify-between">
-          <div className="text-xs text-muted-foreground mb-2">
-            Can't find what you're looking for? Contact support at support@example.com
+        <div className="mt-6 pt-4 border-t">
+          <h3 className="font-semibold mb-2">Additional Resources</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="outline" className="justify-start" onClick={() => window.open('/documentation', '_blank')}>
+              <span className="flex items-center">
+                Documentation
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </span>
+            </Button>
+            <Button variant="outline" className="justify-start" onClick={() => window.open('/tutorials', '_blank')}>
+              <span className="flex items-center">
+                Video Tutorials
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </span>
+            </Button>
+            <Button variant="outline" className="justify-start" onClick={() => window.open('/community', '_blank')}>
+              <span className="flex items-center">
+                Community Forum
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </span>
+            </Button>
+            <Button variant="outline" className="justify-start" onClick={() => window.open('/support', '_blank')}>
+              <span className="flex items-center">
+                Contact Support
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </span>
+            </Button>
           </div>
-          <SheetClose asChild>
-            <Button variant="outline" className="w-full sm:w-auto">Close</Button>
-          </SheetClose>
-        </SheetFooter>
+        </div>
       </SheetContent>
     </Sheet>
   );

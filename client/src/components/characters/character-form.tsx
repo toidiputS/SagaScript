@@ -7,6 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Character } from "@shared/schema";
 
+// Placeholder for TooltipHelper component -  You'll need to implement this
+const TooltipHelper = ({ content, side }: { content: string; side: string }) => (
+  <span title={content} className={`tooltip-${side}`}>{/* Custom styling needed */}</span>
+);
+
+
 interface CharacterFormProps {
   onSubmit: (data: Omit<Character, "id" | "createdAt" | "updatedAt">) => void;
   isSubmitting?: boolean;
@@ -39,11 +45,11 @@ export default function CharacterForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name) {
       return; // Form validation - name is required
     }
-    
+
     // Pass the form data to parent
     onSubmit(formData as Omit<Character, "id" | "createdAt" | "updatedAt">);
   };
@@ -54,7 +60,7 @@ export default function CharacterForm({
     const currentAppearances = Array.isArray(formData.bookAppearances) 
       ? [...formData.bookAppearances] 
       : [];
-    
+
     if (checked && !currentAppearances.includes(bookNumber)) {
       setFormData({
         ...formData,
@@ -82,7 +88,7 @@ export default function CharacterForm({
       {/* Basic Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium border-b pb-2">Basic Information</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
@@ -94,9 +100,15 @@ export default function CharacterForm({
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
+            <div className="flex items-center mb-1">
+              <Label htmlFor="role">Role</Label>
+              <TooltipHelper 
+                content="Define this character's importance in your story. Protagonists are main characters, supporting characters play secondary roles, and minor characters appear briefly."
+                side="right"
+              />
+            </div>
             <Select
               value={formData.role || "supporting"}
               onValueChange={(value) => setFormData({...formData, role: value})}
@@ -114,7 +126,7 @@ export default function CharacterForm({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="age">Age</Label>
             <Input
@@ -124,7 +136,7 @@ export default function CharacterForm({
               placeholder="Character age"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="occupation">Occupation</Label>
             <Input
@@ -134,7 +146,7 @@ export default function CharacterForm({
               placeholder="Character occupation"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
@@ -151,7 +163,7 @@ export default function CharacterForm({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="avatar">Avatar URL</Label>
             <Input
@@ -176,7 +188,7 @@ export default function CharacterForm({
       {/* Book Appearances */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium border-b pb-2">Book Appearances</h3>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5].map((bookNum) => (
             <div key={bookNum} className="flex items-center space-x-2">
@@ -194,7 +206,7 @@ export default function CharacterForm({
       {/* Character Details */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium border-b pb-2">Character Details</h3>
-        
+
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
@@ -206,7 +218,7 @@ export default function CharacterForm({
               rows={3}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="appearance">Physical Appearance</Label>
             <Textarea
@@ -217,9 +229,15 @@ export default function CharacterForm({
               rows={3}
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="personality">Personality</Label>
+            <div className="flex items-center mb-1">
+              <Label htmlFor="personality">Personality</Label>
+              <TooltipHelper 
+                content="Describe your character's traits, habits, quirks, strengths, and flaws. What makes them unique or memorable?"
+                side="right"
+              />
+            </div>
             <Textarea
               id="personality"
               value={formData.personality || ""}
@@ -228,7 +246,7 @@ export default function CharacterForm({
               rows={3}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="goals">Goals & Motivations</Label>
             <Textarea
@@ -239,9 +257,15 @@ export default function CharacterForm({
               rows={3}
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="backstory">Backstory</Label>
+            <div className="flex items-center mb-1">
+              <Label htmlFor="backstory">Backstory</Label>
+              <TooltipHelper 
+                content="Detail the character's history before your story begins. What events shaped them? What secrets do they keep?"
+                side="right"
+              />
+            </div>
             <Textarea
               id="backstory"
               value={formData.backstory || ""}
