@@ -342,7 +342,7 @@ export default function WorldBuilding() {
                 </Select>
               </div>
               <div>
-                <label htmlFor="world-building-tabs" className="block text-sm font-medium text-neutral-700 mb-1">
+                <label htmlFor="world-building-tabs" className="block text-sm font-medium text-foreground mb-1">
                   View
                 </label>
                 <Tabs 
@@ -352,9 +352,19 @@ export default function WorldBuilding() {
                   onValueChange={setActiveTab}
                   id="world-building-tabs"
                 >
-                  <TabsList className="w-full">
-                    <TabsTrigger value="atlas" className="flex-1">Atlas</TabsTrigger>
-                    <TabsTrigger value="list" className="flex-1">List</TabsTrigger>
+                  <TabsList className="w-full bg-background border border-input">
+                    <TabsTrigger 
+                      value="atlas" 
+                      className="flex-1 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                    >
+                      Atlas
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="list" 
+                      className="flex-1 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                    >
+                      List
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>

@@ -262,16 +262,16 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="world-map-title">{selectedLocation?.name}</DialogTitle> {/* Added class for styling */}
+            <DialogTitle className="world-map-title text-foreground">{selectedLocation?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-neutral-700">
+            <p className="text-sm text-foreground dark:text-gray-200">
               {selectedLocation?.description || "No description provided."}
             </p>
-            <div className="text-sm">
+            <div className="text-sm text-foreground dark:text-gray-200">
               <span className="font-medium">Type:</span> {selectedLocation?.locationType || "Not specified"}
             </div>
-            <div className="text-sm">
+            <div className="text-sm text-foreground dark:text-gray-200">
               <span className="font-medium">Appears in:</span> {selectedLocation?.bookAppearances && (selectedLocation.bookAppearances as number[]).length > 0 
                 ? `Book${(selectedLocation.bookAppearances as number[]).length > 1 ? 's' : ''} ${(selectedLocation.bookAppearances as number[]).join(', ')}` 
                 : "Not specified"}
@@ -279,7 +279,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             <div className="flex justify-end space-x-2">
               <Button 
                 variant="secondary" 
-                className="place-button" /* Added class for styling */
+                className="place-button bg-secondary text-secondary-foreground hover:bg-secondary/80" 
                 onClick={() => startPlacingMarker(selectedLocation!)}
               >
                 <i className="ri-map-pin-line mr-2"></i> Place on Map
@@ -290,10 +290,10 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
       </Dialog>
 
       {/* Location placement dropdown */}
-      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-md p-2 shadow-sm max-w-xs">
-        <p className="text-xs text-neutral-600 mb-2">Place locations on the map:</p>
+      <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md p-2 shadow-sm max-w-xs">
+        <p className="text-xs text-neutral-600 dark:text-gray-300 mb-2 font-medium">Place locations on the map:</p>
         <select 
-          className="w-full text-sm border border-neutral-200 rounded p-1 location-selector" /* Added class for styling */
+          className="w-full text-sm border border-neutral-200 dark:border-gray-600 rounded p-1 location-selector bg-white dark:bg-gray-700 text-black dark:text-white" 
           value=""
           onChange={(e) => {
             const locId = parseInt(e.target.value);
@@ -309,7 +309,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
           {locations
             .filter(loc => !loc.mapCoordinates)
             .map(loc => (
-              <option key={loc.id} value={loc.id} className="location-selector"> /* Added class for styling */
+              <option key={loc.id} value={loc.id} className="text-black dark:text-white">
                 {loc.name}
               </option>
             ))}
