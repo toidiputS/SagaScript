@@ -17,6 +17,7 @@ export default function VoiceChat() {
   const [volume, setVolume] = useState(1.0); // Default volume (1.0 = 100%)
 
   const conversation = useConversation();
+  const { status } = useConversation();
   const [conversationSessionId, setConversationSessionId] = useState<string | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
@@ -91,11 +92,17 @@ export default function VoiceChat() {
       try {
         await conversation.endSession();
         setConversationSessionId(null);
+        console.log('Conversation status after ending session:', status);
       } catch (error) {
         console.error('Error ending conversation session:', error);
       }
     }
   };
+
+  // Log status changes
+  React.useEffect(() => {
+    console.log('Conversation status:', status);
+  }, [status]);
 
   const handleVolumeChange = async (newVolume: number) => {
     try {
@@ -215,7 +222,14 @@ export default function VoiceChat() {
           {sessionError && (
             <span className="text-xs text-destructive">{sessionError}</span>
           )}
-          <p className="text-xs text-muted-foreground">Powered by Eleven Labs</p>
+          <p className="text-xs text-muted-foreground">
+            Powered by Eleven Labs 
+            <span className="ml-2">
+              Status: <span className={status === 'connected' ? 'text-green-500' : 'text-red-500'}>
+                {status}
+              </span>
+            </span>
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex flex-col gap-2">
