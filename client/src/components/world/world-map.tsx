@@ -165,7 +165,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
       {/* Map container */}
       <div 
         ref={mapRef}
-        className="relative overflow-hidden world-map-container"  {/* Added class for styling */}
+        className="relative overflow-hidden world-map-container" /* Added class for styling */
         onClick={handleMapClick}
         style={{ cursor: isPlacingMarker ? 'crosshair' : 'default' }}
       >
