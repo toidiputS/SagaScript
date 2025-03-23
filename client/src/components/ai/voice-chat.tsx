@@ -14,6 +14,7 @@ export default function VoiceChat() {
   const { canAccess } = useFeatureAccess();
 
   const [selectedVoice, setSelectedVoice] = useState("21m00Tcm4TlvDq8ikWAM"); // Default voice ID
+  const [volume, setVolume] = useState(1.0); // Default volume (1.0 = 100%)
 
   const conversation = useConversation();
   const [conversationSessionId, setConversationSessionId] = useState<string | null>(null);
@@ -93,6 +94,16 @@ export default function VoiceChat() {
       } catch (error) {
         console.error('Error ending conversation session:', error);
       }
+    }
+  };
+
+  const handleVolumeChange = async (newVolume: number) => {
+    try {
+      setVolume(newVolume);
+      await conversation.setVolume({ volume: newVolume });
+      console.log(`Volume set to: ${newVolume * 100}%`);
+    } catch (error) {
+      console.error('Error setting volume:', error);
     }
   };
 
@@ -207,17 +218,34 @@ export default function VoiceChat() {
           <p className="text-xs text-muted-foreground">Powered by Eleven Labs</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Voice:</span>
-          <select 
-            className="text-xs p-1 rounded border border-input"
-            value={selectedVoice}
-            onChange={(e) => setSelectedVoice(e.target.value)}
-            disabled={isGenerating || isRecording}
-          >
-            <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
-            <option value="AZnzlk1XvdvUeBnXmlld">Domi</option>
-            <option value="EXAVITQu4vr4xnSDxMaL">Bella</option>
-            <option value="ErXwobaYiN019PkySvjV">Antoni</option>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Voice:</span>
+              <select 
+                className="text-xs p-1 rounded border border-input"
+                value={selectedVoice}
+                onChange={(e) => setSelectedVoice(e.target.value)}
+                disabled={isGenerating || isRecording}
+              >
+                <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
+                <option value="AZnzlk1XvdvUeBnXmlld">Domi</option>
+                <option value="EXAVITQu4vr4xnSDxMaL">Bella</option>
+                <option value="ErXwobaYiN019PkySvjV">Antoni</option>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Volume:</span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                className="w-24"
+              />
+              <span className="text-xs">{Math.round(volume * 100)}%</span>
+            </div>
+          </div>
             <option value="MF3mGyEYCl7XYWbV9V6O">Elli</option>
           </select>
         </div>
