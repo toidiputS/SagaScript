@@ -304,10 +304,10 @@ export default function WorldBuilding() {
           </header>
 
           {/* Series Selector and Filters */}
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-4 mb-6">
+          <div className="bg-background rounded-lg shadow-sm border border-border p-4 mb-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label htmlFor="series-select" className="block text-sm font-medium text-neutral-700 mb-1">
+                <label htmlFor="series-select" className="block text-sm font-medium text-foreground mb-1">
                   Select Series
                 </label>
                 <Select 
@@ -333,7 +333,7 @@ export default function WorldBuilding() {
                 </Select>
               </div>
               <div>
-                <label htmlFor="search" className="block text-sm font-medium text-neutral-700 mb-1">
+                <label htmlFor="search" className="block text-sm font-medium text-foreground mb-1">
                   Search Locations
                 </label>
                 <div className="relative">
@@ -344,11 +344,11 @@ export default function WorldBuilding() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
-                  <SearchIcon className="h-4 w-4 absolute left-3 top-3 text-neutral-400" />
+                  <SearchIcon className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
                 </div>
               </div>
               <div>
-                <label htmlFor="type-filter" className="block text-sm font-medium text-neutral-700 mb-1">
+                <label htmlFor="type-filter" className="block text-sm font-medium text-foreground mb-1">
                   Filter by Type
                 </label>
                 <Select 
@@ -554,7 +554,7 @@ export default function WorldBuilding() {
                               <td className="px-6 py-4">
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                                   location.type === 'city' || location.type === 'capital' ? 'bg-secondary/10 text-secondary' :
-                                  location.type === 'forest' || location.type === 'nature' ? 'bg-green-100 text-green-700' :
+                                  location.type === 'forest' || location.type === 'nature' ? 'bg-green-600/10 text-green-700' :
                                   location.type === 'castle' || location.type === 'fortress' ? 'bg-accent/10 text-accent' :
                                   'bg-muted text-muted-foreground'
                                 }`}>
