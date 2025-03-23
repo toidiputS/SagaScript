@@ -215,7 +215,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-md p-1 shadow-sm">
         <div className="flex flex-col">
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
+            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" /* Added class for styling */
             onClick={handleZoomIn}
           >
             <i className="ri-zoom-in-line"></i>
