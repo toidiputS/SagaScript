@@ -17,7 +17,7 @@ export default function VoiceChat() {
   const [volume, setVolume] = useState(1.0); // Default volume (1.0 = 100%)
 
   const conversation = useConversation();
-  const { status } = useConversation();
+  const { status, isSpeaking } = useConversation();
   const [conversationSessionId, setConversationSessionId] = useState<string | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
@@ -103,6 +103,11 @@ export default function VoiceChat() {
   React.useEffect(() => {
     console.log('Conversation status:', status);
   }, [status]);
+
+  // Log speaking status changes
+  React.useEffect(() => {
+    console.log('AI is speaking:', isSpeaking);
+  }, [isSpeaking]);
 
   const handleVolumeChange = async (newVolume: number) => {
     try {
@@ -229,6 +234,11 @@ export default function VoiceChat() {
                 {status}
               </span>
             </span>
+            {isSpeaking && (
+              <span className="ml-2 animate-pulse text-blue-500">
+                Speaking...
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
