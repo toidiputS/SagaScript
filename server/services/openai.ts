@@ -6,6 +6,9 @@ import {
   Location, 
   Series 
 } from '@shared/schema';
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -208,5 +211,169 @@ Keep your analysis professional, supportive, and actionable. Limit your response
   } catch (error) {
     console.error("Error analyzing writing:", error);
     throw new Error("Failed to analyze writing sample");
+  }
+}
+
+/**
+ * Different map styles available for generation
+ */
+export type MapStyle = 
+  | 'fantasy' 
+  | 'sci-fi' 
+  | 'historical' 
+  | 'modern' 
+  | 'post-apocalyptic';
+
+/**
+ * Different art styles available for map generation
+ */
+export type ArtStyle = 
+  | 'ink-and-parchment'
+  | 'watercolor'
+  | 'isometric'
+  | 'topographical';
+
+/**
+ * Configuration options for the map image generation
+ */
+export interface MapGenerationOptions {
+  description: string;
+  style: MapStyle;
+  artStyle: ArtStyle;
+  seriesId?: number;
+  locationId?: number;
+}
+
+/**
+ * Result of the map generation process
+ */
+export interface MapGenerationResult {
+  id: string;
+  imageUrl: string;
+  prompt: string;
+  description: string;
+  style: MapStyle;
+  artStyle: ArtStyle;
+  seriesId?: number;
+  locationId?: number;
+  createdAt: Date;
+}
+
+/**
+ * Generate a detailed map prompt based on the user's description and style preferences
+ */
+function generateMapPrompt(options: MapGenerationOptions): string {
+  let basePrompt = "Create a highly detailed fantasy map with the following description: ";
+  basePrompt += options.description;
+  
+  // Add style-specific elements
+  switch (options.style) {
+    case 'fantasy':
+      basePrompt += " The map should have fantasy elements like dragons, castles, and magical forests.";
+      break;
+    case 'sci-fi':
+      basePrompt += " The map should have sci-fi elements like futuristic cities, space stations, and advanced technology.";
+      break;
+    case 'historical':
+      basePrompt += " The map should have historical elements reminiscent of ancient civilizations and traditional cartography.";
+      break;
+    case 'modern':
+      basePrompt += " The map should have modern elements like cities, highways, and contemporary landmarks.";
+      break;
+    case 'post-apocalyptic':
+      basePrompt += " The map should have post-apocalyptic elements showing ruins, wasteland, and nature reclaiming civilization.";
+      break;
+  }
+  
+  // Add art style-specific elements
+  switch (options.artStyle) {
+    case 'ink-and-parchment':
+      basePrompt += " Render the map in an ink and parchment style like ancient manuscripts, with hand-drawn details and aged paper texture.";
+      break;
+    case 'watercolor':
+      basePrompt += " Render the map in a beautiful watercolor painting style with soft color transitions and artistic brush strokes.";
+      break;
+    case 'isometric':
+      basePrompt += " Render the map in an isometric perspective with 3D-like elements that pop up from the surface.";
+      break;
+    case 'topographical':
+      basePrompt += " Render the map in a topographical style with contour lines indicating elevation, mountains, and valleys.";
+      break;
+  }
+
+  // General map quality instructions
+  basePrompt += " Make sure all locations are clearly labeled. Include a compass rose, scale bar, and decorative border. The map should look professional and highly detailed.";
+  
+  return basePrompt;
+}
+
+/**
+ * Generate a fantasy map image based on a description
+ */
+export async function generateMapImage(options: MapGenerationOptions): Promise<MapGenerationResult> {
+  try {
+    const prompt = generateMapPrompt(options);
+    
+    console.log(`Generating map image with prompt: ${prompt}`);
+    
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "hd",
+      style: "vivid",
+    });
+    
+    const imageUrl = response.data[0].url || '';
+    
+    // Create the result object
+    const result: MapGenerationResult = {
+      id: `map-${Date.now()}`,
+      imageUrl,
+      prompt,
+      description: options.description,
+      style: options.style,
+      artStyle: options.artStyle,
+      seriesId: options.seriesId,
+      locationId: options.locationId,
+      createdAt: new Date(),
+    };
+    
+    return result;
+  } catch (error) {
+    console.error("Error generating map image:", error);
+    throw new Error("Failed to generate map image");
+  }
+}
+
+/**
+ * Save an image from a URL to the local filesystem
+ */
+export async function saveImageFromUrl(imageUrl: string, fileName: string): Promise<string> {
+  try {
+    // Create directory if it doesn't exist
+    const uploadDir = path.join(process.cwd(), 'public', 'maps');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    // Download the image
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+    
+    const buffer = await response.arrayBuffer();
+    const filePath = path.join(uploadDir, fileName);
+    
+    // Write the file
+    await promisify(fs.writeFile)(filePath, Buffer.from(buffer));
+    
+    // Return the public URL
+    return `/maps/${fileName}`;
+  } catch (error) {
+    console.error("Error saving image:", error);
+    throw new Error("Failed to save image");
   }
 }

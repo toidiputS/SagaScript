@@ -1,6 +1,19 @@
 
 import { Router } from 'express';
 import { Request, Response } from 'express';
+import { 
+  generateWritingSuggestions, 
+  generateSingleSuggestion, 
+  generateMapImage,
+  saveImageFromUrl,
+  type SuggestionType,
+  type MapStyle,
+  type ArtStyle,
+  type MapGenerationOptions
+} from '../services/openai';
+import { z } from 'zod';
+import path from 'path';
+import crypto from 'crypto';
 
 const router = Router();
 
@@ -45,6 +58,139 @@ router.get('/conversation/signed-url', async (req: Request, res: Response) => {
     console.error('Error getting signed URL:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+/**
+ * Generate writing suggestions
+ */
+router.post('/writing-suggestions', async (req: Request, res: Response) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const { context, types, count } = req.body;
+    
+    if (!context) {
+      return res.status(400).json({ message: 'Story context is required' });
+    }
+    
+    const suggestions = await generateWritingSuggestions(
+      context,
+      types || undefined,
+      count || 3
+    );
+    
+    return res.status(200).json(suggestions);
+  } catch (error) {
+    console.error('Error generating writing suggestions:', error);
+    return res.status(500).json({ message: 'Failed to generate writing suggestions' });
+  }
+});
+
+/**
+ * Generate a single writing suggestion
+ */
+router.post('/writing-suggestion', async (req: Request, res: Response) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    
+    const { context, type } = req.body;
+    
+    if (!context || !type) {
+      return res.status(400).json({ message: 'Context and suggestion type are required' });
+    }
+    
+    const suggestion = await generateSingleSuggestion(context, type);
+    
+    return res.status(200).json(suggestion);
+  } catch (error) {
+    console.error('Error generating writing suggestion:', error);
+    return res.status(500).json({ message: 'Failed to generate writing suggestion' });
+  }
+});
+
+/**
+ * Schema for map generation request
+ */
+const mapGenerationSchema = z.object({
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  style: z.enum(['fantasy', 'sci-fi', 'historical', 'modern', 'post-apocalyptic']),
+  artStyle: z.enum(['ink-and-parchment', 'watercolor', 'isometric', 'topographical']),
+  seriesId: z.number().optional(),
+  locationId: z.number().optional()
+});
+
+/**
+ * Generate a map from description
+ */
+router.post('/generate-map', async (req: Request, res: Response) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ message: 'OpenAI API key is not configured' });
+    }
+    
+    // Validate request data
+    const parsedData = mapGenerationSchema.safeParse(req.body);
+    
+    if (!parsedData.success) {
+      return res.status(400).json({ 
+        message: 'Invalid request data',
+        errors: parsedData.error.format() 
+      });
+    }
+    
+    const options: MapGenerationOptions = parsedData.data;
+    
+    // Generate the map image
+    const result = await generateMapImage(options);
+    
+    // Save the image locally
+    if (result.imageUrl) {
+      const fileName = `map-${crypto.randomBytes(8).toString('hex')}.png`;
+      
+      try {
+        const localUrl = await saveImageFromUrl(result.imageUrl, fileName);
+        result.imageUrl = localUrl; // Replace with local URL
+      } catch (saveError) {
+        console.warn('Could not save image locally, using original URL:', saveError);
+      }
+    }
+    
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Error generating map:', error);
+    return res.status(500).json({ message: 'Failed to generate map image' });
+  }
+});
+
+/**
+ * Get map styles and art styles
+ */
+router.get('/map-styles', (req: Request, res: Response) => {
+  const mapStyles = [
+    { value: 'fantasy', label: 'Fantasy', description: 'Medieval-inspired world with magical elements' },
+    { value: 'sci-fi', label: 'Sci-Fi', description: 'Futuristic worlds with advanced technology' },
+    { value: 'historical', label: 'Historical', description: 'Based on historical periods and cartography' },
+    { value: 'modern', label: 'Modern', description: 'Contemporary settings with current geography' },
+    { value: 'post-apocalyptic', label: 'Post-Apocalyptic', description: 'World after a catastrophic event' }
+  ];
+  
+  const artStyles = [
+    { value: 'ink-and-parchment', label: 'Ink & Parchment', description: 'Traditional hand-drawn style on aged paper' },
+    { value: 'watercolor', label: 'Watercolor', description: 'Artistic watercolor painting with gentle colors' },
+    { value: 'isometric', label: 'Isometric', description: '3D-like perspective with raised elements' },
+    { value: 'topographical', label: 'Topographical', description: 'Elevation-focused with contour lines' }
+  ];
+  
+  return res.status(200).json({ mapStyles, artStyles });
 });
 
 export default router;
