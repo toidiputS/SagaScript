@@ -16,7 +16,9 @@ export default function VoiceChat() {
   const [selectedVoice, setSelectedVoice] = useState("21m00Tcm4TlvDq8ikWAM"); // Default voice ID
 
   const conversation = useConversation();
-  const [conversationSessionId, setConversationSessionId] = useState(null);
+  const [conversationSessionId, setConversationSessionId] = useState<string | null>(null);
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
+  const [sessionError, setSessionError] = useState<string | null>(null);
 
   const {
     history,
@@ -52,6 +54,47 @@ export default function VoiceChat() {
       startRecording();
     }
   };
+  
+  const startConversationSession = async (agentId: string) => {
+    try {
+      setIsLoadingSession(true);
+      setSessionError(null);
+      
+      // Get a signed URL from our server
+      const response = await fetch(`/api/ai/conversation/signed-url?agentId=${agentId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to get signed URL');
+      }
+      
+      const { url } = await response.json();
+      
+      // Start a session with the signed URL
+      const sessionId = await conversation.startSession({ url });
+      setConversationSessionId(sessionId);
+      
+      console.log('Started conversation session with ID:', sessionId);
+      return sessionId;
+    } catch (error) {
+      console.error('Error starting conversation session:', error);
+      setSessionError((error as Error).message || 'Failed to start conversation session');
+      return null;
+    } finally {
+      setIsLoadingSession(false);
+    }
+  };
+
+  const endConversationSession = async () => {
+    if (conversationSessionId) {
+      try {
+        await conversation.endSession();
+        setConversationSessionId(null);
+      } catch (error) {
+        console.error('Error ending conversation session:', error);
+      }
+    }
+  };
 
   return (
     <Card className="w-full max-w-3xl mx-auto">
@@ -61,7 +104,7 @@ export default function VoiceChat() {
           Chat with your writing assistant using voice or text
           {conversationSessionId && (
             <span className="block mt-1 text-sm text-primary">
-              Session active with context URL
+              Session active: {conversationSessionId.substring(0, 8)}...
             </span>
           )}
         </CardDescription>
@@ -139,7 +182,30 @@ export default function VoiceChat() {
       </CardContent>
 
       <CardFooter className="flex justify-between items-center">
-        <p className="text-xs text-muted-foreground">Powered by Eleven Labs</p>
+        <div className="flex items-center gap-2">
+          {!conversationSessionId ? (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => startConversationSession('your_default_agent_id')}
+              disabled={isLoadingSession}
+            >
+              {isLoadingSession ? 'Starting Session...' : 'Start Session'}
+            </Button>
+          ) : (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={endConversationSession}
+            >
+              End Session
+            </Button>
+          )}
+          {sessionError && (
+            <span className="text-xs text-destructive">{sessionError}</span>
+          )}
+          <p className="text-xs text-muted-foreground">Powered by Eleven Labs</p>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Voice:</span>
           <select 

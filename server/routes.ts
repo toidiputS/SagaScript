@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import collaborationRoutes from "./routes/collaboration";
+import aiRoutes from "./routes/ai";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe integration will be disabled.');
@@ -1512,6 +1513,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount collaboration routes
   app.use('/api/collaboration', isAuthenticated, collaborationRoutes);
+  
+  // Mount AI routes
+  app.use('/api/ai', isAuthenticated, aiRoutes);
 
   return httpServer;
 }
