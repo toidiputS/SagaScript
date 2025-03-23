@@ -212,24 +212,27 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
       </div>
 
       {/* Map Controls */}
-      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-md p-1 shadow-sm">
+      <div className="absolute top-4 right-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md p-1 shadow-sm">
         <div className="flex flex-col">
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" /* Added class for styling */
+            className="p-1.5 hover:bg-neutral-100 dark:hover:bg-gray-700 rounded map-control-button" 
             onClick={handleZoomIn}
+            aria-label="Zoom in"
           >
             <i className="ri-zoom-in-line"></i>
           </button>
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" 
+            className="p-1.5 hover:bg-neutral-100 dark:hover:bg-gray-700 rounded map-control-button" 
             onClick={handleZoomOut}
+            aria-label="Zoom out"
           >
             <i className="ri-zoom-out-line"></i>
           </button>
-          <div className="border-t border-neutral-200 my-1"></div>
+          <div className="border-t border-neutral-200 dark:border-gray-700 my-1"></div>
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" 
+            className="p-1.5 hover:bg-neutral-100 dark:hover:bg-gray-700 rounded map-control-button" 
             onClick={() => setZoomLevel(1)}
+            aria-label="Reset view"
           >
             <i className="ri-compass-3-line"></i>
           </button>
@@ -238,15 +241,16 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
 
       {/* Placing marker indicator */}
       {isPlacingMarker && (
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-md p-2 shadow-sm">
+        <div className="absolute top-4 left-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-md p-2 shadow-sm">
           <div className="flex items-center">
-            <div className="mr-2 text-primary">
+            <div className="mr-2 text-primary dark:text-blue-400">
               <i className="ri-map-pin-line"></i>
             </div>
-            <span className="text-sm">Placing: {selectedLocation?.name}</span>
+            <span className="text-sm dark:text-white">Placing: {selectedLocation?.name}</span>
             <button 
-              className="ml-2 p-1 hover:bg-neutral-100 rounded map-control-button" 
+              className="ml-2 p-1 hover:bg-neutral-100 dark:hover:bg-gray-700 rounded map-control-button" 
               onClick={cancelPlacingMarker}
+              aria-label="Cancel placing"
             >
               <i className="ri-close-line"></i>
             </button>

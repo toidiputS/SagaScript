@@ -388,15 +388,35 @@ h1, h2, h3, h4, h5, h6,
   height: 100%;
 }
 
+.world-map-container button,
+.world-map-container [role="button"],
+.world-map-container .button {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  font-weight: 600 !important;
+}
+
+.dark .world-map-container button,
+.dark .world-map-container [role="button"],
+.dark .world-map-container .button,
+.spooky .world-map-container button,
+.spooky .world-map-container [role="button"],
+.spooky .world-map-container .button {
+  background-color: #2d3748 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
 .world-map-label {
-  background-color: rgba(255, 255, 255, 0.9);
-  border: 1px solid #e2e8f0;
-  color: #1e293b;
-  font-weight: 500;
-  padding: 2px 6px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  z-index: 10 !important;
 }
 /* Subscription card text contrast improvements */
 .subscription-tier-card h3,
@@ -425,17 +445,27 @@ h1, h2, h3, h4, h5, h6,
   text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.8);
 }
 
-/* Fix for blue text on blue background in the world map */
-.world-map-container button,
+/* Fix for elements in world map with contrast issues */
 .world-map-container .location-selector,
 .world-map-container .location-list,
 .world-map-container .place-button {
-  background-color: rgba(0, 0, 0, 0.8) !important;
-  color: white !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
   text-shadow: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(0, 0, 0, 0.3) !important;
   font-weight: 600;
   padding: 0.5rem 1rem;
+}
+
+.dark .world-map-container .location-selector,
+.dark .world-map-container .location-list,
+.dark .world-map-container .place-button,
+.spooky .world-map-container .location-selector,
+.spooky .world-map-container .location-list,
+.spooky .world-map-container .place-button {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
 .map-control-button {
@@ -444,14 +474,11 @@ h1, h2, h3, h4, h5, h6,
   border: 1px solid rgba(0, 0, 0, 0.2) !important;
 }
 
-.world-map-label {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #1a1a1a !important;
-  font-weight: 600 !important;
-  text-shadow: none !important;
-  padding: 3px 8px !important;
-  border: 1px solid rgba(0, 0, 0, 0.2) !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+.dark .map-control-button,
+.spooky .map-control-button {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 /* General text visibility improvements across the app */
@@ -460,20 +487,32 @@ h1, h2, h3, h4, h5, h6,
   font-weight: 500;
 }
 
-/* Make all input fields and selects more visible */
-input, select, textarea, button, .MuiSelect-select {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+/* Make all input fields and selects more visible while respecting themes */
+/* For light theme */
+input, select, textarea {
+  background-color: rgba(255, 255, 255, 0.95) !important;
   color: #121212 !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
 }
 
-/* For dark mode inputs */
-.dark-mode input, 
-.dark-mode select, 
-.dark-mode textarea, 
-.dark-mode button:not(.primary-button):not(.world-map-container button) {
-  background-color: rgba(30, 41, 59, 0.8) !important;
-  color: #f1f1f1 !important;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.button-primary, button.primary {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.button-secondary, button.secondary {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* For dark themes */
+.dark input, .dark select, .dark textarea,
+.spooky input, .spooky select, .spooky textarea,
+.dark-theme input, .dark-theme select, .dark-theme textarea,
+.spooky-theme input, .spooky-theme select, .spooky-theme textarea {
+  background-color: hsl(var(--input)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Improve visibility of all card content */
