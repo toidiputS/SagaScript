@@ -14,6 +14,8 @@ export default function VoiceChat() {
   const [hasMicrophonePermission, setHasMicrophonePermission] = useState(false);
   const { canAccess } = useFeatureAccess();
   
+  const [selectedVoice, setSelectedVoice] = useState("21m00Tcm4TlvDq8ikWAM"); // Default voice ID
+  
   const {
     history,
     isGenerating,
@@ -23,8 +25,15 @@ export default function VoiceChat() {
     stopRecording,
     isRecording
   } = useConversation({
-    // Use a default voice or get from user preferences
-    voiceId: "21m00Tcm4TlvDq8ikWAM"
+    voiceId: selectedVoice,
+    onStart: () => {
+      console.log("AI started generating response");
+    },
+    onFinish: () => {
+      console.log("AI finished generating response");
+    }
+    // Note: Typically you'd use an API key from environment variables,
+    // but in the FeatureGate component it seems this might be handled elsewhere
   });
 
   const handleSendMessage = async () => {
@@ -122,8 +131,23 @@ export default function VoiceChat() {
         </div>
       </CardContent>
       
-      <CardFooter className="text-xs text-muted-foreground">
-        <p>Powered by Eleven Labs</p>
+      <CardFooter className="flex justify-between items-center">
+        <p className="text-xs text-muted-foreground">Powered by Eleven Labs</p>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Voice:</span>
+          <select 
+            className="text-xs p-1 rounded border border-input"
+            value={selectedVoice}
+            onChange={(e) => setSelectedVoice(e.target.value)}
+            disabled={isGenerating || isRecording}
+          >
+            <option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>
+            <option value="AZnzlk1XvdvUeBnXmlld">Domi</option>
+            <option value="EXAVITQu4vr4xnSDxMaL">Bella</option>
+            <option value="ErXwobaYiN019PkySvjV">Antoni</option>
+            <option value="MF3mGyEYCl7XYWbV9V6O">Elli</option>
+          </select>
+        </div>
       </CardFooter>
     </Card>
   );
