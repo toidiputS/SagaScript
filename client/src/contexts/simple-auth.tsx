@@ -225,3 +225,8 @@ export function useSimpleAuth() {
   
   return context;
 }
+
+// Add useAuth as an alias for backward compatibility
+export function useAuth() {
+  return useSimpleAuth();
+}
