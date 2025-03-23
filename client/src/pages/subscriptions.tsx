@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MainLayout from '@/components/layout/main-layout';
 import SubscriptionTiers from '@/components/subscription/SubscriptionTiers';
@@ -28,7 +29,7 @@ export default function SubscriptionsPage() {
         {user ? (
           <>
             <div className="mb-8 p-4 bg-muted rounded-lg">
-              <h2 className="text-xl font-semibold mb-2">Your Current Plan: {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}</h2>
+              <h2 className="text-xl font-semibold mb-2">Your Current Plan: {user.plan || 'Free'}</h2>
               <p className="text-muted-foreground">
                 Manage your subscription and explore other plans below.
               </p>
@@ -37,8 +38,10 @@ export default function SubscriptionsPage() {
             <SubscriptionTiers />
           </>
         ) : (
-          <div className="p-8 text-center">
-            <p className="text-lg mb-4">Please log in to view and manage your subscription.</p>
+          <div className="text-center p-8 bg-muted rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">Sign in to manage subscriptions</h2>
+            <p className="mb-6">Please sign in to view and manage your subscription options.</p>
+            <Button>Sign In</Button>
           </div>
         )}
       </div>
@@ -46,8 +49,8 @@ export default function SubscriptionsPage() {
   );
 }
 
-
-export default function SubscriptionPlansPage() {
+// Alternative subscription page with a different layout
+export function SubscriptionPlansAlternative() {
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -67,29 +70,28 @@ export default function SubscriptionPlansPage() {
           {/* Page header */}
           <header className="mb-6">
             <h1 className="text-2xl md:text-3xl font-heading font-bold text-neutral-900">Subscription Plans</h1>
-            <p className="text-neutral-600 mt-1">Choose the perfect plan for your writing journey</p>
+            <p className="text-neutral-500 mt-1">Choose the plan that works best for you</p>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {isLoading ? (
-              <p>Loading subscription plans...</p>
-            ) : (
-              plans?.map((plan) => (
-                <Card key={plan.id} className={`overflow-hidden ${plan.name === 'Premium' ? 'border-primary' : ''}`}>
-                  <CardHeader className={`${plan.name === 'Premium' ? 'bg-primary text-primary-foreground' : 'bg-card'}`}>
-                    <CardTitle className="flex justify-between items-center">
-                      <span>{plan.name}</span>
-                      {plan.name === 'Premium' && <Badge>Popular</Badge>}
-                    </CardTitle>
-                    <div className="mt-3">
-                      <span className="text-3xl font-bold">${plan.price}</span>
-                      <span className="text-sm opacity-80">/month</span>
+          {/* Plans grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-8">
+            {plans && plans.map((plan: any) => (
+                <Card key={plan.id || plan.name} className={plan.name === 'Premium' ? 'border-primary' : ''}>
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{plan.name}</CardTitle>
+                        <div className="text-2xl font-bold mt-2">${plan.price}/mo</div>
+                      </div>
+                      {plan.name === 'Premium' && (
+                        <Badge className="bg-primary text-white">Popular</Badge>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent className="pt-6">
                     <CardDescription className="mb-4">{plan.description}</CardDescription>
                     <ul className="space-y-2 mb-6">
-                      {plan.features?.map((feature, index) => (
+                      {plan.features?.map((feature: string, index: number) => (
                         <li key={index} className="flex items-start">
                           <span className="mr-2 text-green-500">✓</span>
                           <span>{feature}</span>
