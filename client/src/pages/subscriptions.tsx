@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MainLayout from '@/components/layout/main-layout';
 import SubscriptionTiers from '@/components/subscription/SubscriptionTiers';
@@ -98,13 +97,16 @@ export function SubscriptionPlansAlternative() {
                         </li>
                       ))}
                     </ul>
-                    <Button className="w-full">
-                      {user?.plan === plan.name ? 'Current Plan' : 'Select Plan'}
+                    <Button 
+                      className="w-full"
+                      variant={user?.plan === plan.name.toLowerCase() ? "outline" : "default"}
+                      disabled={user?.plan === plan.name.toLowerCase()}
+                    >
+                      {user?.plan === plan.name.toLowerCase() ? 'Current Plan' : 'Select Plan'}
                     </Button>
                   </CardContent>
                 </Card>
-              ))
-            )}
+            ))}
           </div>
         </div>
       </main>
