@@ -62,7 +62,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
         // Determine icon and color based on locationType
         let icon = "ri-map-pin-line";
         let color = "#3B82F6"; // default blue
-        
+
         switch (loc.locationType?.toLowerCase()) {
           case "city":
           case "town":
@@ -100,7 +100,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             color = "#EF4444"; // red
             break;
         }
-        
+
         return {
           id: loc.id,
           x: (loc.mapCoordinates as any).x,
@@ -116,11 +116,11 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
   // Handle map click for placing markers
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isPlacingMarker || !selectedLocation) return;
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
+
     updateLocationCoordsMutation.mutate({
       id: selectedLocation.id,
       x,
@@ -165,7 +165,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
       {/* Map container */}
       <div 
         ref={mapRef}
-        className="relative overflow-hidden"
+        className="relative overflow-hidden world-map-container"  {/* Added class for styling */}
         onClick={handleMapClick}
         style={{ cursor: isPlacingMarker ? 'crosshair' : 'default' }}
       >
@@ -179,7 +179,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             alt="Fantasy world map" 
             className="w-full h-full object-cover"
           />
-          
+
           {/* Map Markers */}
           {getMarkers().map((marker) => (
             <div 
@@ -202,7 +202,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
                 <i className={marker.icon}></i>
               </div>
               {selectedLocation?.id === marker.id && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 bg-white px-2 py-1 rounded shadow-sm text-xs whitespace-nowrap">
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 bg-white px-2 py-1 rounded shadow-sm text-xs whitespace-nowrap world-map-label"> {/* Added class for styling */}
                   {marker.name}
                 </div>
               )}
@@ -210,32 +210,32 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
           ))}
         </div>
       </div>
-      
+
       {/* Map Controls */}
       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-md p-1 shadow-sm">
         <div className="flex flex-col">
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded"
+            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
             onClick={handleZoomIn}
           >
             <i className="ri-zoom-in-line"></i>
           </button>
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded"
+            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
             onClick={handleZoomOut}
           >
             <i className="ri-zoom-out-line"></i>
           </button>
           <div className="border-t border-neutral-200 my-1"></div>
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded"
+            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
             onClick={() => setZoomLevel(1)}
           >
             <i className="ri-compass-3-line"></i>
           </button>
         </div>
       </div>
-      
+
       {/* Placing marker indicator */}
       {isPlacingMarker && (
         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-md p-2 shadow-sm">
@@ -245,7 +245,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             </div>
             <span className="text-sm">Placing: {selectedLocation?.name}</span>
             <button 
-              className="ml-2 p-1 hover:bg-neutral-100 rounded"
+              className="ml-2 p-1 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
               onClick={cancelPlacingMarker}
             >
               <i className="ri-close-line"></i>
@@ -253,12 +253,12 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
           </div>
         </div>
       )}
-      
+
       {/* Place location dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{selectedLocation?.name}</DialogTitle>
+            <DialogTitle className="world-map-title">{selectedLocation?.name}</DialogTitle> {/* Added class for styling */}
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-neutral-700">
@@ -274,7 +274,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
             </div>
             <div className="flex justify-end space-x-2">
               <Button 
-                variant="secondary"
+                variant="secondary" className="place-button" {/* Added class for styling */}
                 onClick={() => startPlacingMarker(selectedLocation!)}
               >
                 <i className="ri-map-pin-line mr-2"></i> Place on Map
@@ -283,12 +283,12 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* Location placement dropdown */}
       <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-md p-2 shadow-sm max-w-xs">
         <p className="text-xs text-neutral-600 mb-2">Place locations on the map:</p>
         <select 
-          className="w-full text-sm border border-neutral-200 rounded p-1"
+          className="w-full text-sm border border-neutral-200 rounded p-1 location-selector" {/* Added class for styling */}
           value=""
           onChange={(e) => {
             const locId = parseInt(e.target.value);
@@ -304,7 +304,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
           {locations
             .filter(loc => !loc.mapCoordinates)
             .map(loc => (
-              <option key={loc.id} value={loc.id}>
+              <option key={loc.id} value={loc.id} className="location-selector"> {/* Added class for styling */}
                 {loc.name}
               </option>
             ))}

@@ -406,3 +406,52 @@ h1, h2, h3, h4, h5, h6,
   color: #1a1a1a;
   text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.8);
 }
+
+/* Fix for blue text on blue background in the world map */
+.world-map-container button,
+.world-map-container .location-selector,
+.world-map-container .location-list,
+.world-map-container .place-button {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  color: white !important;
+  text-shadow: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+/* General text visibility improvements across the app */
+.text-field-label {
+  color: #f1f1f1 !important;
+  font-weight: 500;
+}
+
+/* Make all input fields and selects more visible */
+input, select, textarea, button, .MuiSelect-select {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #121212 !important;
+}
+
+/* For dark mode inputs */
+.dark-mode input, 
+.dark-mode select, 
+.dark-mode textarea, 
+.dark-mode button:not(.primary-button):not(.world-map-container button) {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  color: #f1f1f1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Improve visibility of all card content */
+.card-content, .dialog-content {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Fix for the placeholder text */
+::placeholder {
+  color: rgba(80, 80, 80, 0.7) !important;
+}
+
+.dark-mode ::placeholder {
+  color: rgba(200, 200, 200, 0.7) !important;
+}
