@@ -33,7 +33,7 @@ export default function Sidebar() {
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground mr-2">
               <i className="ri-quill-pen-line"></i>
             </div>
-            {isSidebarOpen && <span className="font-serif font-bold text-lg text-foreground">Saga Scribe</span>}
+            {isSidebarOpen && <span className="font-serif font-bold text-lg text-foreground">SagaScript.Life</span>}
           </div>
           <div className="flex items-center space-x-2">
             {isSidebarOpen && <ThemeSwitcher />}

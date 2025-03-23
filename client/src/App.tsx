@@ -26,10 +26,10 @@ import AuthPage from "@/pages/auth-page";
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  
+
   // Check if the current route is auth-related
   const isAuthRoute = ['/login', '/register', '/auth'].includes(location);
-  
+
   return (
     <div className="h-screen flex overflow-hidden">
       {!isAuthRoute && (
@@ -51,19 +51,19 @@ function Router() {
               </svg>
             </button>
             <div className="ml-4 flex items-center">
-              <span className="font-serif font-bold text-lg">Saga Scribe</span>
+              <span className="font-serif font-bold text-lg">SagaScript.Life</span>
             </div>
           </div>
         </>
       )}
-      
+
       <main className={`flex-1 overflow-y-auto bg-neutral-50 ${!isAuthRoute ? 'pt-16 md:pt-0' : ''}`}>
         <Switch>
           {/* Auth routes */}
           <Route path="/auth" component={AuthPage} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
-          
+
           {/* Protected routes */}
           <ProtectedRoute path="/" component={() => <Dashboard />} />
           <ProtectedRoute path="/series" component={() => <Series />} />
@@ -79,7 +79,7 @@ function Router() {
             const params = new URLSearchParams(window.location.search);
             const bookId = params.get("bookId");
             const seriesId = params.get("seriesId");
-            
+
             // If no bookId is provided, redirect to series page or home
             if (!bookId) {
               // If seriesId is available, redirect to that series
@@ -91,10 +91,10 @@ function Router() {
               window.location.href = "/";
               return <div>Redirecting...</div>;
             }
-            
+
             return <ChapterEditor />;
           }} />
-          
+
           {/* Fallback to 404 */}
           <Route component={NotFound} />
         </Switch>
