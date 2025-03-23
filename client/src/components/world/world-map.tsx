@@ -228,7 +228,7 @@ export default function WorldMap({ locations, seriesId }: WorldMapProps) {
           </button>
           <div className="border-t border-neutral-200 my-1"></div>
           <button 
-            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" {/* Added class for styling */}
+            className="p-1.5 hover:bg-neutral-100 rounded map-control-button" 
             onClick={() => setZoomLevel(1)}
           >
             <i className="ri-compass-3-line"></i>
