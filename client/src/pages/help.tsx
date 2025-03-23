@@ -1,19 +1,15 @@
 
 import React from 'react';
-import Head from 'next/head';
-import MainLayout from '@/components/layout/main-layout';
+import { NextPage } from 'next';
 import HelpCenter from '@/components/help/help-center';
+import Layout from '@/components/layout/layout';
 
-export default function HelpPage() {
+const HelpPage: NextPage = () => {
   return (
-    <>
-      <Head>
-        <title>Help & Support - Saga Scribe</title>
-        <meta name="description" content="Find answers, guides, and support for using Saga Scribe" />
-      </Head>
-      <MainLayout>
-        <HelpCenter />
-      </MainLayout>
-    </>
+    <Layout>
+      <HelpCenter />
+    </Layout>
   );
-}
+};
+
+export default HelpPage;

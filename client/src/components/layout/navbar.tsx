@@ -1,8 +1,7 @@
-
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { HelpCircle, Bell, Settings, User } from 'lucide-react';
+import { HelpCircle, Bell, Settings, User, BookOpen } from 'lucide-react'; // Added BookOpen import
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 export default function Navbar() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  
+
   return (
     <nav className="bg-background border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,7 +50,40 @@ export default function Navbar() {
               <Bell className="h-5 w-5" />
               <span className="sr-only">Notifications</span>
             </Button>
-            <DropdownMenu>
+            <DropdownMenu> {/* Help Dropdown */}
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <HelpCircle className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Help & Support</DropdownMenuLabel>
+                <DropdownMenuItem>
+                  <Link href="/help">
+                    <div className="flex items-center">
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      <span>Help Center</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/help/tutorials">
+                    <div className="flex items-center">
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      <span>Tutorials</span>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <a href="mailto:support@sagascribe.com" className="flex items-center">
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    <span>Contact Support</span>
+                  </a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu> {/* User Dropdown */}
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <User className="h-5 w-5" />
