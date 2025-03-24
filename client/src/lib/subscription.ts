@@ -1,4 +1,3 @@
-
 // Tier display information
 export const TIER_DISPLAY: Record<SubscriptionTier, { 
   name: string; 
@@ -62,7 +61,9 @@ export type RestrictedFeature =
   | 'cloudStorage'
   | 'exportFormats'
   | 'backupFrequency'
-  | 'platformAccess';
+  | 'platformAccess'
+  | 'aiCharacterImages'; // Added AI image generation feature
+
 
 // Feature limits by tier 
 export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, number | boolean | string>> = {
@@ -86,7 +87,8 @@ export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, num
     cloudStorage: 5, // 5GB
     exportFormats: 'basic', // TXT, DOC
     backupFrequency: 'weekly',
-    platformAccess: 'web'
+    platformAccess: 'web',
+    aiCharacterImages: false // Added AI image generation feature
   },
   wordsmith: {
     maxSeries: -1, // unlimited
@@ -129,7 +131,9 @@ export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, num
     basicResearchIntegration: true,
     imageInspirationBoards: true,
     basicTextToSpeech: true,
-    priorityEmailSupport: true
+    priorityEmailSupport: true,
+    aiCharacterImages: true // Added AI image generation feature
+
   },
   loremaster: {
     maxSeries: -1, // unlimited
@@ -151,7 +155,8 @@ export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, num
     cloudStorage: 50, // 50GB
     exportFormats: 'advanced', // All formats
     backupFrequency: 'daily',
-    platformAccess: 'all'
+    platformAccess: 'all',
+    aiCharacterImages: true // Added AI image generation feature
   },
   legendary: {
     maxSeries: -1, // unlimited
@@ -173,7 +178,8 @@ export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, num
     cloudStorage: 100, // 100GB
     exportFormats: 'premium', // All formats + specialized
     backupFrequency: 'realtime',
-    platformAccess: 'all'
+    platformAccess: 'all',
+    aiCharacterImages: true // Added AI image generation feature
   }
 };
 
@@ -200,12 +206,12 @@ export function hasReachedLimit(
   currentCount: number
 ): boolean {
   const limit = TIER_LIMITS[userTier][feature];
-  
+
   // If limit is not a number or is unlimited (-1), user hasn't reached the limit
   if (typeof limit !== 'number' || limit < 0) {
     return false;
   }
-  
+
   return currentCount >= limit;
 }
 
@@ -222,9 +228,9 @@ import { useSimpleAuth } from "@/contexts/simple-auth";
 
 export function useFeatureAccess() {
   const { user } = useSimpleAuth();
-  
+
   const userTier = (user?.plan || 'apprentice') as SubscriptionTier;
-  
+
   return {
     userTier,
     tierInfo: TIER_DISPLAY[userTier],

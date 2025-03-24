@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Character } from "@shared/schema";
+import { AICharacterImage } from "./ai-character-image";
 
 // Placeholder for TooltipHelper component -  You'll need to implement this
 const TooltipHelper = ({ content, side }: { content: string; side: string }) => (
@@ -163,15 +164,11 @@ export default function CharacterForm({
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="avatar">Avatar URL</Label>
-            <Input
-              id="avatar"
-              value={formData.avatar || ""}
-              onChange={(e) => setFormData({...formData, avatar: e.target.value})}
-              placeholder="URL to character image"
-            />
+            <Label htmlFor="avatar">Avatar</Label>
+            <div className="relative w-48 h-48"> {/*Larger Avatar Box*/}
+              <AICharacterImage description={formData.description || ''} />
+            </div>
           </div>
         </div>
 
