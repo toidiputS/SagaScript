@@ -164,15 +164,16 @@ export default function CharacterForm({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="avatar">Avatar</Label>
-            <div className="relative w-48 h-48"> {/*Larger Avatar Box*/}
-              <AICharacterImage description={formData.description || ''} />
-            </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="avatar">Avatar</Label>
+          <div className="relative w-64 h-64"> {/*Larger Avatar Box*/}
+            <AICharacterImage description={formData.description || ''} />
           </div>
         </div>
+      </div>
 
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2">
           <Checkbox 
             id="isProtagonist" 
             checked={formData.isProtagonist}
@@ -180,7 +181,7 @@ export default function CharacterForm({
           />
           <Label htmlFor="isProtagonist">Main character</Label>
         </div>
-      </div>
+
 
       {/* Book Appearances */}
       <div className="space-y-4">

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,7 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
   const { canUseFeature } = useFeatureAccess();
   const { toast } = useToast();
   const { canAccess } = useFeatureAccess();
-  
+
   const hasAccess = canAccess('aiCharacterImages');
 
   const generateImage = async () => {
@@ -39,12 +38,12 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
     }
 
     setIsGenerating(true);
-    
+
     try {
       // This would be replaced with an actual API call in production
       // For demo purposes, we'll simulate a delay and return a placeholder image
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       // In a real implementation, this would be the URL returned from your image generation API
       const placeholderImages = [
         'https://placehold.co/400x400/3b3b3b/FFF?text=Character+Image',
@@ -52,9 +51,9 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
         'https://placehold.co/400x400/2d3748/FFF?text=Character'
       ];
       const randomImage = placeholderImages[Math.floor(Math.random() * placeholderImages.length)];
-      
+
       onImageGenerated(randomImage);
-      
+
       toast({
         title: "Image Generated",
         description: "Your character image has been created successfully.",
