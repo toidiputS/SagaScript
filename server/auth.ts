@@ -29,6 +29,13 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+export const isAuthenticated = (req: any, res: any, next: any) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Unauthorized - Please log in' });
+  }
+  next();
+};
+
 export function setupAuth(app: Express) {
   // Use the storage's session store which is either MemoryStore or PostgreSQLStore
   const sessionSettings: session.SessionOptions = {
