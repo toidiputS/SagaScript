@@ -62,7 +62,9 @@ export default function SubscriptionsPage() {
       
       <main className="flex-1 md:ml-64 pt-4 md:pt-0">
         <div className="p-4 md:p-6 max-w-7xl mx-auto">
-          <MobileNav />
+          <div className="md:hidden mb-4">
+            <MobileNav />
+          </div>
 
           {/* Page header */}
           <header className="md:flex justify-between items-center mb-6">
