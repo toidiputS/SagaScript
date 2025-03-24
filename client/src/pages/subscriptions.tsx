@@ -62,16 +62,16 @@ export default function SubscriptionsPage() {
       </header>
 
       {/* Subscription Plans */}
-      <div className="grid gap-6 md:grid-cols-3 my-8">
+      <div className="grid gap-6 md:grid-cols-4 my-8">
         {isLoading ? (
-          <div className="col-span-3 flex justify-center items-center py-12">
+          <div className="col-span-4 flex justify-center items-center py-12">
             <div className="flex flex-col items-center">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
               <p className="text-muted-foreground">Loading subscription plans...</p>
             </div>
           </div>
         ) : !plans || plans.length === 0 ? (
-          <div className="col-span-3 bg-background border border-border rounded-lg p-8 text-center">
+          <div className="col-span-4 bg-background border border-border rounded-lg p-8 text-center">
             <h3 className="text-lg font-medium mb-2 text-foreground">No Plans Available</h3>
             <p className="text-muted-foreground mb-4">There are currently no subscription plans available.</p>
           </div>

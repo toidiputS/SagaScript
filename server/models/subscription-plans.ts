@@ -83,6 +83,39 @@ export async function initializeSubscriptionPlans() {
           timelineManagement: true,
           multimediaIntegration: true
         }
+      },
+      {
+        name: "legendary",
+        description: "Enterprise-grade series planning system with all premium features",
+        price: 4999, // $49.99
+        billingInterval: "monthly",
+        features: [
+          "Complete series architecture system",
+          "Advanced AI writing assistant with unlimited suggestions",
+          "Custom character and location art generation",
+          "Detailed fantasy map generator with multiple styles",
+          "Cross-series universe building tools",
+          "Collaborative writing environment for teams",
+          "Priority feature development and support",
+          "100GB cloud storage with automated backups",
+          "Advanced analytics and writing pattern insights"
+        ],
+        limits: {
+          maxSeries: -1, // unlimited
+          maxBooksPerSeries: -1, // unlimited
+          maxCharactersPerSeries: -1, // unlimited
+          maxLocationsPerSeries: -1, // unlimited
+          aiSuggestions: true,
+          aiSuggestionsLimit: -1, // unlimited
+          worldBuildingAdvanced: true,
+          relationshipMapping: true,
+          timelineManagement: true,
+          multimediaIntegration: true,
+          aiImageGeneration: true,
+          fantasyMapGeneration: true,
+          collaborativeWriting: true,
+          advancedAnalytics: true
+        }
       }
     ];
     
