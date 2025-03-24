@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { ArrowUp, Flame } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AuthContext } from '@/context/authContext'; // Assuming an AuthContext exists
 
 export interface WritingStats {
   wordsToday: number;

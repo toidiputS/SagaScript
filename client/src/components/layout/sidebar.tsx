@@ -4,13 +4,40 @@ import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { useTheme } from "@/contexts/theme-context";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Sidebar() {
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { user, logoutMutation } = useAuth();
+  const { user } = useAuth();
   const { currentSeries } = useSeries();
   const { theme } = useTheme();
+  const { toast } = useToast();
+
+  // Create logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/logout");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+      // Reload the page to reset the auth state
+      window.location.href = "/";
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Logout failed",
+        description: error.message || "An error occurred while logging out",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Navigation links
   const navLinks = [

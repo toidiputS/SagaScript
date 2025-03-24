@@ -1,7 +1,7 @@
 
 import { Router } from 'express';
 import { db } from '../db';
-import { auth } from '../auth';
+import { Express } from 'express';
 
 const router = Router();
 
