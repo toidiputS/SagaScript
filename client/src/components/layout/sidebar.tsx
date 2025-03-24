@@ -6,7 +6,7 @@ import { useTheme } from "@/contexts/theme-context";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Sidebar() {
   const [location] = useLocation();
