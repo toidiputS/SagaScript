@@ -205,11 +205,27 @@ export default function SubscriptionTiers() {
   const { user } = useAuth();
   const currentTier = (user?.plan || 'apprentice') as SubscriptionTier;
   
-  const handleUpgrade = (tier: SubscriptionTier) => {
-    // Redirect to payment or upgrade flow
-    // This would be integrated with your payment service provider
-    console.log(`Upgrade to ${tier}`);
-    alert('This feature will be implemented in the near future.');
+  const handleUpgrade = async (tier: SubscriptionTier) => {
+    try {
+      const response = await fetch('/api/subscriptions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planName: tier })
+      });
+
+      const data = await response.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error starting subscription:', error);
+      alert('Failed to start subscription process. Please try again.');
+    }
   };
   
   return (
