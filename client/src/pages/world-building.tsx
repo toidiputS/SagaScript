@@ -1,20 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import Sidebar from "@/components/layout/sidebar";
 import MobileNav from "@/components/layout/mobile-nav";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusIcon, MapPinIcon, SearchIcon, MapIcon, Settings2 } from "lucide-react";
-import { UnifiedWorldMap } from '@/components/world-building/unified-world-map';
+import { DirectMapGenerator } from "@/components/map-generator/direct-map-generator";
 
 export default function WorldBuilding() {
+  const { user } = useAuth();
   const [selectedSeries, setSelectedSeries] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("atlas");
+  const [showMapDialog, setShowMapDialog] = useState(false);
 
   // Define types for data
   interface Series {
@@ -27,9 +31,6 @@ export default function WorldBuilding() {
   const { data: series, isLoading: isLoadingSeries } = useQuery<Series[]>({
     queryKey: ['/api/series'],
   });
-
-  // Locations data placeholder
-  const locations: any[] = [];
 
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex">
@@ -121,18 +122,74 @@ export default function WorldBuilding() {
             <>
               {/* Map Generator Section - Shown when Atlas tab is active */}
               {activeTab === "atlas" && (
-                <div className="mb-6">
-                  {/* Prominent Map Generator Title */}
-                  <div className="bg-primary text-primary-foreground px-4 py-3 rounded-t-lg shadow-lg mb-0 flex items-center">
-                    <MapIcon className="h-6 w-6 mr-2" />
-                    <h2 className="text-xl font-bold">Fantasy Map Generator</h2>
+                <>
+                  {/* World Map Section with Map Generator Button */}
+                  <Card className="mb-8">
+                    <CardHeader className="flex flex-row items-center justify-between bg-primary text-primary-foreground rounded-t-lg">
+                      <CardTitle className="flex items-center">
+                        <MapIcon className="h-5 w-5 mr-2" />
+                        World Map
+                      </CardTitle>
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        onClick={() => setShowMapDialog(true)}
+                      >
+                        Generate Fantasy Map
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="relative w-full min-h-[300px] flex items-center justify-center p-6">
+                        {/* This is where the current world map would be displayed */}
+                        <div className="text-center p-8 border-2 border-dashed rounded-lg w-full h-full flex flex-col items-center justify-center">
+                          <MapIcon className="h-16 w-16 mb-4 text-muted-foreground" />
+                          <p className="text-muted-foreground max-w-md mx-auto">
+                            No map has been created for this series yet. 
+                            Click the "Generate Fantasy Map" button above to create a custom map for your world.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Map Generator Dialog */}
+                  <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
+                    <DialogContent className="max-w-4xl">
+                      <DialogHeader>
+                        <DialogTitle>Fantasy Map Generator</DialogTitle>
+                      </DialogHeader>
+                      {selectedSeries && (
+                        <DirectMapGenerator seriesId={selectedSeries} />
+                      )}
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Location Cards Section */}
+                  <div className="mt-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold">Series Locations</h3>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                      >
+                        <PlusIcon className="h-4 w-4 mr-2" />
+                        Add Location
+                      </Button>
+                    </div>
+
+                    <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+                      <MapPinIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                      <h3 className="text-lg font-semibold mb-2">No Locations Found</h3>
+                      <p className="text-muted-foreground mb-6">
+                        This series doesn't have any locations yet.
+                      </p>
+                      <Button>
+                        <PlusIcon className="h-5 w-5 mr-2" />
+                        Create Location
+                      </Button>
+                    </div>
                   </div>
-                  
-                  {/* Map Generator Component */}
-                  <div className="border-x border-b border-primary/30 rounded-b-lg mb-8">
-                    <UnifiedWorldMap selectedSeries={selectedSeries} />
-                  </div>
-                </div>
+                </>
               )}
 
               {/* List View - Shown when List tab is active */}
@@ -141,7 +198,7 @@ export default function WorldBuilding() {
                   <MapPinIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                   <h3 className="text-lg font-semibold mb-2">Location List View</h3>
                   <p className="text-muted-foreground mb-6">
-                    This is a simplified placeholder for the locations list view.
+                    This is the list view for managing your locations.
                   </p>
                 </div>
               )}
