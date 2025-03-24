@@ -22,7 +22,8 @@ import { SimpleAuthProvider } from "@/contexts/simple-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
-import SubscriptionsPage from '@/pages/subscriptions'; 
+import SubscriptionsPage from '@/pages/subscriptions';
+import AICompanion from '@/pages/ai-companion';
 // Map generator is now integrated into world-building
 
 
@@ -77,6 +78,7 @@ function Router() {
           <ProtectedRoute path="/collaboration" component={() => <Collaboration />} />
           <ProtectedRoute path="/products" component={() => <Products />} />
           <ProtectedRoute path="/checkout" component={() => <Checkout />} />
+          <ProtectedRoute path="/ai-companion" component={() => <AICompanion />} />
           <ProtectedRoute path="/chapter-editor" component={() => {
             // Extract bookId from URL
             const params = new URLSearchParams(window.location.search);
