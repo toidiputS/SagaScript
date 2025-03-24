@@ -4,6 +4,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Check } from 'lucide-react'; // Assuming this icon is used
 
+function handleUpgrade(tier) {
+  // Placeholder function - Replace with actual upgrade logic
+  console.log(`Upgrading to tier: ${tier}`);
+}
+
 export default function SubscriptionTiersPage() {
   return (
     <div className="container mx-auto py-8">
@@ -12,7 +17,7 @@ export default function SubscriptionTiersPage() {
         {SUBSCRIPTION_TIERS.map((tier) => {
           const tierInfo = TIER_DISPLAY[tier];
           return (
-            <Card key={tier} className="flex flex-col h-full hover:shadow-lg transition-shadow">
+            <Card key={tier} className={`flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow`} onClick={() => handleUpgrade(tier)}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <i className={`${tierInfo.icon} text-2xl ${tierInfo.color}`}></i>
