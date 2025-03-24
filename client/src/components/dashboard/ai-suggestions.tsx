@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSimpleAuth } from '@/contexts/simple-auth'; // Added import for useSimpleAuth
 
 interface Suggestion {
   type: string;
@@ -15,6 +16,7 @@ interface Suggestion {
 }
 
 export default function AISuggestions() {
+  const { user } = useSimpleAuth(); // Replaced useAuth with useSimpleAuth
   const { canAccess, getLimit } = useFeatureAccess();
   const hasAIAccess = canAccess('aiSuggestions');
   const remainingSuggestions = getLimit('aiSuggestionsLimit') as number;

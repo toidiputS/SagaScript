@@ -15,7 +15,7 @@ export const TIER_DISPLAY: Record<SubscriptionTier, {
     color: 'text-green-500'
   },
   wordsmith: {
-    name: 'Wordsmith',
+    name: 'The Wordsmith',
     description: 'Enhanced world-building tools with advanced character management',
     price: 9.99,
     icon: 'ri-book-open-line',
@@ -89,26 +89,47 @@ export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, num
     platformAccess: 'web'
   },
   wordsmith: {
-    maxSeries: 5,
+    maxSeries: -1, // unlimited
     maxBooksPerSeries: -1, // unlimited
     maxCharactersPerSeries: -1, // unlimited
     maxLocationsPerSeries: -1, // unlimited
     aiSuggestions: true,
-    aiSuggestionsLimit: 50,
+    aiSuggestionsLimit: 100,
     worldBuildingAdvanced: true,
     relationshipMapping: true,
     writingChallenges: true,
-    timelineManagement: false,
-    multimediaIntegration: false,
-    communityCollaboration: false,
-    customVoices: false,
-    prioritySupport: false,
+    timelineManagement: true,
+    multimediaIntegration: true,
+    communityCollaboration: true,
+    customVoices: true,
+    prioritySupport: true,
     priorityFeatures: false,
     customFeatureDevelopment: false,
-    cloudStorage: 20, // 20GB
-    exportFormats: 'standard', // More formats
+    cloudStorage: 25, // 25GB
+    exportFormats: 'advanced', // Including EPUB
     backupFrequency: 'daily',
-    platformAccess: 'web'
+    platformAccess: 'web_mobile',
+    characterDevelopmentTracking: true,
+    characterConsistencyAlerts: true,
+    customCharacterTemplates: true,
+    hierarchicalLocationOrganization: true,
+    culturalFrameworkTemplates: true,
+    historicalEventTimeline: true,
+    tagBasedCrossReferencing: true,
+    customizableWritingGoals: true,
+    detailedProgressAnalytics: true,
+    thirtyDayStreakVisualization: true,
+    writingPacePredictions: true,
+    expandedAchievementSystem: true,
+    socialSharingMilestones: true,
+    enhancedContinuityChecking: true,
+    contextAwareWritingSuggestions: true,
+    characterVoiceConsistencyTips: true,
+    plotDevelopmentPrompts: true,
+    basicResearchIntegration: true,
+    imageInspirationBoards: true,
+    basicTextToSpeech: true,
+    priorityEmailSupport: true
   },
   loremaster: {
     maxSeries: -1, // unlimited
@@ -194,6 +215,9 @@ export function getFeatureLimit(userTier: SubscriptionTier, feature: RestrictedF
 }
 
 // React hook to check feature access
+import { useSimpleAuth } from "@/contexts/simple-auth";
+
+// Import the context rather than a hook
 import { useSimpleAuth } from "@/contexts/simple-auth";
 
 export function useFeatureAccess() {
