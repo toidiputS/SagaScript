@@ -20,8 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusIcon, MapPinIcon, SearchIcon, MapIcon, Settings2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import React from 'react';
-import { WorldMap } from '@/components/world-building/world-map';
-import { WorldMapProvider } from '@/components/world-building/world-map-context';
+import { UnifiedWorldMap } from '@/components/world-building/unified-world-map';
 
 
 const locationSchema = z.object({
@@ -421,14 +420,12 @@ export default function WorldBuilding() {
           ) : (
             <>
               <TabsContent value="atlas" className="mt-0" hidden={activeTab !== "atlas"}>
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <WorldMapProvider>
-                    <WorldMap />
-                  </WorldMapProvider>
+                <div className="bg-background rounded-lg shadow-md overflow-hidden">
+                  <UnifiedWorldMap selectedSeries={selectedSeries} />
                 </div>
                 {/* Location Cards (rest of the original code) */}
                 {locations.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                     {locations.map((location: any) => (
                       <Card
                         key={location.id}

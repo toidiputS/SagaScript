@@ -46,7 +46,6 @@ export default function Sidebar() {
     { name: "Characters", path: "/characters", icon: "ri-user-star-line" },
     { name: "World", path: "/world", icon: "ri-earth-line" },
     { name: "Timeline", path: "/timeline", icon: "ri-time-line" },
-    { name: "Map Generator", path: "/map-generator", icon: "ri-map-pin-line" },
     { name: "Collaboration", path: "/collaboration", icon: "ri-team-line" },
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
     { name: "Products", path: "/products", icon: "ri-shopping-bag-3-line" },

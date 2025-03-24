@@ -23,7 +23,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
 import SubscriptionsPage from '@/pages/subscriptions'; 
-import MapGenerator from '@/pages/map-generator';
+// Map generator is now integrated into world-building
 
 
 function Router() {
@@ -98,7 +98,6 @@ function Router() {
             return <ChapterEditor />;
           }} />
           <ProtectedRoute path="/subscriptions" component={() => <SubscriptionsPage />} />
-          <ProtectedRoute path="/map-generator" component={() => <MapGenerator />} />
 
           {/* Fallback to 404 */}
           <Route component={NotFound} />
