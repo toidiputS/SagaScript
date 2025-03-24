@@ -42,23 +42,50 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useLocation } from "wouter";
 
+// New component to display writing statistics
+const WritingStats = ({ wordsToday, currentStreak }: { wordsToday: number; currentStreak: number }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <StatsCard 
+      title="Words Today" 
+      value={wordsToday}
+      icon="ri-quill-pen-line"
+      iconBg="bg-primary/10"
+      iconColor="text-primary"
+      trend={{
+        value: 14,
+        type: "increase",
+        text: "from yesterday"
+      }}
+    />
+    <StatsCard 
+      title="Current Streak" 
+      value={`${currentStreak} Days`}
+      icon="ri-fire-line"
+      iconBg="bg-secondary/10"
+      iconColor="text-secondary"
+      streakDays={7}
+    />
+  </div>
+);
+
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { currentSeries, fetchCurrentBook } = useSeries();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
-  
+
   // State for dialog management
   const [isEditSeriesDialogOpen, setIsEditSeriesDialogOpen] = useState(false);
   const [isSeriesMenuOpen, setIsSeriesMenuOpen] = useState(false);
-  
+
   // Form schema for editing series
   const seriesSchema = z.object({
     name: z.string().min(1, "Series name is required"),
     description: z.string().optional(),
   });
-  
+
   // Form for editing series
   const form = useForm({
     resolver: zodResolver(seriesSchema),
@@ -67,7 +94,7 @@ export default function Dashboard() {
       description: currentSeries?.description || "",
     }
   });
-  
+
   // Keep form values in sync with currentSeries
   useEffect(() => {
     if (currentSeries) {
@@ -77,7 +104,7 @@ export default function Dashboard() {
       });
     }
   }, [currentSeries, form]);
-  
+
   // Update series mutation
   const updateSeriesMutation = useMutation({
     mutationFn: async (data: { name: string; description: string }) => {
@@ -102,7 +129,7 @@ export default function Dashboard() {
       });
     }
   });
-  
+
   // Fetch writing stats for today
   const { data: todayStats } = useQuery({
     queryKey: ['/api/writing-stats', 'day'],
@@ -111,7 +138,7 @@ export default function Dashboard() {
       return res.json();
     }
   });
-  
+
   // Fetch user achievements
   const { data: userAchievements } = useQuery({
     queryKey: ['/api/user-achievements'],
@@ -120,12 +147,13 @@ export default function Dashboard() {
       return res.json();
     }
   });
-  
+
   // Calculate words written today
   const wordsToday = todayStats?.reduce((sum, stat) => sum + stat.wordsWritten, 0) || 0;
-  
-  // Get current streak
-  const currentStreak = 7; // For demo purposes
+
+  // Get current streak -  This needs a proper API call or state management
+  const currentStreak = 7; // Placeholder - Replace with actual data
+
 
   // Start writing handler
   const handleStartWriting = () => {
@@ -137,14 +165,14 @@ export default function Dashboard() {
       });
       return;
     }
-    
+
     fetchCurrentBook();
     toast({
       title: "Ready to write",
       description: "Opening your current chapter",
     });
   };
-  
+
   // Series action handlers
   const handleEditSeries = () => {
     if (!currentSeries) {
@@ -157,27 +185,27 @@ export default function Dashboard() {
     }
     setIsEditSeriesDialogOpen(true);
   };
-  
+
   const handleViewAllBooks = () => {
     if (!currentSeries) return;
     navigate(`/series/${currentSeries.id}`);
   };
-  
+
   const handleCreateNewBook = () => {
     if (!currentSeries) return;
     navigate(`/series/${currentSeries.id}/books/new`);
   };
-  
+
   const handleManageCharacters = () => {
     if (!currentSeries) return;
     navigate('/characters');
   };
-  
+
   const handleManageLocations = () => {
     if (!currentSeries) return;
     navigate('/world');
   };
-  
+
   const handleViewTimeline = () => {
     if (!currentSeries) return;
     navigate('/timeline');
@@ -256,7 +284,7 @@ export default function Dashboard() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       <div className="max-w-7xl mx-auto">
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
@@ -277,37 +305,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stats Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatsCard 
-            title="Words Today" 
-            value={wordsToday}
-            icon="ri-quill-pen-line"
-            iconBg="bg-primary/10"
-            iconColor="text-primary"
-            trend={{
-              value: 14,
-              type: "increase",
-              text: "from yesterday"
-            }}
-          />
-          
-          <StatsCard 
-            title="Current Streak" 
-            value={`${currentStreak} Days`}
-            icon="ri-fire-line"
-            iconBg="bg-secondary/10"
-            iconColor="text-secondary"
-            streakDays={7}
-          />
-          
-          {currentSeries && (
-            <SeriesProgress 
-              title="Series Progress"
-              series={currentSeries}
-            />
-          )}
-        </div>
+        {/* Added Writing Stats */}
+        <WritingStats wordsToday={wordsToday} currentStreak={currentStreak} />
 
         {/* Badge Progression */}
         <div className="grid grid-cols-1 gap-6 mb-8">
@@ -316,7 +315,7 @@ export default function Dashboard() {
             maxShown={6}
           />
         </div>
-        
+
         {/* Current Project & Companion */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Current Project */}
@@ -365,7 +364,7 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            
+
             {currentSeries ? (
               <ChapterList series={currentSeries} />
             ) : (
@@ -391,7 +390,7 @@ export default function Dashboard() {
               limit={3}
               showViewAll={true}
             />
-            
+
             {/* Recent Achievements */}
             <AchievementsDisplay achievements={userAchievements} />
           </div>
