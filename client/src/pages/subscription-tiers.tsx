@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { SUBSCRIPTION_TIERS, TIER_DISPLAY } from '@/lib/subscription';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Check } from 'lucide-react'; // Assuming this icon is used
 
 export default function SubscriptionTiersPage() {
   return (
@@ -26,10 +26,17 @@ export default function SubscriptionTiersPage() {
                 </div>
               </CardHeader>
               <CardContent className="flex-grow">
-                <ul className="list-disc list-inside space-y-2">
+                <ul className="list-none space-y-3">
                   {tierInfo.features?.map((feature, index) => (
-                    <li key={index} className={`text-sm ${feature.startsWith('//') ? 'font-bold mt-4 text-primary' : ''}`}>
-                      {feature.startsWith('//') ? feature.substring(2).trim() : feature}
+                    <li key={index} className={`text-sm ${feature.startsWith('//') ? 'font-semibold text-primary mt-4' : 'flex items-start'}`}>
+                      {feature.startsWith('//') ? (
+                        feature.replace('//', '')
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4 mr-2 text-primary shrink-0" />
+                          <span>{feature}</span>
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>
