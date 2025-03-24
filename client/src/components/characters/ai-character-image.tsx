@@ -79,7 +79,7 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
           placeholder="Describe your character in detail..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full min-h-[80px]"
+          className="w-full min-h-[120px]"
           disabled={isGenerating}
         />
         <Button 
