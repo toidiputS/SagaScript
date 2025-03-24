@@ -71,15 +71,15 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
   };
 
   return (
-    <div className="space-y-3 w-full h-full flex flex-col p-1">
+    <div className="space-y-3 w-full h-full flex flex-col">
       <Label htmlFor="avatarDescription" className="text-lg font-medium">AI Image Generator</Label>
-      <div className="flex flex-col gap-3 flex-grow">
+      <div className="flex flex-col gap-3 flex-grow overflow-hidden">
         <Textarea
           id="avatarDescription"
           placeholder="Describe your character in detail..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full flex-grow min-h-[280px]"
+          className="w-full flex-grow min-h-[220px] overflow-auto"
           disabled={isGenerating}
         />
         <Button 
