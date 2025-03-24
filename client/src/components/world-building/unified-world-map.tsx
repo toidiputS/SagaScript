@@ -145,8 +145,8 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
     resolver: zodResolver(mapGenerationSchema),
     defaultValues: {
       description: '',
-      style: '',
-      artStyle: '',
+      style: effectiveStyles.mapStyles[0]?.value || 'fantasy',
+      artStyle: effectiveStyles.artStyles[0]?.value || 'ink-and-parchment',
       seriesId: selectedSeries || undefined,
     },
   });
@@ -497,7 +497,7 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
                     <CardTitle className="text-base">Art Styles</CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
-                    {styles?.artStyles.map((style) => (
+                    {effectiveStyles.artStyles.map((style) => (
                       <div key={style.value}>
                         <span className="font-semibold">{style.label}:</span>{' '}
                         {style.description}
