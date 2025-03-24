@@ -1,103 +1,3 @@
-import { useAuth } from '@/hooks/use-auth';
-
-// Define subscription tiers in order of increasing capabilities
-export const SUBSCRIPTION_TIERS = ['apprentice', 'wordsmith', 'loremaster', 'legendary'] as const;
-export type SubscriptionTier = typeof SUBSCRIPTION_TIERS[number];
-
-// Features that can be restricted by subscription tier
-export type RestrictedFeature = 
-  | 'maxSeries'
-  | 'maxBooksPerSeries'
-  | 'maxCharactersPerSeries'
-  | 'maxLocationsPerSeries'
-  | 'aiSuggestions'
-  | 'aiSuggestionsLimit'
-  | 'worldBuildingAdvanced'
-  | 'relationshipMapping'
-  | 'writingChallenges'
-  | 'timelineManagement'
-  | 'multimediaIntegration'
-  | 'communityCollaboration'
-  | 'customVoices'
-  | 'prioritySupport'
-  | 'priorityFeatures'
-  | 'customFeatureDevelopment';
-
-// Feature limits by tier 
-export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, number | boolean>> = {
-  apprentice: {
-    maxSeries: 1,
-    maxBooksPerSeries: 3,
-    maxCharactersPerSeries: 10,
-    maxLocationsPerSeries: 5,
-    aiSuggestions: true,
-    aiSuggestionsLimit: 10,
-    worldBuildingAdvanced: false,
-    relationshipMapping: false,
-    writingChallenges: false,
-    timelineManagement: false,
-    multimediaIntegration: false,
-    communityCollaboration: false,
-    customVoices: false,
-    prioritySupport: false,
-    priorityFeatures: false,
-    customFeatureDevelopment: false
-  },
-  wordsmith: {
-    maxSeries: 5,
-    maxBooksPerSeries: -1, // unlimited
-    maxCharactersPerSeries: -1, // unlimited
-    maxLocationsPerSeries: -1, // unlimited
-    aiSuggestions: true,
-    aiSuggestionsLimit: 50,
-    worldBuildingAdvanced: true,
-    relationshipMapping: true,
-    writingChallenges: true,
-    timelineManagement: false,
-    multimediaIntegration: false,
-    communityCollaboration: false,
-    customVoices: false,
-    prioritySupport: false,
-    priorityFeatures: false,
-    customFeatureDevelopment: false
-  },
-  loremaster: {
-    maxSeries: -1, // unlimited
-    maxBooksPerSeries: -1, // unlimited
-    maxCharactersPerSeries: -1, // unlimited
-    maxLocationsPerSeries: -1, // unlimited
-    aiSuggestions: true,
-    aiSuggestionsLimit: 200,
-    worldBuildingAdvanced: true,
-    relationshipMapping: true,
-    writingChallenges: true,
-    timelineManagement: true,
-    multimediaIntegration: true,
-    communityCollaboration: true,
-    customVoices: true,
-    prioritySupport: false,
-    priorityFeatures: false,
-    customFeatureDevelopment: false
-  },
-  legendary: {
-    maxSeries: -1, // unlimited
-    maxBooksPerSeries: -1, // unlimited
-    maxCharactersPerSeries: -1, // unlimited
-    maxLocationsPerSeries: -1, // unlimited
-    aiSuggestions: true,
-    aiSuggestionsLimit: -1, // unlimited
-    worldBuildingAdvanced: true,
-    relationshipMapping: true,
-    writingChallenges: true,
-    timelineManagement: true,
-    multimediaIntegration: true,
-    communityCollaboration: true,
-    customVoices: true,
-    prioritySupport: true,
-    priorityFeatures: true,
-    customFeatureDevelopment: true
-  }
-};
 
 // Tier display information
 export const TIER_DISPLAY: Record<SubscriptionTier, { 
@@ -137,6 +37,125 @@ export const TIER_DISPLAY: Record<SubscriptionTier, {
   }
 };
 
+// Subscription tier list
+export const SUBSCRIPTION_TIERS: SubscriptionTier[] = ['apprentice', 'wordsmith', 'loremaster', 'legendary'];
+
+// Types for subscription features
+export type SubscriptionTier = 'apprentice' | 'wordsmith' | 'loremaster' | 'legendary';
+export type RestrictedFeature = 
+  | 'maxSeries' 
+  | 'maxBooksPerSeries' 
+  | 'maxCharactersPerSeries' 
+  | 'maxLocationsPerSeries'
+  | 'aiSuggestions'
+  | 'aiSuggestionsLimit'
+  | 'worldBuildingAdvanced'
+  | 'relationshipMapping'
+  | 'writingChallenges'
+  | 'timelineManagement'
+  | 'multimediaIntegration'
+  | 'communityCollaboration'
+  | 'customVoices'
+  | 'prioritySupport'
+  | 'priorityFeatures'
+  | 'customFeatureDevelopment'
+  | 'cloudStorage'
+  | 'exportFormats'
+  | 'backupFrequency'
+  | 'platformAccess';
+
+// Feature limits by tier 
+export const TIER_LIMITS: Record<SubscriptionTier, Record<RestrictedFeature, number | boolean | string>> = {
+  apprentice: {
+    maxSeries: 1,
+    maxBooksPerSeries: 3,
+    maxCharactersPerSeries: 10,
+    maxLocationsPerSeries: 10,
+    aiSuggestions: true,
+    aiSuggestionsLimit: 3,
+    worldBuildingAdvanced: false,
+    relationshipMapping: false,
+    writingChallenges: false,
+    timelineManagement: false,
+    multimediaIntegration: false,
+    communityCollaboration: false,
+    customVoices: false,
+    prioritySupport: false,
+    priorityFeatures: false,
+    customFeatureDevelopment: false,
+    cloudStorage: 5, // 5GB
+    exportFormats: 'basic', // TXT, DOC
+    backupFrequency: 'weekly',
+    platformAccess: 'web'
+  },
+  wordsmith: {
+    maxSeries: 5,
+    maxBooksPerSeries: -1, // unlimited
+    maxCharactersPerSeries: -1, // unlimited
+    maxLocationsPerSeries: -1, // unlimited
+    aiSuggestions: true,
+    aiSuggestionsLimit: 50,
+    worldBuildingAdvanced: true,
+    relationshipMapping: true,
+    writingChallenges: true,
+    timelineManagement: false,
+    multimediaIntegration: false,
+    communityCollaboration: false,
+    customVoices: false,
+    prioritySupport: false,
+    priorityFeatures: false,
+    customFeatureDevelopment: false,
+    cloudStorage: 20, // 20GB
+    exportFormats: 'standard', // More formats
+    backupFrequency: 'daily',
+    platformAccess: 'web'
+  },
+  loremaster: {
+    maxSeries: -1, // unlimited
+    maxBooksPerSeries: -1, // unlimited
+    maxCharactersPerSeries: -1, // unlimited
+    maxLocationsPerSeries: -1, // unlimited
+    aiSuggestions: true,
+    aiSuggestionsLimit: 200,
+    worldBuildingAdvanced: true,
+    relationshipMapping: true,
+    writingChallenges: true,
+    timelineManagement: true,
+    multimediaIntegration: true,
+    communityCollaboration: true,
+    customVoices: true,
+    prioritySupport: false,
+    priorityFeatures: false,
+    customFeatureDevelopment: false,
+    cloudStorage: 50, // 50GB
+    exportFormats: 'advanced', // All formats
+    backupFrequency: 'daily',
+    platformAccess: 'all'
+  },
+  legendary: {
+    maxSeries: -1, // unlimited
+    maxBooksPerSeries: -1, // unlimited
+    maxCharactersPerSeries: -1, // unlimited
+    maxLocationsPerSeries: -1, // unlimited
+    aiSuggestions: true,
+    aiSuggestionsLimit: -1, // unlimited
+    worldBuildingAdvanced: true,
+    relationshipMapping: true,
+    writingChallenges: true,
+    timelineManagement: true,
+    multimediaIntegration: true,
+    communityCollaboration: true,
+    customVoices: true,
+    prioritySupport: true,
+    priorityFeatures: true,
+    customFeatureDevelopment: true,
+    cloudStorage: 100, // 100GB
+    exportFormats: 'premium', // All formats + specialized
+    backupFrequency: 'realtime',
+    platformAccess: 'all'
+  }
+};
+
 // Get tier index for comparison
 export function getTierIndex(tier: SubscriptionTier): number {
   return SUBSCRIPTION_TIERS.indexOf(tier);
@@ -167,6 +186,11 @@ export function hasReachedLimit(
   }
   
   return currentCount >= limit;
+}
+
+// Get the limit for a specific feature
+export function getFeatureLimit(userTier: SubscriptionTier, feature: RestrictedFeature): number | boolean | string {
+  return TIER_LIMITS[userTier][feature];
 }
 
 // React hook to check feature access

@@ -2,11 +2,11 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check } from 'lucide-react';
+import { Check, Zap } from 'lucide-react';
+import { SUBSCRIPTION_TIERS, getTierIndex, type SubscriptionTier } from '@/lib/subscription';
 
-type SubscriptionTier = 'apprentice' | 'wordsmith' | 'loremaster';
-
-interface TierInfo {
+// Define tier info type
+type TierInfo = {
   name: string;
   description: string;
   price: number;
@@ -15,6 +15,7 @@ interface TierInfo {
   features: string[];
 }
 
+// Tier display information with detailed features
 const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
   apprentice: {
     name: "The Apprentice",
@@ -23,19 +24,51 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
     icon: "ri-quill-pen-line",
     color: "text-gray-600",
     features: [
+      // Series Architecture System
+      "// Series Architecture System",
       "Basic series outline with up to 3 books",
       "Simple linear timeline for plot events",
       "Limited milestone tracking (10 major plot points)",
       "Basic book-to-book connection tracker",
       "Text-only series planning",
+      
+      // Character Evolution Engine
+      "// Character Evolution Engine",
       "Basic character profiles for up to 10 characters",
       "Simple relationship mapping (direct connections only)",
+      "Basic character trait tracking",
+      "Text-only character descriptions",
+      "Manual consistency tracking",
+      
+      // World-Building Hub
+      "// World-Building Hub",
       "Up to 10 location entries",
+      "Basic world rules documentation",
+      "Simple cultural notes",
+      "Text-only world elements",
+      "Manual cross-referencing",
+      
+      // Productivity & Motivation
+      "// Productivity & Motivation",
       "Basic daily word count goals",
       "Simple progress tracking",
       "7-day streak visualization",
-      "Basic AI assistance (3 prompts per day)",
+      "Standard writing statistics",
+      "Basic achievement badges",
+      
+      // AI Writing Companion
+      "// AI Writing Companion",
+      "Basic spelling and grammar assistance",
+      "Limited continuity prompts (3 per day)",
+      "Simple character name suggestions",
+      "Generic writing prompts",
+      
+      // Multimedia & Technical
+      "// Multimedia & Technical",
       "5GB cloud storage",
+      "Web access only",
+      "Weekly backups",
+      "Basic export formats (TXT, DOC)",
       "Email support with 48-hour response time"
     ]
   },
@@ -46,56 +79,109 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
     icon: "ri-book-open-line",
     color: "text-blue-600",
     features: [
+      "// Series Architecture System",
       "Expanded series planning for unlimited books",
       "Visual timeline with branching capabilities",
       "Advanced milestone system (unlimited plot points)",
       "Comprehensive story arc designer",
+      
+      "// Character Evolution Engine",
       "Unlimited character profiles",
       "Advanced character development tracking",
       "Relationship web visualization",
       "Character consistency alerts",
+      
+      "// World-Building Hub",
       "Unlimited location entries",
-      "Hierarchical location organization",
-      "Customizable writing goals",
+      "Detailed map integration",
+      "Advanced world-building templates",
+      "Multi-layered world elements",
+      
+      "// Productivity & Motivation",
+      "Custom writing goals and schedules",
+      "Detailed progress analytics",
       "30-day streak visualization",
-      "Enhanced AI continuity checking",
-      "25GB cloud storage",
+      "Personalized writing challenges",
+      
+      "// AI Writing Companion",
+      "Advanced AI writing assistance",
+      "Enhanced continuity checking",
+      "Character voice consistency tools",
+      "Contextual writing suggestions",
+      
+      "// Multimedia & Technical",
+      "20GB cloud storage",
+      "Web and mobile access",
+      "Daily backups",
+      "Expanded export formats",
       "Priority email support with 24-hour response time"
     ]
   },
   loremaster: {
     name: "The Loremaster",
-    description: "Professional series blueprint with comprehensive features",
+    description: "Comprehensive timeline and continuity management",
     price: 19.99,
-    icon: "ri-magic-line",
+    icon: "ri-map-2-line",
     color: "text-purple-600",
     features: [
-      "Professional series blueprint designer",
-      "Multi-dimensional timeline with nested events",
-      "Adaptive timeline scaling (days to millennia)",
-      "Comprehensive foreshadowing tracker",
-      "Visual plot thread mapper",
-      "Series pacing analysis",
-      "Advanced character psychology profiles",
-      "Character arc visualization across books",
-      "Dynamic relationship mapping with history",
-      "Automatic consistency checking",
-      "Comprehensive setting atlas with map integration",
-      "Advanced cultural design system",
-      "Historical cause-and-effect visualization",
-      "Advanced AI writing assistance",
-      "Unlimited cloud storage",
-      "Priority email support with 12-hour response time"
+      "// Series Architecture System",
+      "Multi-series universe planning",
+      "Dynamic interactive timelines",
+      "Conflict management system",
+      "Plot hole detection algorithms",
+      
+      "// Character Evolution Engine",
+      "Character psychology profiling",
+      "Dynamic relationship tracking over time",
+      "Character arc visualization",
+      "Multi-dimensional character development",
+      
+      "// World-Building Hub",
+      "Advanced world-building ecosystem",
+      "Interactive maps with multiple layers",
+      "Cultural and language creation tools",
+      "Ecosystem and economy simulators",
+      
+      "// Productivity & Motivation",
+      "Community writing challenges",
+      "Comprehensive analytics dashboard",
+      "90-day streak visualization",
+      "Team collaboration features",
+      
+      "// AI Writing Companion",
+      "Premium AI writing tools",
+      "Story structure analysis",
+      "World consistency enforcement",
+      "Dialogue enhancement suggestions",
+      
+      "// Multimedia & Technical",
+      "50GB cloud storage",
+      "All platform access",
+      "Hourly backups",
+      "Professional publishing formats",
+      "Live chat support with quick response time"
+    ]
+  },
+  legendary: {
+    name: "The Legendary",
+    description: "All features unlocked with priority support",
+    price: 49.99,
+    icon: "ri-sword-line",
+    color: "text-amber-600",
+    features: [
+      "// Everything in Loremaster, plus:",
+      "Early access to all new features",
+      "Custom feature development",
+      "Dedicated support manager",
+      "Unlimited AI usage",
+      "100GB cloud storage",
+      "Real-time collaborative editing",
+      "White-label publishing tools",
+      "Exclusive author workshops",
+      "Professional consultation sessions"
     ]
   }
 };
-
-const SUBSCRIPTION_TIERS: SubscriptionTier[] = ['apprentice', 'wordsmith', 'loremaster'];
-
-// Function to get tier index for comparison
-function getTierIndex(tier: SubscriptionTier): number {
-  return SUBSCRIPTION_TIERS.indexOf(tier);
-}
 
 export default function SubscriptionTiers() {
   const { user } = useAuth();
@@ -120,7 +206,7 @@ export default function SubscriptionTiers() {
           </p>
         </div>
         
-        <div className="mt-12 grid grid-cols-1 gap-y-6 sm:gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+        <div className="mt-12 grid grid-cols-1 gap-y-6 sm:gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
           {SUBSCRIPTION_TIERS.map((tier) => {
             const tierInfo = TIER_DISPLAY[tier];
             const isCurrentTier = tier === currentTier;
@@ -152,36 +238,65 @@ export default function SubscriptionTiers() {
                   </div>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                  <ul className="space-y-2 text-sm">
-                    {tierInfo.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center">
-                        <Check className="h-3.5 w-3.5 mr-2 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Group features by category */}
+                  {(() => {
+                    const features = tierInfo.features;
+                    // Extract categories from comments
+                    const categories = new Map<string, string[]>();
+                    let currentCategory = "Features";
+                    
+                    features.forEach((feat: string, index: number) => {
+                      // Use the comment before the feature as the category name
+                      if (feat.startsWith('//')) {
+                        currentCategory = feat.replace('//', '').trim();
+                      } else {
+                        if (!categories.has(currentCategory)) {
+                          categories.set(currentCategory, []);
+                        }
+                        categories.get(currentCategory)!.push(feat);
+                      }
+                    });
+                    
+                    // Display features grouped by category
+                    return Array.from(categories.entries()).map(([category, feats]: [string, string[]], catIndex: number) => (
+                      <div key={catIndex} className="mb-4">
+                        <h3 className="text-sm font-semibold text-primary mb-2 flex items-center">
+                          {category === 'AI Writing Companion' && <Zap className="h-3.5 w-3.5 mr-1.5" />}
+                          {category}
+                        </h3>
+                        <ul className="space-y-1.5">
+                          {feats.map((feature, featIndex) => (
+                            <li key={featIndex} className="flex items-start">
+                              <Check className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ));
+                  })()}
                 </CardContent>
-                <CardFooter>
-                  <Button 
-                    variant={isCurrentTier ? "outline" : "default"} 
-                    className="w-full"
-                    disabled={isCurrentTier || isLowerTier}
-                    onClick={() => handleUpgrade(tier)}
-                  >
-                    {isCurrentTier ? 'Current Plan' : isLowerTier ? 'Lower Tier' : 'Upgrade'}
-                  </Button>
+                <CardFooter className="mt-auto">
+                  {isCurrentTier ? (
+                    <Button className="w-full" variant="outline" disabled>
+                      Current Plan
+                    </Button>
+                  ) : isLowerTier ? (
+                    <Button className="w-full" variant="outline" disabled>
+                      Lower Tier
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleUpgrade(tier)}
+                    >
+                      {tier === 'apprentice' ? 'Start Free' : 'Upgrade'}
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             );
           })}
-        </div>
-        
-        <div className="mt-10 text-center">
-          <p className="text-sm text-gray-500">
-            All plans include access to the SagaScript core writing platform.
-            <br />
-            Need a custom enterprise solution? <a href="#" className="text-primary hover:underline">Contact us</a>.
-          </p>
         </div>
       </div>
     </div>

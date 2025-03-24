@@ -153,34 +153,43 @@ const helpArticles: HelpArticle[] = [
       <h3>The Apprentice (Free)</h3>
       <p>Get started with basic features at no cost.</p>
       <ul>
-        <li>1 active series</li>
-        <li>Up to 3 books per series</li>
-        <li>Basic AI assistance (limited queries)</li>
-        <li>Standard editor features</li>
-        <li>Community access</li>
+        <li>1 active series with up to 3 books</li>
+        <li>Up to 10 character profiles</li>
+        <li>Up to 10 location entries</li>
+        <li>Basic AI assistance (3 prompts per day)</li>
+        <li>Basic daily word count tracking</li>
+        <li>7-day streak visualization</li>
+        <li>5GB cloud storage</li>
+        <li>Weekly backups</li>
+        <li>Basic export formats (TXT, DOC)</li>
+        <li>Email support (48-hour response time)</li>
       </ul>
       
-      <h3>The Journeyman</h3>
+      <h3>The Wordsmith</h3>
       <p>For dedicated writers working on multiple projects.</p>
       <ul>
-        <li>3 active series</li>
-        <li>Unlimited books per series</li>
-        <li>Advanced AI assistance</li>
-        <li>World-building tools</li>
-        <li>Consistency checker</li>
-        <li>Priority support</li>
+        <li>5 active series with unlimited books</li>
+        <li>Unlimited character profiles</li>
+        <li>Unlimited location entries</li>
+        <li>Advanced AI assistance (50 prompts per day)</li>
+        <li>Advanced character relationship mapping</li>
+        <li>Personalized writing challenges</li>
+        <li>20GB cloud storage</li>
+        <li>Daily backups</li>
+        <li>Priority email support (24-hour response time)</li>
       </ul>
       
-      <h3>The Master</h3>
+      <h3>The Loremaster</h3>
       <p>Professional-grade tools for serious authors.</p>
       <ul>
         <li>Unlimited series</li>
-        <li>All premium features</li>
-        <li>Unlimited AI usage</li>
-        <li>Voice dictation</li>
-        <li>Export to multiple formats</li>
-        <li>Publishing assistance</li>
-        <li>24/7 priority support</li>
+        <li>Comprehensive timeline management</li>
+        <li>Advanced multimedia integration</li>
+        <li>Community collaboration features</li>
+        <li>Premium AI writing tools (200 prompts per day)</li>
+        <li>50GB cloud storage</li>
+        <li>Hourly backups</li>
+        <li>Live chat support</li>
       </ul>
       
       <h3>Upgrading Your Plan</h3>
