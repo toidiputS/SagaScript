@@ -402,6 +402,7 @@ export default function WorldBuilding() {
           </div>
 
           {/* World Building Content */}
+          {/* Debug info: selectedSeries = {selectedSeries}, activeTab = {activeTab} */}
           {!selectedSeries ? (
             <div className="bg-background rounded-xl shadow-card overflow-hidden border border-border p-8 text-center">
               <MapIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -419,8 +420,10 @@ export default function WorldBuilding() {
             </div>
           ) : (
             <>
+              {/* Debug: Rendering content for selected series {activeTab === "atlas" ? "atlas tab" : "list tab"} */}
               <TabsContent value="atlas" className="mt-0" hidden={activeTab !== "atlas"}>
                 <div className="bg-background rounded-lg shadow-md overflow-hidden">
+                  {/* Debug: About to render UnifiedWorldMap */}
                   <UnifiedWorldMap selectedSeries={selectedSeries} />
                 </div>
                 {/* Location Cards (rest of the original code) */}

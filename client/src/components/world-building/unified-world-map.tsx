@@ -97,6 +97,8 @@ interface MapGenerationResult {
 }
 
 export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | null }) {
+  console.log("Debug: UnifiedWorldMap rendering with selectedSeries =", selectedSeries);
+  
   const { toast } = useToast();
   const [activeView, setActiveView] = useState<'generator' | 'history'>('generator');
   const [generatedMap, setGeneratedMap] = useState<MapGenerationResult | null>(null);
