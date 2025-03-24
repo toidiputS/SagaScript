@@ -71,15 +71,15 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
   };
 
   return (
-    <div className="space-y-2 w-full">
-      <Label htmlFor="avatarDescription">AI Image Generator</Label>
-      <div className="flex flex-col gap-2">
+    <div className="space-y-3 w-full h-full flex flex-col">
+      <Label htmlFor="avatarDescription" className="text-lg font-medium">AI Image Generator</Label>
+      <div className="flex flex-col gap-3 flex-grow">
         <Textarea
           id="avatarDescription"
           placeholder="Describe your character in detail..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full min-h-[120px]"
+          className="w-full flex-grow min-h-[180px]"
           disabled={isGenerating}
         />
         <Button 
@@ -87,12 +87,12 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
           variant="secondary"
           onClick={generateImage}
           disabled={isGenerating}
-          className="w-full"
+          className="w-full py-2"
         >
           {isGenerating ? "Generating..." : "Generate Character Image"}
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground mt-2">
         {hasAccess 
           ? "Enter a detailed description to generate an AI character image" 
           : "Available in Wordsmith plan and higher"}
