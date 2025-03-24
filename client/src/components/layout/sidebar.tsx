@@ -95,8 +95,8 @@ export default function Sidebar() {
             ))}
           </div>
 
-          {/* Current Series Section */}
-          {currentSeries && (
+          {/* Current Series Section - Only show on writing-related pages */}
+          {currentSeries && (location === '/' || location === '/series' || location.startsWith('/book/') || location.startsWith('/chapter/')) && (
             <div className="mt-6 pt-6 border-t border-border">
               <h3 className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                 Current Series
@@ -121,21 +121,25 @@ export default function Sidebar() {
                 </div>
               </div>
 
-              {/* Recent Activity */}
-              <h3 className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mt-6 mb-3">
-                Recent Activity
-              </h3>
-              <div className="space-y-3">
-                {currentSeries.recentActivities?.map((activity, index) => (
-                  <div key={index} className="text-xs text-foreground flex items-start">
-                    <i className={`${activity.icon} ${activity.iconColor} mt-0.5 mr-2`}></i>
-                    <div>
-                      <p>{activity.description}</p>
-                      <p className="text-muted-foreground mt-1">{activity.time}</p>
-                    </div>
+              {/* Recent Activity - Only show on dashboard */}
+              {location === '/' && (
+                <>
+                  <h3 className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mt-6 mb-3">
+                    Recent Activity
+                  </h3>
+                  <div className="space-y-3">
+                    {currentSeries.recentActivities?.map((activity, index) => (
+                      <div key={index} className="text-xs text-foreground flex items-start">
+                        <i className={`${activity.icon} ${activity.iconColor} mt-0.5 mr-2`}></i>
+                        <div>
+                          <p>{activity.description}</p>
+                          <p className="text-muted-foreground mt-1">{activity.time}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </div>
           )}
         </nav>
