@@ -195,12 +195,21 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
     onError: (error: any) => {
       console.error('Map generation error:', error);
       
-      // Extract helpful information from the error
-      let errorMessage = error.message;
+      // Provide more specific error handling
+      let errorMessage = 'Failed to generate map. Please try again with a different description.';
       
-      // Show a more user-friendly toast
+      if (error.message.includes('API key')) {
+        errorMessage = 'AI service configuration issue. Please try again later.';
+      } else if (error.message.includes('content_policy')) {
+        errorMessage = 'Please revise your description to avoid sensitive content.';
+      }
+      
       toast({
         title: 'Map Generation Failed',
+        description: errorMessage,
+        variant: 'destructive',
+        duration: 5000
+      });
         description: errorMessage || 'There was an error generating your map. Try a different description.',
         variant: 'destructive',
       });
