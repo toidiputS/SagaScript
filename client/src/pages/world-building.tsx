@@ -420,16 +420,19 @@ export default function WorldBuilding() {
             </div>
           ) : (
             <>
-              {/* World Map and Location Management Section */}
-              <TabsContent value="atlas" className="mt-0">
-                <div className="bg-background rounded-lg shadow-md overflow-hidden mb-6">
-                  <div className="border-b border-border p-3 bg-muted/30">
-                    <h3 className="text-lg font-semibold text-foreground">World Map Generator</h3>
+              {/* Direct Visible Map Generator Section - Removed TabsContent to fix display issues */}
+              {activeTab === "atlas" && (
+                <div>
+                  <div className="bg-primary-500 text-white px-4 py-3 rounded-t-lg shadow-lg mb-0 flex items-center">
+                    <MapIcon className="h-6 w-6 mr-2" />
+                    <h2 className="text-xl font-bold">World Map Generator</h2>
                   </div>
-                  <UnifiedWorldMap selectedSeries={selectedSeries} />
-                </div>
-                {/* Location Cards (rest of the original code) */}
-                {locations.length > 0 && (
+                  <div className="bg-background border-2 border-primary/50 rounded-b-lg shadow-md overflow-hidden mb-6 p-4">
+                    <UnifiedWorldMap selectedSeries={selectedSeries} />
+                  </div>
+                
+                  {/* Location Cards (rest of the original code) */}
+                  {locations.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                     {locations.map((location: any) => (
                       <Card
