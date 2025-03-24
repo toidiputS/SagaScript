@@ -7,3 +7,48 @@
     margin-bottom: 2rem;
   }
 }
+
+/* Sidebar and series section styles */
+.current-series {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.current-series h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.series-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.recent-activity {
+  padding: 1rem;
+}
+
+.recent-activity h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.activity-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
