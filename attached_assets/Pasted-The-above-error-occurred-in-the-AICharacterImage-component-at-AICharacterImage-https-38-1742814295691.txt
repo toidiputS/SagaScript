@@ -1,0 +1,49 @@
+The above error occurred in the <AICharacterImage> component:
+
+    at AICharacterImage (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/components/characters/ai-character-image.tsx:23:36)
+    at div
+    at div
+    at div
+    at div
+    at form
+    at CharacterForm (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/components/characters/character-form.tsx:33:3)
+    at div
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2JFZEFXJ.js?v=be4aafcc:41:13
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LAP3Z2MN.js?v=be4aafcc:59:7
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=be4aafcc:52:11
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=be4aafcc:33:11
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2JFZEFXJ.js?v=be4aafcc:41:13
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BFJGOCGD.js?v=be4aafcc:29:5
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=be4aafcc:232:13
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=be4aafcc:155:58
+    at Presence (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-X7Q75VJA.js?v=be4aafcc:24:11)
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=be4aafcc:146:64
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=be4aafcc:52:11
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4WIT4MX7.js?v=be4aafcc:33:11
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2JFZEFXJ.js?v=be4aafcc:41:13
+    at https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LAP3Z2MN.js?v=be4aafcc:258:22
+    at Presence (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-X7Q75VJA.js?v=be4aafcc:24:11)
+    at Provider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MLRCWJEU.js?v=be4aafcc:38:15)
+    at DialogPortal (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=be4aafcc:109:11)
+    at _c3 (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/components/ui/dialog.tsx:51:12)
+    at Provider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MLRCWJEU.js?v=be4aafcc:38:15)
+    at Dialog (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=be4aafcc:50:5)
+    at div
+    at div
+    at div
+    at div
+    at CharactersPage (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/pages/characters.tsx:38:21)
+    at component
+    at Route (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=be4aafcc:323:16)
+    at ProtectedRoute (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/lib/protected-route.tsx:22:3)
+    at Switch (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=be4aafcc:379:17)
+    at main
+    at div
+    at Router (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/App.tsx?v=BrOKvIPcwzPN9WyrZ55yg:46:51)
+    at ThemeProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/theme-context.tsx:20:33)
+    at SimpleAuthProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/src/contexts/simple-auth.tsx:22:38)
+    at QueryClientProvider (https://38e86622-a272-4acf-80a1-6e82020c9b1d-00-1x8p5eliz00qd.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=be4aafcc:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
