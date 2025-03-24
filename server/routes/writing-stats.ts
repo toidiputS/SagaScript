@@ -1,26 +1,6 @@
-
 import { Router } from 'express';
 import { isAuthenticated as auth } from '../auth'; // Import the auth middleware
-
-const router = Router();
-
-// Period can be 'day', 'week', 'month', or 'year'
-router.get('/', auth, async (req, res) => {
-  try {
-    // Your existing code here
-    res.json({ message: 'Writing stats endpoint' });
-  } catch (error) {
-    console.error('Error in writing stats route:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-export default router;
-
-
-import { Router } from 'express';
 import { db } from '../db';
-import { Express } from 'express';
 
 const router = Router();
 
@@ -35,7 +15,7 @@ router.get('/', auth, async (req, res) => {
     // For this example, we'll calculate word count for today based on word count from chapters
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Get chapters modified today
     const chaptersToday = await db.query.chapters.findMany({
       where: (chapters, { and, eq, gte }) => and(
@@ -43,23 +23,23 @@ router.get('/', auth, async (req, res) => {
         gte(chapters.updatedAt, today)
       ),
     });
-    
+
     // Calculate total words written today
     const wordsToday = chaptersToday.reduce((total, chapter) => total + (chapter.wordCount || 0), 0);
-    
+
     // Calculate change from yesterday (for demonstration)
     const yesterdayWords = wordsToday * 0.8; // Simplified mock data
     const wordsTodayChange = yesterdayWords > 0 
       ? Math.round((wordsToday - yesterdayWords) / yesterdayWords * 100) 
       : 0;
-    
+
     // Calculate streak (for demonstration)
     // In a real app, you would query the database for consecutive days of writing
     const currentStreak = 7; // Simplified mock data
-    
+
     // Generate mock streak days (in a real app, these would be the days the user wrote)
     const streakDays = ['1', '2', '3', '4', '5', '6', '7']; // Simplified mock data
-    
+
     return res.json({
       wordsToday,
       wordsTodayChange,

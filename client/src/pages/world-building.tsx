@@ -633,3 +633,16 @@ export default function WorldBuilding() {
     </div>
   );
 }
+import React from 'react';
+import { WorldMap } from '@/components/world-building/world-map';
+
+export default function WorldBuildingPage() {
+  return (
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold mb-6">World Building</h1>
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <WorldMap />
+      </div>
+    </div>
+  );
+}
