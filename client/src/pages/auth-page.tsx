@@ -43,7 +43,7 @@ export default function AuthPage() {
   const auth = useSimpleAuth();
   const { user, isLoading } = auth;
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-  
+
   console.log("Auth Page - Simple Auth state:", {
     isAuthenticated: auth.isAuthenticated,
     isLoading: auth.isLoading
@@ -65,7 +65,7 @@ export default function AuthPage() {
       <div className="flex flex-col w-full md:w-1/2 px-6 py-12 justify-center">
         <div className="max-w-md w-full mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-serif font-bold text-foreground">Saga Scribe</h1>
+            <h1 className="text-3xl font-serif font-bold text-foreground">Saga Script Life</h1>
             <p className="text-muted-foreground mt-2">Your ultimate writing companion</p>
           </div>
 
@@ -93,7 +93,7 @@ export default function AuthPage() {
             Craft Your Epic Tales
           </h2>
           <p className="text-lg mb-8">
-            Saga Scribe helps you organize your story ideas, track character
+            Saga Script Life helps you organize your story ideas, track character
             development, and manage your writing journey with powerful tools designed
             for serious authors.
           </p>
@@ -293,15 +293,15 @@ function RegisterForm() {
     try {
       // Remove confirmPassword from the data sent to the API
       const { confirmPassword, ...registerData } = values;
-      
+
       // Set default plan to free tier
       const registerWithPlan = {
         ...registerData,
         plan: "apprentice",
       };
-      
+
       console.log("Submitting registration form with values:", registerWithPlan);
-      
+
       setIsPending(true);
       await auth.register(registerWithPlan);
     } catch (error) {
@@ -316,7 +316,7 @@ function RegisterForm() {
     <Card>
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
-        <CardDescription>Join the Saga Scribe community</CardDescription>
+        <CardDescription>Join the Saga Script Life community</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
