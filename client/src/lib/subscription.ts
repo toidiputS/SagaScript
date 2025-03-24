@@ -28,11 +28,72 @@ export const TIER_DISPLAY: Record<SubscriptionTier, {
     color: 'text-purple-500'
   },
   legendary: {
-    name: 'Legendary',
-    description: 'All features unlocked with priority support',
+    name: 'Legendary Chronicler',
+    description: 'Enterprise-grade series planning with AI assistance',
     price: 49.99,
     icon: 'ri-sword-line',
-    color: 'text-amber-500'
+    color: 'text-amber-500',
+    features: [
+      "// Series Architecture System",
+      "Enterprise-grade series planning tools",
+      "Multi-series universe management",
+      "Quantum timeline system (alternate storylines)",
+      "Professional story structure templates",
+      "Integrated plot analysis",
+      "Advanced narrative tension mapping",
+      "Cross-series continuity management",
+      
+      "// Character Evolution Engine",
+      "Professional character psychology system",
+      "Character ensemble management",
+      "Family/dynasty tracking across generations",
+      "Character statistical analysis",
+      "AI-powered character consistency engine",
+      "Advanced dialogue patterns by context",
+      "Multi-perspective character development",
+      
+      "// World-Building Hub",
+      "Professional worldbuilding suite",
+      "Economic and political systems modeling",
+      "Interconnected world dynamics",
+      "Language and terminology management",
+      "Scientific/magic system coherence tools",
+      "Interactive world visualization",
+      "Universe logic validation",
+      
+      "// Productivity & Motivation",
+      "Professional writing analytics dashboard",
+      "Customizable workflow automation",
+      "Predictive writing pattern analysis",
+      "Personalized motivation system",
+      "Custom achievement framework",
+      "Industry benchmarking",
+      "Professional deadline management",
+      
+      "// AI Writing Companion",
+      "Enterprise-grade AI writing assistant",
+      "Deep narrative structure analysis",
+      "Advanced series-specific feedback",
+      "Professional continuity management",
+      "Multi-book thematic analysis",
+      "Publisher-ready manuscript evaluation",
+      "Custom AI training for your writing style",
+      
+      "// Multimedia & Technical",
+      "Unlimited cloud storage",
+      "White-glove data migration service",
+      "Continuous backup with unlimited history",
+      "Professional series bible generator",
+      "Advanced multimedia integration",
+      "Custom feature development requests",
+      "Dedicated support specialist",
+      "Early access to all new features",
+      "Professional development resources",
+      "Marketing tools for series promotion",
+      "Publisher submission package preparation",
+      "Collaborative universe features",
+      "API access for custom integrations"
+    ]
   }
 };
 
