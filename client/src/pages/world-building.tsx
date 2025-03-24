@@ -420,10 +420,12 @@ export default function WorldBuilding() {
             </div>
           ) : (
             <>
-              {/* Debug: Rendering content for selected series {activeTab === "atlas" ? "atlas tab" : "list tab"} */}
-              <TabsContent value="atlas" className="mt-0" hidden={activeTab !== "atlas"}>
-                <div className="bg-background rounded-lg shadow-md overflow-hidden">
-                  {/* Debug: About to render UnifiedWorldMap */}
+              {/* World Map and Location Management Section */}
+              <TabsContent value="atlas" className="mt-0">
+                <div className="bg-background rounded-lg shadow-md overflow-hidden mb-6">
+                  <div className="border-b border-border p-3 bg-muted/30">
+                    <h3 className="text-lg font-semibold text-foreground">World Map Generator</h3>
+                  </div>
                   <UnifiedWorldMap selectedSeries={selectedSeries} />
                 </div>
                 {/* Location Cards (rest of the original code) */}

@@ -97,8 +97,6 @@ interface MapGenerationResult {
 }
 
 export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | null }) {
-  console.log("Debug: UnifiedWorldMap rendering with selectedSeries =", selectedSeries);
-  
   const { toast } = useToast();
   const [activeView, setActiveView] = useState<'generator' | 'history'>('generator');
   const [generatedMap, setGeneratedMap] = useState<MapGenerationResult | null>(null);
@@ -325,6 +323,13 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
 
   return (
     <div ref={mapContainerRef} className="bg-background rounded-lg shadow-sm overflow-hidden border border-border">
+      {/* Debug info banner */}
+      <div className="bg-blue-500/10 text-blue-700 p-2 text-sm border-b border-blue-200">
+        Map Generator: {selectedSeries ? `Series ID: ${selectedSeries}` : 'No series selected'} | 
+        Styles loaded: {stylesLoading ? 'Loading...' : stylesError ? 'Error' : 'Yes'} |
+        Active tab: {activeView}
+      </div>
+      
       <Tabs defaultValue="generator" onValueChange={(value) => setActiveView(value as 'generator' | 'history')}>
         <div className="p-4 border-b border-border flex items-center justify-between">
           <h2 className="text-xl font-bold">World Map</h2>
