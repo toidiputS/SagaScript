@@ -17,19 +17,43 @@ import ChapterEditor from "@/pages/chapter-editor";
 import Collaboration from "@/pages/collaboration";
 import Sidebar from "@/components/layout/sidebar";
 import MobileMenu from "@/components/layout/mobile-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SimpleAuthProvider } from "@/contexts/simple-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
 import SubscriptionsPage from '@/pages/subscriptions';
 import AICompanion from '@/pages/ai-companion';
+import { cn } from "@/lib/utils";
 // Map generator is now integrated into world-building
 
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    // Initialize from localStorage if available
+    const saved = localStorage.getItem('sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Update when localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('sidebar-collapsed');
+      if (saved) {
+        setIsSidebarCollapsed(JSON.parse(saved));
+      }
+    };
+    
+    // Listen for storage events
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Check initial value
+    handleStorageChange();
+    
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Check if the current route is auth-related
   const isAuthRoute = ['/login', '/register', '/auth'].includes(location);
@@ -43,10 +67,10 @@ function Router() {
             isOpen={isMobileMenuOpen} 
             onClose={() => setIsMobileMenuOpen(false)} 
           />
-          <div className="md:hidden w-full bg-white border-b border-neutral-200 h-16 fixed top-0 z-10 flex items-center px-4">
+          <div className="md:hidden w-full bg-background border-b border-border h-16 fixed top-0 z-10 flex items-center px-4">
             <button 
               onClick={() => setIsMobileMenuOpen(true)} 
-              className="p-2 rounded-md text-neutral-500 hover:text-neutral-700"
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -55,13 +79,17 @@ function Router() {
               </svg>
             </button>
             <div className="ml-4 flex items-center">
-              <span className="font-serif font-bold text-lg">SagaScript.Life</span>
+              <span className="font-serif font-bold text-lg text-foreground">SagaScript</span>
             </div>
           </div>
         </>
       )}
 
-      <main className={`flex-1 overflow-y-auto bg-neutral-50 ${!isAuthRoute ? 'pt-16 md:pt-0' : ''}`}>
+      <main className={cn(
+        "flex-1 overflow-y-auto bg-background transition-all duration-300", 
+        !isAuthRoute ? 'pt-16 md:pt-0 md:ml-64' : '',
+        !isAuthRoute && isSidebarCollapsed ? 'md:ml-16' : ''
+      )}>
         <Switch>
           {/* Auth routes */}
           <Route path="/auth" component={AuthPage} />

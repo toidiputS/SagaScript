@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
@@ -7,14 +7,24 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function Sidebar() {
   const [location] = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
   const { currentSeries } = useSeries();
   const { theme } = useTheme();
   const { toast } = useToast();
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Initialize from localStorage if available
+    const saved = localStorage.getItem('sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Save to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
 
   // Create logout mutation
   const logoutMutation = useMutation({
@@ -54,55 +64,67 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden lg:flex h-screen flex-col fixed left-0 top-0 bottom-0 w-64 bg-background border-r">
-      <div className={`flex flex-col`}>
+    <aside 
+      className={cn(
+        "hidden lg:flex h-screen flex-col fixed left-0 top-0 bottom-0 bg-background border-r transition-all duration-300 ease-in-out z-30",
+        isCollapsed ? "w-16" : "w-64" 
+      )}
+    >
+      <div className="flex flex-col h-full">
         {/* Sidebar Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-border">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground mr-2">
+        <div className="h-16 flex items-center justify-between px-3 sm:px-4 border-b border-border">
+          <div className={cn("flex items-center", isCollapsed ? "justify-center w-full" : "")}>
+            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground">
               <i className="ri-quill-pen-line"></i>
             </div>
-            <span className="font-serif font-bold text-lg text-foreground">SagaScript.Life</span>
+            {!isCollapsed && <span className="font-serif font-bold text-lg text-foreground ml-2">SagaScript</span>}
           </div>
-          <div className="flex items-center space-x-2">
-            <ThemeSwitcher />
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-1 rounded-md text-muted-foreground hover:text-foreground"
-            >
-              <i className={`ri-arrow-${isSidebarOpen ? 'left' : 'right'}-s-line text-xl`}></i>
-            </button>
-          </div>
+          {!isCollapsed && (
+            <div className="flex items-center space-x-2">
+              <ThemeSwitcher />
+            </div>
+          )}
         </div>
 
+        {/* Toggle Button - Fixed at bottom of sidebar */}
+        <button
+          onClick={() => setIsCollapsed(prev => !prev)}
+          className="absolute bottom-20 right-0 translate-x-1/2 w-6 h-16 flex items-center justify-center bg-background border border-border rounded-r-md text-muted-foreground hover:text-foreground hover:bg-accent"
+        >
+          <i className={`ri-arrow-${isCollapsed ? 'right' : 'left'}-s-line text-sm`}></i>
+        </button>
+
         {/* Main Sidebar Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+        <nav className="flex-1 overflow-y-auto p-2 space-y-2">
           {/* Navigation Links */}
           <div className="flex flex-col space-y-1">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 href={link.path}
-                className={`flex items-center p-2 rounded-md ${
+                title={isCollapsed ? link.name : undefined}
+                className={cn(
+                  "flex items-center p-2 rounded-md",
+                  isCollapsed ? "justify-center" : "",
                   location === link.path
                     ? "bg-primary/10 text-primary"
                     : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
+                )}
               >
-                <i className={`${link.icon} mr-3 text-lg`}></i>
-                <span>{link.name}</span>
+                <i className={cn(link.icon, "text-lg", isCollapsed ? "" : "mr-3")}></i>
+                {!isCollapsed && <span>{link.name}</span>}
               </Link>
             ))}
           </div>
 
-          {/* Current Series Section - Only show on writing-related pages */}
-          {currentSeries && (location === '/' || location === '/series' || location.startsWith('/book/') || location.startsWith('/chapter/')) && (
+          {/* Current Series Section - Only show on writing-related pages and when not collapsed */}
+          {!isCollapsed && currentSeries && (location === '/' || location === '/series' || location.startsWith('/book/') || location.startsWith('/chapter/')) && (
             <div className="mt-6 pt-6 border-t border-border">
               <h3 className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                 Current Series
               </h3>
               <div className="bg-card rounded-md p-3">
-                <div className="font-medium text-card-foreground">{currentSeries.title}</div>
+                <div className="font-medium text-card-foreground truncate">{currentSeries.title}</div>
                 <div className="flex items-center justify-between mt-2">
                   <div className="text-xs text-muted-foreground">
                     Book {currentSeries.currentBook} of {currentSeries.totalBooks}
@@ -132,7 +154,7 @@ export default function Sidebar() {
                       <div key={index} className="text-xs text-foreground flex items-start">
                         <i className={`${activity.icon} ${activity.iconColor} mt-0.5 mr-2`}></i>
                         <div>
-                          <p>{activity.description}</p>
+                          <p className="truncate">{activity.description}</p>
                           <p className="text-muted-foreground mt-1">{activity.time}</p>
                         </div>
                       </div>
@@ -145,26 +167,36 @@ export default function Sidebar() {
         </nav>
 
         {/* User Section */}
-        <div className="p-4 border-t border-border">
+        <div className={cn(
+          "border-t border-border", 
+          isCollapsed ? "p-2" : "p-4"
+        )}>
           {user && (
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                <span className="font-medium">
+            <div className={cn(
+              "flex items-center", 
+              isCollapsed ? "justify-center" : ""
+            )}>
+              <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0">
+                <span className="font-medium text-sm">
                   {user.displayName.split(" ").map(word => word[0]).join("").toUpperCase()}
                 </span>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-foreground">{user.displayName}</p>
-                <p className="text-xs text-muted-foreground">{user.plan} Plan</p>
-              </div>
-              <div className="ml-auto">
-                <button
-                  onClick={() => logoutMutation.mutate()}
-                  className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
-                >
-                  <i className="ri-logout-box-line"></i>
-                </button>
-              </div>
+              {!isCollapsed && (
+                <>
+                  <div className="ml-3 overflow-hidden">
+                    <p className="text-sm font-medium text-foreground truncate">{user.displayName}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{user.plan} Plan</p>
+                  </div>
+                  <div className="ml-auto">
+                    <button
+                      onClick={() => logoutMutation.mutate()}
+                      className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
+                    >
+                      <i className="ri-logout-box-line"></i>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
