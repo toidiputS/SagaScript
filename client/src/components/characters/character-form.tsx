@@ -128,7 +128,16 @@ export default function CharacterForm({
               </SelectContent>
             </Select>
           </div>
-          
+
+          <div className="space-y-2">
+            <Label htmlFor="occupation">Occupation</Label>
+            <Input
+              id="occupation"
+              value={formData.occupation || ""}
+              onChange={(e) => setFormData({...formData, occupation: e.target.value})}
+              placeholder="Character occupation"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
             <Select
@@ -149,16 +158,6 @@ export default function CharacterForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="occupation">Occupation</Label>
-            <Input
-              id="occupation"
-              value={formData.occupation || ""}
-              onChange={(e) => setFormData({...formData, occupation: e.target.value})}
-              placeholder="Character occupation"
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="avatar">Avatar</Label>
             <div className="relative w-80 h-80">
               <AICharacterImage 
@@ -166,35 +165,6 @@ export default function CharacterForm({
                 onImageGenerated={(imageUrl) => setFormData({...formData, avatarUrl: imageUrl})}
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              value={formData.role || "supporting"}
-              onValueChange={(value) => setFormData({...formData, role: value})}
-            >
-              <SelectTrigger id="role">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="protagonist">Protagonist</SelectItem>
-                <SelectItem value="antagonist">Antagonist</SelectItem>
-                <SelectItem value="supporting">Supporting</SelectItem>
-                <SelectItem value="mentor">Mentor</SelectItem>
-                <SelectItem value="comic_relief">Comic Relief</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="occupation">Occupation</Label>
-            <Input
-              id="occupation"
-              value={formData.occupation || ""}
-              onChange={(e) => setFormData({...formData, occupation: e.target.value})}
-              placeholder="Character occupation"
-            />
           </div>
         </div>
       </div>
