@@ -15,8 +15,9 @@ export function AICharacterImage({ onImageGenerated }: AICharacterImageProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { canUseFeature } = useFeatureAccess();
   const { toast } = useToast();
+  const { canAccess } = useFeatureAccess();
   
-  const hasAccess = canUseFeature('aiCharacterImages');
+  const hasAccess = canAccess('aiCharacterImages');
 
   const generateImage = async () => {
     if (!hasAccess) {
