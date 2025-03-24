@@ -187,10 +187,10 @@ export default function CharacterForm({
             </div>
           </div>
 
-          <div className="md:w-1/2 space-y-4 flex flex-col">
+          <div className="md:w-3/5 space-y-4 flex flex-col">
             <div className="space-y-2 flex-grow">
               <Label htmlFor="avatar">Avatar</Label>
-              <div className="relative w-full h-full min-h-[400px]">
+              <div className="relative w-full h-full min-h-[450px]">
                 <AICharacterImage 
                   onImageGenerated={(imageUrl) => setFormData({...formData, avatarUrl: imageUrl})}
                 />
