@@ -3,11 +3,18 @@ import { SubscriptionPlan, InsertSubscriptionPlan } from '@shared/schema';
 import { storage } from '../storage';
 
 // Initialize subscription plans based on the Saga Script Life Subscription tiers
-export async function initializeSubscriptionPlans() {
+export async function initializeSubscriptionPlans(force = false) {
   const existingPlans = await storage.getSubscriptionPlans();
   
-  // Only initialize if no plans exist
-  if (existingPlans.length === 0) {
+  // Initialize if no plans exist or if forced
+  if (existingPlans.length === 0 || force) {
+    // If forced and plans exist, delete existing plans first
+    if (force && existingPlans.length > 0) {
+      console.log('[Initialization] Forcing re-creation of subscription plans');
+      for (const plan of existingPlans) {
+        await storage.deleteSubscriptionPlan(plan.id);
+      }
+    }
     const plans: InsertSubscriptionPlan[] = [
       {
         name: "apprentice",
