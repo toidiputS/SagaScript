@@ -6,6 +6,7 @@ import { setupAuth } from "./auth";
 import collaborationRoutes from "./routes/collaboration";
 import aiRoutes from "./routes/ai";
 import writingStatsRoutes from './routes/writing-stats'; // Added import for writing-stats routes
+import mapsRouter from './routes/maps'; // Added import for maps routes
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe integration will be disabled.');
@@ -1520,6 +1521,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   //Mount writing stats routes
   app.use('/api/writing-stats', writingStatsRoutes);
+
+  // Mount maps routes
+  app.use('/api/maps', mapsRouter);
 
   return httpServer;
 }

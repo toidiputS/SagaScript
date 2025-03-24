@@ -19,6 +19,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusIcon, MapPinIcon, SearchIcon, MapIcon, Settings2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import React from 'react';
+import { WorldMap } from '@/components/world-building/world-map';
+import { WorldMapProvider } from '@/components/world-building/world-map-context';
+
 
 const locationSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -82,8 +86,8 @@ export default function WorldBuilding() {
   // Filter locations based on search and type filter
   const locations = allLocations
     ? allLocations.filter((location) => {
-        const matchesSearch = searchQuery === "" || 
-          location.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        const matchesSearch = searchQuery === "" ||
+          location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (location.description && location.description.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesType = !selectedType || location.type === selectedType;
         return matchesSearch && matchesType;
@@ -93,10 +97,10 @@ export default function WorldBuilding() {
   // Extract unique location types for filtering
   const locationTypes = allLocations
     ? Array.from(new Set(
-        allLocations
-          .filter(loc => loc.type)
-          .map(loc => loc.type as string)
-      ))
+      allLocations
+        .filter(loc => loc.type)
+        .map(loc => loc.type as string)
+    ))
     : [];
 
   // Create location mutation
@@ -146,11 +150,11 @@ export default function WorldBuilding() {
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex">
       <Sidebar />
-      
+
       <main className="flex-1 md:ml-64 pt-4 md:pt-0">
         <div className="p-4 md:p-6 max-w-7xl mx-auto">
           <MobileNav />
-          
+
           {/* Page header */}
           <header className="md:flex justify-between items-center mb-6">
             <div>
@@ -180,8 +184,8 @@ export default function WorldBuilding() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Series</FormLabel>
-                            <Select 
-                              onValueChange={(value) => handleSeriesChange(value)} 
+                            <Select
+                              onValueChange={(value) => handleSeriesChange(value)}
                               defaultValue={field.value?.toString()}
                             >
                               <FormControl>
@@ -221,9 +225,9 @@ export default function WorldBuilding() {
                           <FormItem>
                             <FormLabel>Location Type</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="e.g. City, Forest, Castle" 
-                                {...field} 
+                              <Input
+                                placeholder="e.g. City, Forest, Castle"
+                                {...field}
                                 value={field.value || ""}
                               />
                             </FormControl>
@@ -238,9 +242,9 @@ export default function WorldBuilding() {
                           <FormItem>
                             <FormLabel>Description</FormLabel>
                             <FormControl>
-                              <Textarea 
-                                placeholder="Describe the location and its significance" 
-                                {...field} 
+                              <Textarea
+                                placeholder="Describe the location and its significance"
+                                {...field}
                                 value={field.value || ""}
                               />
                             </FormControl>
@@ -263,7 +267,7 @@ export default function WorldBuilding() {
                                       onCheckedChange={(checked) => {
                                         const current = form.getValues("bookAppearances") || [];
                                         const bookId = book.id.toString();
-                                        
+
                                         if (checked) {
                                           form.setValue("bookAppearances", [...current, bookId]);
                                         } else {
@@ -289,8 +293,8 @@ export default function WorldBuilding() {
                         />
                       )}
                       <DialogFooter>
-                        <Button 
-                          type="submit" 
+                        <Button
+                          type="submit"
                           disabled={createLocationMutation.isPending}
                         >
                           {createLocationMutation.isPending ? "Creating..." : "Create Location"}
@@ -310,7 +314,7 @@ export default function WorldBuilding() {
                 <label htmlFor="series-select" className="block text-sm font-medium text-foreground mb-1">
                   Select Series
                 </label>
-                <Select 
+                <Select
                   onValueChange={(value) => setSelectedSeries(parseInt(value))}
                   value={selectedSeries?.toString()}
                 >
@@ -351,7 +355,7 @@ export default function WorldBuilding() {
                 <label htmlFor="type-filter" className="block text-sm font-medium text-foreground mb-1">
                   Filter by Type
                 </label>
-                <Select 
+                <Select
                   onValueChange={(value) => setSelectedType(value === "all" ? null : value)}
                   value={selectedType || "all"}
                 >
@@ -372,22 +376,22 @@ export default function WorldBuilding() {
                 <label htmlFor="world-building-tabs" className="block text-sm font-medium text-foreground mb-1">
                   View
                 </label>
-                <Tabs 
-                  defaultValue="atlas" 
-                  className="w-full" 
-                  value={activeTab} 
+                <Tabs
+                  defaultValue="atlas"
+                  className="w-full"
+                  value={activeTab}
                   onValueChange={setActiveTab}
                   id="world-building-tabs"
                 >
                   <TabsList className="w-full bg-background border border-input">
-                    <TabsTrigger 
-                      value="atlas" 
+                    <TabsTrigger
+                      value="atlas"
                       className="flex-1 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
                     >
                       Atlas
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="list" 
+                    <TabsTrigger
+                      value="list"
                       className="flex-1 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
                     >
                       List
@@ -417,64 +421,31 @@ export default function WorldBuilding() {
           ) : (
             <>
               <TabsContent value="atlas" className="mt-0" hidden={activeTab !== "atlas"}>
-                {/* World Map Preview */}
-                <div className="bg-background rounded-lg shadow-card border border-border p-4 mb-6 hover:shadow-card-hover transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-medium text-foreground">
-                      {series?.find((s) => s.id === selectedSeries)?.title} - World Map
-                    </h3>
-                    <button className="text-muted-foreground hover:text-primary">
-                      <Settings2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                  <div className="bg-muted/50 rounded-md h-64 flex items-center justify-center relative overflow-hidden">
-                    {locations.length > 0 ? (
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 flex items-end">
-                        <div className="p-3 w-full">
-                          <div className="flex justify-between items-center">
-                            <span className="text-white text-xs font-medium">{locations.length} Locations</span>
-                            <button className="bg-background/30 backdrop-blur-sm text-white rounded p-1 hover:bg-background/50 transition-colors">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 011.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 011.414-1.414L15 13.586V12a1 1 0 011-1z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center p-6 text-center">
-                        <MapIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                        <h3 className="text-foreground font-medium mb-2">No Locations Created Yet</h3>
-                        <p className="text-muted-foreground text-sm mb-3">Add locations to start building your world map</p>
-                        <Button size="sm" onClick={() => setIsCreateLocationOpen(true)}>
-                          <PlusIcon className="h-4 w-4 mr-1" />
-                          Add First Location
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <WorldMapProvider>
+                    <WorldMap />
+                  </WorldMapProvider>
                 </div>
-
-                {/* Location Cards */}
+                {/* Location Cards (rest of the original code) */}
                 {locations.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {locations.map((location: any) => (
-                      <Card 
-                        key={location.id} 
+                      <Card
+                        key={location.id}
                         className="overflow-hidden hover:shadow-lg transition-shadow bg-card border-border"
                       >
                         <CardHeader className={`p-4 ${
                           location.type === 'city' || location.type === 'capital' ? 'bg-secondary/10' :
-                          location.type === 'forest' || location.type === 'nature' ? 'bg-green-600/10' :
-                          location.type === 'castle' || location.type === 'fortress' ? 'bg-accent/10' :
-                          'bg-muted'
+                            location.type === 'forest' || location.type === 'nature' ? 'bg-green-600/10' :
+                              location.type === 'castle' || location.type === 'fortress' ? 'bg-accent/10' :
+                                'bg-muted'
                         }`}>
                           <div className="flex items-center">
                             <div className={`h-10 w-10 rounded-md flex items-center justify-center text-white mr-3 flex-shrink-0 ${
                               location.type === 'city' || location.type === 'capital' ? 'bg-secondary' :
-                              location.type === 'forest' || location.type === 'nature' ? 'bg-green-600' :
-                              location.type === 'castle' || location.type === 'fortress' ? 'bg-accent' :
-                              'bg-muted-foreground'
+                                location.type === 'forest' || location.type === 'nature' ? 'bg-green-600' :
+                                  location.type === 'castle' || location.type === 'fortress' ? 'bg-accent' :
+                                    'bg-muted-foreground'
                             }`}>
                               <MapPinIcon className="h-5 w-5" />
                             </div>
@@ -495,7 +466,7 @@ export default function WorldBuilding() {
                             <div className="flex flex-wrap gap-2">
                               {location.bookAppearances && location.bookAppearances.length > 0 ? (
                                 location.bookAppearances.map((bookId: string) => (
-                                  <span 
+                                  <span
                                     key={`${location.id}-${bookId}`}
                                     className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground"
                                   >
@@ -542,9 +513,9 @@ export default function WorldBuilding() {
                                 <div className="flex items-center">
                                   <div className={`h-8 w-8 rounded-md flex items-center justify-center text-white mr-3 flex-shrink-0 ${
                                     location.type === 'city' || location.type === 'capital' ? 'bg-secondary' :
-                                    location.type === 'forest' || location.type === 'nature' ? 'bg-green-600' :
-                                    location.type === 'castle' || location.type === 'fortress' ? 'bg-accent' :
-                                    'bg-muted-foreground'
+                                      location.type === 'forest' || location.type === 'nature' ? 'bg-green-600' :
+                                        location.type === 'castle' || location.type === 'fortress' ? 'bg-accent' :
+                                          'bg-muted-foreground'
                                   }`}>
                                     <MapPinIcon className="h-4 w-4" />
                                   </div>
@@ -554,9 +525,9 @@ export default function WorldBuilding() {
                               <td className="px-6 py-4">
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                                   location.type === 'city' || location.type === 'capital' ? 'bg-secondary/10 text-secondary' :
-                                  location.type === 'forest' || location.type === 'nature' ? 'bg-green-600/10 text-green-700' :
-                                  location.type === 'castle' || location.type === 'fortress' ? 'bg-accent/10 text-accent' :
-                                  'bg-muted text-muted-foreground'
+                                    location.type === 'forest' || location.type === 'nature' ? 'bg-green-600/10 text-green-700' :
+                                      location.type === 'castle' || location.type === 'fortress' ? 'bg-accent/10 text-accent' :
+                                        'bg-muted text-muted-foreground'
                                 }`}>
                                   {location.type || "Location"}
                                 </span>
@@ -568,7 +539,7 @@ export default function WorldBuilding() {
                                 <div className="flex flex-wrap gap-1">
                                   {location.bookAppearances && location.bookAppearances.length > 0 ? (
                                     location.bookAppearances.map((bookId: string) => (
-                                      <span 
+                                      <span
                                         key={`${location.id}-${bookId}`}
                                         className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground"
                                       >
@@ -630,19 +601,6 @@ export default function WorldBuilding() {
           </footer>
         </div>
       </main>
-    </div>
-  );
-}
-import React from 'react';
-import { WorldMap } from '@/components/world-building/world-map';
-
-export default function WorldBuildingPage() {
-  return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-6">World Building</h1>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <WorldMap />
-      </div>
     </div>
   );
 }

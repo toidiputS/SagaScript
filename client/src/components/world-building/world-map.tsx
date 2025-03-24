@@ -1,10 +1,36 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { MapControls } from './map-controls';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Loader2 } from 'lucide-react';
+
+interface MapGenerationResult {
+  id: string;
+  imageUrl: string;
+  prompt: string;
+  description: string;
+  style: string;
+  artStyle: string;
+  createdAt: string;
+}
 
 export function WorldMap() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [currentMap, setCurrentMap] = useState<MapGenerationResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Fetch the most recent map if available
+  const { data: recentMaps } = useQuery<MapGenerationResult[]>({
+    queryKey: ['/api/maps/recent'],
+    enabled: !currentMap,
+    onSuccess: (data) => {
+      if (data && data.length > 0) {
+        setCurrentMap(data[0]);
+      }
+    }
+  });
   
   // Handle edit mode
   const handleEditClick = () => {
@@ -25,6 +51,12 @@ export function WorldMap() {
       }
     }
   };
+
+  // Function to update the current map
+  const setGeneratedMap = (mapData: MapGenerationResult) => {
+    setCurrentMap(mapData);
+    setIsLoading(false);
+  };
   
   return (
     <div ref={mapContainerRef} className="relative w-full h-[500px] bg-slate-200 overflow-hidden">
@@ -32,36 +64,49 @@ export function WorldMap() {
         <h2 className="text-xl font-bold text-slate-800">World Map</h2>
       </div>
       
-      {/* Map content would go here */}
+      {/* Map content */}
       <div className="p-4 flex items-center justify-center h-[400px]">
-        {isEditing ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="mt-2 text-slate-600">Generating your map...</p>
+          </div>
+        ) : isEditing ? (
           <div className="bg-white p-4 rounded shadow">
             <p>Edit mode active. Implement your map editing interface here.</p>
           </div>
+        ) : currentMap ? (
+          <div className="flex flex-col items-center">
+            <img 
+              src={currentMap.imageUrl} 
+              alt={`Generated ${currentMap.style} map in ${currentMap.artStyle} style`}
+              className="max-h-[350px] max-w-full object-contain shadow-lg rounded"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = '/placeholder-map.png';
+              }}
+            />
+            <p className="mt-2 text-sm text-slate-600">
+              {currentMap.description}
+            </p>
+          </div>
         ) : (
           <div className="text-center text-slate-600">
-            <p>Your world map content will display here.</p>
-            <p className="text-sm mt-2">Click the edit button to make changes</p>
+            <p>No map available. Generate a new map to display here.</p>
+            <p className="text-sm mt-2">Use the map generator to create your world</p>
           </div>
         )}
       </div>
       
       {/* Controls */}
-      <MapControls
-        onEditClick={handleEditClick}
+      <MapControls 
+        onEditClick={handleEditClick} 
         onFullscreenClick={handleFullscreenClick}
+        isEditing={isEditing}
       />
-      
-      {/* Location placement interface at the bottom */}
-      <div className="absolute bottom-4 left-4">
-        <div className="bg-white rounded shadow p-2">
-          <p className="text-sm text-slate-700 mb-2">Place locations on the map:</p>
-          <select className="border rounded p-1 text-sm w-full">
-            <option>Select a location to place</option>
-            {/* Populate with actual locations */}
-          </select>
-        </div>
-      </div>
     </div>
   );
 }
+
+export { setIsLoading, setGeneratedMap } from './world-map-context';
