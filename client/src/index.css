@@ -112,12 +112,72 @@
   }
 }
 
+@keyframes iconSlide {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(10px, -10px) rotate(10deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-30px, -20px) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes tileFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+}
+
 .animate-float {
   animation: float 15s ease-in-out infinite;
 }
 
 .animate-fadeIn {
   animation: fadeIn 1s ease-out forwards;
+}
+
+.animate-icon-slide {
+  animation: iconSlide 1.5s ease-out forwards;
+}
+
+.animate-tile-float {
+  animation: tileFloat 2s ease-in-out infinite;
+}
+
+.feature-card {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.feature-card:hover .feature-icon {
+  animation: iconSlide 1.5s ease-out forwards;
+}
+
+.feature-card .backup-icon {
+  opacity: 0;
+}
+
+.feature-card:hover .backup-icon {
+  animation: fadeIn 0.5s ease-out 0.7s forwards;
 }
 
     --accent-foreground: 300 6% 100%;
