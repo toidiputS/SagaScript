@@ -86,114 +86,116 @@ export default function CharacterForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Basic Information */}
+      {/* Basic Info */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium border-b pb-2">Basic Information</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
-            <Input
-              id="name"
-              value={formData.name || ""}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              placeholder="Character name"
-              required
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={formData.name || ""}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                placeholder="Character name"
+                required
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="age">Age</Label>
-            <Input
-              id="age"
-              value={formData.age || ""}
-              onChange={(e) => setFormData({...formData, age: e.target.value})}
-              placeholder="Character age"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="age">Age</Label>
+              <Input
+                id="age"
+                value={formData.age || ""}
+                onChange={(e) => setFormData({...formData, age: e.target.value})}
+                placeholder="Character age"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status || "alive"}
-              onValueChange={(value) => setFormData({...formData, status: value})}
-            >
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alive">Alive</SelectItem>
-                <SelectItem value="deceased">Deceased</SelectItem>
-                <SelectItem value="unknown">Unknown</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="occupation">Occupation</Label>
+              <Input
+                id="occupation"
+                value={formData.occupation || ""}
+                onChange={(e) => setFormData({...formData, occupation: e.target.value})}
+                placeholder="Character occupation"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="occupation">Occupation</Label>
-            <Input
-              id="occupation"
-              value={formData.occupation || ""}
-              onChange={(e) => setFormData({...formData, occupation: e.target.value})}
-              placeholder="Character occupation"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              value={formData.role || "supporting"}
-              onValueChange={(value) => setFormData({...formData, role: value})}
-            >
-              <SelectTrigger id="role">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="protagonist">Protagonist</SelectItem>
-                <SelectItem value="antagonist">Antagonist</SelectItem>
-                <SelectItem value="supporting">Supporting</SelectItem>
-                <SelectItem value="mentor">Mentor</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status || "alive"}
+                onValueChange={(value) => setFormData({...formData, status: value})}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="alive">Alive</SelectItem>
+                  <SelectItem value="deceased">Deceased</SelectItem>
+                  <SelectItem value="unknown">Unknown</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={formData.role || "supporting"}
+                onValueChange={(value) => setFormData({...formData, role: value})}
+              >
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="protagonist">Protagonist</SelectItem>
+                  <SelectItem value="antagonist">Antagonist</SelectItem>
+                  <SelectItem value="supporting">Supporting</SelectItem>
+                  <SelectItem value="mentor">Mentor</SelectItem>
+                  <SelectItem value="comic_relief">Comic Relief</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Book Appearances */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium border-b pb-2">Book Appearances</h3>
+
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {[1, 2, 3, 4, 5].map((bookNum) => (
+                  <div key={bookNum} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={`book-${bookNum}`} 
+                      checked={isBookInAppearances(bookNum)}
+                      onCheckedChange={(checked) => handleBookAppearanceChange(bookNum, checked as boolean)}
+                    />
+                    <Label htmlFor={`book-${bookNum}`}>Book {bookNum}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="isProtagonist" 
+                checked={formData.isProtagonist}
+                onCheckedChange={(checked) => setFormData({...formData, isProtagonist: checked as boolean})}
+              />
+              <Label htmlFor="isProtagonist">Main character</Label>
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="avatar">Avatar</Label>
-            <div className="relative w-80 h-80">
+            <div className="relative w-full h-96">
               <AICharacterImage 
                 description={formData.description || ''} 
                 onImageGenerated={(imageUrl) => setFormData({...formData, avatarUrl: imageUrl})}
               />
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="isProtagonist" 
-            checked={formData.isProtagonist}
-            onCheckedChange={(checked) => setFormData({...formData, isProtagonist: checked as boolean})}
-          />
-          <Label htmlFor="isProtagonist">Main character</Label>
-        </div>
-
-
-      {/* Book Appearances */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium border-b pb-2">Book Appearances</h3>
-
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {[1, 2, 3, 4, 5].map((bookNum) => (
-            <div key={bookNum} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`book-${bookNum}`} 
-                checked={isBookInAppearances(bookNum)}
-                onCheckedChange={(checked) => handleBookAppearanceChange(bookNum, checked as boolean)}
-              />
-              <Label htmlFor={`book-${bookNum}`}>Book {bookNum}</Label>
-            </div>
-          ))}
         </div>
       </div>
 
