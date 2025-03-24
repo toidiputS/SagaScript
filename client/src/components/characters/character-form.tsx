@@ -103,48 +103,12 @@ export default function CharacterForm({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center mb-1">
-              <Label htmlFor="role">Role</Label>
-              <TooltipHelper 
-                content="Define this character's importance in your story. Protagonists are main characters, supporting characters play secondary roles, and minor characters appear briefly."
-                side="right"
-              />
-            </div>
-            <Select
-              value={formData.role || "supporting"}
-              onValueChange={(value) => setFormData({...formData, role: value})}
-            >
-              <SelectTrigger id="role">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="protagonist">Protagonist</SelectItem>
-                <SelectItem value="deuteragonist">Deuteragonist</SelectItem>
-                <SelectItem value="antagonist">Antagonist</SelectItem>
-                <SelectItem value="supporting">Supporting</SelectItem>
-                <SelectItem value="minor">Minor</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="age">Age</Label>
             <Input
               id="age"
               value={formData.age || ""}
               onChange={(e) => setFormData({...formData, age: e.target.value})}
               placeholder="Character age"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="occupation">Occupation</Label>
-            <Input
-              id="occupation"
-              value={formData.occupation || ""}
-              onChange={(e) => setFormData({...formData, occupation: e.target.value})}
-              placeholder="Character occupation"
             />
           </div>
 
@@ -164,11 +128,41 @@ export default function CharacterForm({
               </SelectContent>
             </Select>
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="avatar">Avatar</Label>
-          <div className="relative w-64 h-64"> {/*Larger Avatar Box*/}
-            <AICharacterImage description={formData.description || ''} />
+
+          <div className="space-y-2">
+            <Label htmlFor="avatar">Avatar</Label>
+            <div className="relative w-80 h-80"> {/*Larger Avatar Box*/}
+              <AICharacterImage description={formData.description || ''} />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+              value={formData.role || "supporting"}
+              onValueChange={(value) => setFormData({...formData, role: value})}
+            >
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="protagonist">Protagonist</SelectItem>
+                <SelectItem value="antagonist">Antagonist</SelectItem>
+                <SelectItem value="supporting">Supporting</SelectItem>
+                <SelectItem value="mentor">Mentor</SelectItem>
+                <SelectItem value="comic_relief">Comic Relief</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="occupation">Occupation</Label>
+            <Input
+              id="occupation"
+              value={formData.occupation || ""}
+              onChange={(e) => setFormData({...formData, occupation: e.target.value})}
+              placeholder="Character occupation"
+            />
           </div>
         </div>
       </div>
