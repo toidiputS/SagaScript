@@ -1,5 +1,24 @@
 
 import { Router } from 'express';
+import { isAuthenticated as auth } from '../auth'; // Import the auth middleware
+
+const router = Router();
+
+// Period can be 'day', 'week', 'month', or 'year'
+router.get('/', auth, async (req, res) => {
+  try {
+    // Your existing code here
+    res.json({ message: 'Writing stats endpoint' });
+  } catch (error) {
+    console.error('Error in writing stats route:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+export default router;
+
+
+import { Router } from 'express';
 import { db } from '../db';
 import { Express } from 'express';
 
