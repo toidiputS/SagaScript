@@ -106,10 +106,32 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Fetch map styles and art styles
-  const { data: styles, isLoading: stylesLoading } = useQuery<StylesResponse>({
+  const { data: styles, isLoading: stylesLoading, isError: stylesError } = useQuery<StylesResponse>({
     queryKey: ['/api/ai/map-styles'],
-    retry: false,
+    retry: 1,
   });
+  
+  // Default styles to use if the API call fails
+  const defaultMapStyles = [
+    { value: 'fantasy', label: 'Fantasy', description: 'Medieval-inspired world with magical elements' },
+    { value: 'sci-fi', label: 'Sci-Fi', description: 'Futuristic worlds with advanced technology' },
+    { value: 'historical', label: 'Historical', description: 'Based on historical periods and cartography' },
+    { value: 'modern', label: 'Modern', description: 'Contemporary settings with current geography' },
+    { value: 'post-apocalyptic', label: 'Post-Apocalyptic', description: 'World after a catastrophic event' }
+  ];
+  
+  const defaultArtStyles = [
+    { value: 'ink-and-parchment', label: 'Ink & Parchment', description: 'Traditional hand-drawn style on aged paper' },
+    { value: 'watercolor', label: 'Watercolor', description: 'Artistic watercolor painting with gentle colors' },
+    { value: 'isometric', label: 'Isometric', description: '3D-like perspective with raised elements' },
+    { value: 'topographical', label: 'Topographical', description: 'Elevation-focused with contour lines' }
+  ];
+  
+  // Use default styles if the API call fails or is loading
+  const effectiveStyles = {
+    mapStyles: styles?.mapStyles || defaultMapStyles,
+    artStyles: styles?.artStyles || defaultArtStyles
+  };
 
   // Fetch map history
   useEffect(() => {
@@ -363,7 +385,7 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {styles?.mapStyles.map((style) => (
+                                  {effectiveStyles.mapStyles.map((style) => (
                                     <SelectItem
                                       key={style.value}
                                       value={style.value}
@@ -395,7 +417,7 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {styles?.artStyles.map((style) => (
+                                  {effectiveStyles.artStyles.map((style) => (
                                     <SelectItem
                                       key={style.value}
                                       value={style.value}
@@ -461,7 +483,7 @@ export function UnifiedWorldMap({ selectedSeries }: { selectedSeries?: number | 
                     <CardTitle className="text-base">Map Styles</CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
-                    {styles?.mapStyles.map((style) => (
+                    {effectiveStyles.mapStyles.map((style) => (
                       <div key={style.value}>
                         <span className="font-semibold">{style.label}:</span>{' '}
                         {style.description}
