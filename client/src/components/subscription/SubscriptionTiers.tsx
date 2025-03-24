@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Check, Zap } from 'lucide-react';
 import { SUBSCRIPTION_TIERS, getTierIndex, type SubscriptionTier } from '@/lib/subscription';
 
@@ -31,7 +30,7 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Advanced milestone system (unlimited plot points)",
       "Comprehensive story arc designer",
       "Book-to-book link visualization",
-      
+
       // Character Evolution Engine
       "// Character Evolution Engine",
       "Unlimited character profiles",
@@ -40,7 +39,7 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Character consistency alerts",
       "Voice pattern documentation",
       "Custom character templates by genre",
-      
+
       // World-Building Hub
       "// World-Building Hub",
       "Unlimited location entries",
@@ -49,7 +48,7 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Historical event timeline",
       "Basic rule system documentation",
       "Tag-based cross-referencing",
-      
+
       // Productivity & Motivation
       "// Productivity & Motivation",
       "Customizable writing goals",
@@ -58,7 +57,7 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Writing pace predictions",
       "Expanded achievement system",
       "Social sharing of milestones",
-      
+
       // AI Writing Companion
       "// AI Writing Companion",
       "Enhanced continuity checking",
@@ -66,7 +65,7 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Character voice consistency tips",
       "Plot development prompts",
       "Basic research integration",
-      
+
       // Multimedia & Technical
       "// Multimedia & Technical",
       "25GB cloud storage",
@@ -80,7 +79,7 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Limited continuity prompts (3 per day)",
       "Simple character name suggestions",
       "Generic writing prompts",
-      
+
       // Multimedia & Technical
       "// Multimedia & Technical",
       "5GB cloud storage",
@@ -102,31 +101,31 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Visual timeline with branching capabilities",
       "Advanced milestone system (unlimited plot points)",
       "Comprehensive story arc designer",
-      
+
       "// Character Evolution Engine",
       "Unlimited character profiles",
       "Advanced character development tracking",
       "Relationship web visualization",
       "Character consistency alerts",
-      
+
       "// World-Building Hub",
       "Unlimited location entries",
       "Detailed map integration",
       "Advanced world-building templates",
       "Multi-layered world elements",
-      
+
       "// Productivity & Motivation",
       "Custom writing goals and schedules",
       "Detailed progress analytics",
       "30-day streak visualization",
       "Personalized writing challenges",
-      
+
       "// AI Writing Companion",
       "Advanced AI writing assistance",
       "Enhanced continuity checking",
       "Character voice consistency tools",
       "Contextual writing suggestions",
-      
+
       "// Multimedia & Technical",
       "20GB cloud storage",
       "Web and mobile access",
@@ -147,31 +146,31 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
       "Dynamic interactive timelines",
       "Conflict management system",
       "Plot hole detection algorithms",
-      
+
       "// Character Evolution Engine",
       "Character psychology profiling",
       "Dynamic relationship tracking over time",
       "Character arc visualization",
       "Multi-dimensional character development",
-      
+
       "// World-Building Hub",
       "Advanced world-building ecosystem",
       "Interactive maps with multiple layers",
       "Cultural and language creation tools",
       "Ecosystem and economy simulators",
-      
+
       "// Productivity & Motivation",
       "Community writing challenges",
       "Comprehensive analytics dashboard",
       "90-day streak visualization",
       "Team collaboration features",
-      
+
       "// AI Writing Companion",
       "Premium AI writing tools",
       "Story structure analysis",
       "World consistency enforcement",
       "Dialogue enhancement suggestions",
-      
+
       "// Multimedia & Technical",
       "50GB cloud storage",
       "All platform access",
@@ -204,7 +203,7 @@ const TIER_DISPLAY: Record<SubscriptionTier, TierInfo> = {
 export default function SubscriptionTiers() {
   const { user } = useAuth();
   const currentTier = (user?.plan || 'apprentice') as SubscriptionTier;
-  
+
   const handleUpgrade = async (tier: SubscriptionTier) => {
     try {
       const response = await fetch('/api/subscriptions', {
@@ -216,7 +215,7 @@ export default function SubscriptionTiers() {
       });
 
       const data = await response.json();
-      
+
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -227,7 +226,7 @@ export default function SubscriptionTiers() {
       alert('Failed to start subscription process. Please try again.');
     }
   };
-  
+
   return (
     <div className="py-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -239,13 +238,13 @@ export default function SubscriptionTiers() {
             Select the plan that best fits your creative needs
           </p>
         </div>
-        
+
         <div className="mt-12 grid grid-cols-1 gap-y-6 sm:gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
           {SUBSCRIPTION_TIERS.map((tier) => {
             const tierInfo = TIER_DISPLAY[tier];
             const isCurrentTier = tier === currentTier;
             const isLowerTier = getTierIndex(tier) < getTierIndex(currentTier);
-            
+
             return (
               <Card 
                 key={tier} 
@@ -278,7 +277,7 @@ export default function SubscriptionTiers() {
                     // Extract categories from comments
                     const categories = new Map<string, string[]>();
                     let currentCategory = "Features";
-                    
+
                     features.forEach((feat: string, index: number) => {
                       // Use the comment before the feature as the category name
                       if (feat.startsWith('//')) {
@@ -290,7 +289,7 @@ export default function SubscriptionTiers() {
                         categories.get(currentCategory)!.push(feat);
                       }
                     });
-                    
+
                     // Display features grouped by category
                     return Array.from(categories.entries()).map(([category, feats]: [string, string[]], catIndex: number) => (
                       <div key={catIndex} className="mb-4">
@@ -323,8 +322,10 @@ export default function SubscriptionTiers() {
                     <Button 
                       className="w-full" 
                       onClick={() => handleUpgrade(tier)}
+                      disabled={tier === 'apprentice'}
+                      variant={isCurrentTier ? "outline" : "default"}
                     >
-                      {tier === 'apprentice' ? 'Start Free' : 'Upgrade'}
+                      {tier === 'apprentice' ? 'Free Plan' : 'Upgrade Plan'}
                     </Button>
                   )}
                 </CardFooter>
