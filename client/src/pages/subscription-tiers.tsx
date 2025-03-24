@@ -12,7 +12,7 @@ export default function SubscriptionTiersPage() {
         {SUBSCRIPTION_TIERS.map((tier) => {
           const tierInfo = TIER_DISPLAY[tier];
           return (
-            <Card key={tier} className="flex flex-col h-full">
+            <Card key={tier} className="flex flex-col h-full hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <i className={`${tierInfo.icon} text-2xl ${tierInfo.color}`}></i>
@@ -28,7 +28,9 @@ export default function SubscriptionTiersPage() {
               <CardContent className="flex-grow">
                 <ul className="list-disc list-inside space-y-2">
                   {tierInfo.features?.map((feature, index) => (
-                    <li key={index} className="text-sm">{feature}</li>
+                    <li key={index} className={`text-sm ${feature.startsWith('//') ? 'font-bold mt-4 text-primary' : ''}`}>
+                      {feature.startsWith('//') ? feature.substring(2).trim() : feature}
+                    </li>
                   ))}
                 </ul>
               </CardContent>
