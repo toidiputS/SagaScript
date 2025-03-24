@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
-import { useSimpleAuth } from "@/hooks/use-simple-auth";
+import { useSimpleAuth } from "@/contexts/simple-auth";
 import {
   Form,
   FormControl,
