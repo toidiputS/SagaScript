@@ -24,20 +24,13 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
 import SubscriptionsPage from '@/pages/subscriptions';
 import AICompanion from '@/pages/ai-companion';
-import { cn } from "@/lib/utils";
-// Map generator is now integrated into world-building
-
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    // Initialize from localStorage if available
-    const saved = localStorage.getItem('sidebar-collapsed');
-    return saved ? JSON.parse(saved) : false;
-  });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Update when localStorage changes
+  // Check sidebar state from localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       const saved = localStorage.getItem('sidebar-collapsed');
@@ -46,20 +39,22 @@ function Router() {
       }
     };
     
-    // Listen for storage events
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Check initial value
+    // Initial check
     handleStorageChange();
     
-    return () => window.removeEventListener('storage', handleStorageChange);
+    // Listen for changes (needed for cross-tab syncing)
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Check if the current route is auth-related
   const isAuthRoute = ['/login', '/register', '/auth'].includes(location);
 
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden bg-background">
       {!isAuthRoute && (
         <>
           <Sidebar />
@@ -85,11 +80,13 @@ function Router() {
         </>
       )}
 
-      <main className={cn(
-        "flex-1 overflow-y-auto bg-background transition-all duration-300", 
-        !isAuthRoute ? 'pt-16 md:pt-0 md:ml-64' : '',
-        !isAuthRoute && isSidebarCollapsed ? 'md:ml-16' : ''
-      )}>
+      <main 
+        className={`flex-1 overflow-y-auto bg-background transition-all duration-300 ${
+          !isAuthRoute ? 'pt-16 md:pt-0' : ''
+        } ${
+          !isAuthRoute ? (isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64') : ''
+        }`}
+      >
         <Switch>
           {/* Auth routes */}
           <Route path="/auth" component={AuthPage} />

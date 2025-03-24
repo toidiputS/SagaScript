@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
-import { useTheme } from "@/contexts/theme-context";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -13,17 +12,21 @@ export default function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
   const { currentSeries } = useSeries();
-  const { theme } = useTheme();
   const { toast } = useToast();
   const [isCollapsed, setIsCollapsed] = useState(() => {
     // Initialize from localStorage if available
-    const saved = localStorage.getItem('sidebar-collapsed');
-    return saved ? JSON.parse(saved) : false;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebar-collapsed');
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
   });
 
   // Save to localStorage when changed
   useEffect(() => {
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+    }
   }, [isCollapsed]);
 
   // Create logout mutation
@@ -88,7 +91,7 @@ export default function Sidebar() {
 
         {/* Toggle Button - Fixed at bottom of sidebar */}
         <button
-          onClick={() => setIsCollapsed(prev => !prev)}
+          onClick={() => setIsCollapsed((prev: boolean) => !prev)}
           className="absolute bottom-20 right-0 translate-x-1/2 w-6 h-16 flex items-center justify-center bg-background border border-border rounded-r-md text-muted-foreground hover:text-foreground hover:bg-accent"
         >
           <i className={`ri-arrow-${isCollapsed ? 'right' : 'left'}-s-line text-sm`}></i>
