@@ -54,18 +54,18 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex md:flex-shrink-0">
-      <div className={`flex flex-col ${isSidebarOpen ? 'w-64' : 'w-20'} bg-background border-r border-border transition-width duration-200`}>
+    <aside className="hidden lg:flex h-screen flex-col fixed left-0 top-0 bottom-0 w-64 bg-background border-r">
+      <div className={`flex flex-col`}>
         {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-border">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground mr-2">
               <i className="ri-quill-pen-line"></i>
             </div>
-            {isSidebarOpen && <span className="font-serif font-bold text-lg text-foreground">SagaScript.Life</span>}
+            <span className="font-serif font-bold text-lg text-foreground">SagaScript.Life</span>
           </div>
           <div className="flex items-center space-x-2">
-            {isSidebarOpen && <ThemeSwitcher />}
+            <ThemeSwitcher />
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-1 rounded-md text-muted-foreground hover:text-foreground"
@@ -90,13 +90,13 @@ export default function Sidebar() {
                 }`}
               >
                 <i className={`${link.icon} mr-3 text-lg`}></i>
-                {isSidebarOpen && <span>{link.name}</span>}
+                <span>{link.name}</span>
               </Link>
             ))}
           </div>
 
           {/* Current Series Section */}
-          {isSidebarOpen && currentSeries && (
+          {currentSeries && (
             <div className="mt-6 pt-6 border-t border-border">
               <h3 className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
                 Current Series
@@ -142,7 +142,7 @@ export default function Sidebar() {
 
         {/* User Section */}
         <div className="p-4 border-t border-border">
-          {user && isSidebarOpen ? (
+          {user && (
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                 <span className="font-medium">
@@ -161,15 +161,6 @@ export default function Sidebar() {
                   <i className="ri-logout-box-line"></i>
                 </button>
               </div>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <button
-                onClick={() => logoutMutation.mutate()}
-                className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground"
-              >
-                <i className="ri-logout-box-line"></i>
-              </button>
             </div>
           )}
         </div>
