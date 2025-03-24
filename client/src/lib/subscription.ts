@@ -194,8 +194,10 @@ export function getFeatureLimit(userTier: SubscriptionTier, feature: RestrictedF
 }
 
 // React hook to check feature access
+import { useSimpleAuth } from "@/contexts/simple-auth";
+
 export function useFeatureAccess() {
-  const { user } = useAuth();
+  const { user } = useSimpleAuth();
   
   const userTier = (user?.plan || 'apprentice') as SubscriptionTier;
   

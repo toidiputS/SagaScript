@@ -30,12 +30,12 @@ export default function AISuggestions() {
         // Get the first series for the user
         const seriesResponse = await apiRequest('GET', '/api/series');
         const seriesData = await seriesResponse.json();
-        
+
         if (seriesData && seriesData.length > 0) {
           const firstSeries = seriesData[0];
           const params = new URLSearchParams();
           params.append('seriesId', firstSeries.id.toString());
-          
+
           console.log("Fetching AI suggestions for series:", firstSeries.id);
           const response = await apiRequest('GET', `/api/ai/suggestions?${params}`);
           const suggestions = await response.json();
@@ -81,20 +81,20 @@ export default function AISuggestions() {
   const handleGenerateMore = async () => {
     try {
       setIsGenerating(true);
-      
+
       // Get the first series for the user
       const seriesResponse = await apiRequest('GET', '/api/series');
       const seriesData = await seriesResponse.json();
-      
+
       if (seriesData && seriesData.length > 0) {
         const firstSeries = seriesData[0];
-        
+
         // Force a refetch of suggestions with the series ID
         await queryClient.refetchQueries({ 
           queryKey: ['/api/ai/suggestions'],
           type: 'active',
         });
-        
+
         toast({
           title: "New insights generated",
           description: "Fresh writing suggestions are ready for you",
@@ -143,7 +143,7 @@ export default function AISuggestions() {
                 </div>
               </div>
             ))}
-            
+
             <Button 
               variant="secondary" 
               className="w-full mt-4 text-foreground" 
