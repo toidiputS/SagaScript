@@ -24,7 +24,10 @@ router.get('/', isAuthenticated, async (req, res) => {
       ),
     });
 
-    const wordsToday = chaptersToday.reduce((total, chapter) => total + (chapter.wordCount || 0), 0);
+    const wordsToday = chaptersToday.reduce((total, chapter) => {
+      const wordCount = typeof chapter.wordCount === 'number' ? chapter.wordCount : 0;
+      return total + wordCount;
+    }, 0);
 
     // Get yesterday's word count
     const yesterday = new Date();
@@ -39,14 +42,19 @@ router.get('/', isAuthenticated, async (req, res) => {
       ),
     });
 
-    const yesterdayWords = chaptersYesterday.reduce((total, chapter) => total + (chapter.wordCount || 0), 0);
+    const yesterdayWords = chaptersYesterday.reduce((total, chapter) => {
+      const wordCount = typeof chapter.wordCount === 'number' ? chapter.wordCount : 0;
+      return total + wordCount;
+    }, 0);
+
     const wordsTodayChange = yesterdayWords > 0 
-      ? Math.round((wordsToday - yesterdayWords) / yesterdayWords * 100) 
-      : 0;
+      ? Math.round(((wordsToday - yesterdayWords) / yesterdayWords) * 100) 
+      : (wordsToday > 0 ? 100 : 0);
 
     // Calculate streak
     let currentStreak = 0;
     let streakDays = [];
+    let consecutiveDays = true;
     
     for (let i = 0; i < 7; i++) {
       const date = new Date();
@@ -64,14 +72,20 @@ router.get('/', isAuthenticated, async (req, res) => {
         ),
       });
       
-      if (dayChapters.length > 0) {
-        currentStreak = i === currentStreak ? currentStreak + 1 : currentStreak;
+      const hasWordsToday = dayChapters.some(chapter => 
+        typeof chapter.wordCount === 'number' && chapter.wordCount > 0
+      );
+      
+      if (hasWordsToday && consecutiveDays) {
+        currentStreak++;
         streakDays.push((i + 1).toString());
-      } else if (i === 0) {
-        // If no writing today, check if wrote yesterday to maintain streak
-        continue;
       } else {
-        break;
+        consecutiveDays = false;
+        if (i === 0) {
+          // Reset streak if no writing today
+          currentStreak = 0;
+          streakDays = [];
+        }
       }
     } 
 
