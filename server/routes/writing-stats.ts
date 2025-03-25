@@ -26,13 +26,54 @@ router.get('/', isAuthenticated, async (req, res) => {
 
     const wordsToday = chaptersToday.reduce((total, chapter) => total + (chapter.wordCount || 0), 0);
 
-    const yesterdayWords = wordsToday * 0.8; 
+    // Get yesterday's word count
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+
+    const chaptersYesterday = await db.query.chapters.findMany({
+      where: (chapters, { and, eq, gte, lt }) => and(
+        eq(chapters.userId, userId),
+        gte(chapters.updatedAt, yesterday),
+        lt(chapters.updatedAt, today)
+      ),
+    });
+
+    const yesterdayWords = chaptersYesterday.reduce((total, chapter) => total + (chapter.wordCount || 0), 0);
     const wordsTodayChange = yesterdayWords > 0 
       ? Math.round((wordsToday - yesterdayWords) / yesterdayWords * 100) 
       : 0;
 
-    const currentStreak = 7; 
-    const streakDays = ['1', '2', '3', '4', '5', '6', '7']; 
+    // Calculate streak
+    let currentStreak = 0;
+    let streakDays = [];
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      const dayChapters = await db.query.chapters.findMany({
+        where: (chapters, { and, eq, gte, lt }) => and(
+          eq(chapters.userId, userId),
+          gte(chapters.updatedAt, date),
+          lt(chapters.updatedAt, nextDay)
+        ),
+      });
+      
+      if (dayChapters.length > 0) {
+        currentStreak = i === currentStreak ? currentStreak + 1 : currentStreak;
+        streakDays.push((i + 1).toString());
+      } else if (i === 0) {
+        // If no writing today, check if wrote yesterday to maintain streak
+        continue;
+      } else {
+        break;
+      }
+    } 
 
     return res.json({
       wordsToday,
