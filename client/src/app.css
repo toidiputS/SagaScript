@@ -8,7 +8,7 @@ body {
   }
 
 .content-container {
-    @apply bg-transparent backdrop-blur-sm;
+    @apply bg-background/40 backdrop-blur-sm;
   }
 
 main {
