@@ -44,7 +44,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         className="md:hidden fixed inset-0 z-20 bg-black/50 transition-opacity"
         onClick={onClose}
       />
-      
+
       {/* Mobile Sidebar */}
       <div className="md:hidden fixed inset-y-0 left-0 z-30 w-72 flex flex-col bg-background shadow-xl">
         <div className="p-4 border-b border-border flex items-center justify-between">
@@ -139,7 +139,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   <p className="text-xs text-muted-foreground">{user.plan} Plan</p>
                 </div>
               </div>
-              
+
               {/* Logout Button */}
               <div className="mt-4 flex">
                 <button
