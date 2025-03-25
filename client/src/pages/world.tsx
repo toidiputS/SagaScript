@@ -4,7 +4,6 @@ import { useWorld } from "@/hooks/use-world";
 import { useToast } from "@/hooks/use-toast";
 import LocationCard from "@/components/world/location-card";
 import LocationForm from "@/components/world/location-form";
-import WorldMap from "@/components/world/world-map";
 import {
   Dialog,
   DialogContent,
@@ -127,28 +126,7 @@ export default function WorldPage() {
           </Tabs>
         </div>
 
-        {/* World Map - only show for locations tab */}
-        {activeTab === "locations" && currentSeries && (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden mb-8">
-            <div className="border-b border-neutral-200 px-5 py-4 flex justify-between items-center">
-              <h2 className="font-serif font-bold text-lg text-neutral-800">World Map</h2>
-              <div className="flex space-x-2">
-                <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
-                  <i className="ri-edit-line"></i>
-                </button>
-                <button className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500">
-                  <i className="ri-fullscreen-line"></i>
-                </button>
-              </div>
-            </div>
-            <div className="p-0">
-              <WorldMap 
-                locations={locations || []} 
-                seriesId={currentSeries.id} 
-              />
-            </div>
-          </div>
-        )}
+        {/* World Map - removed as requested */}
 
         {/* Search bar - only show for locations */}
         {activeTab === "locations" && (
