@@ -1,13 +1,13 @@
 body {
-    @apply font-sans antialiased text-foreground;
+    @apply font-sans antialiased text-foreground min-h-screen;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-color: transparent;
+    background-attachment: fixed;
   }
 
 .content-container {
-    @apply bg-transparent backdrop-blur-sm;
+    @apply bg-background/40 backdrop-blur-sm;
     color: white;
   }
 
