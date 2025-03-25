@@ -26,7 +26,6 @@ export default function LocationForm({
     locationType: "general",
     description: "",
     importance: "secondary",
-    mapCoordinates: null,
     bookAppearances: [],
     image: "",
     ...initialData
@@ -169,24 +168,7 @@ export default function LocationForm({
         </div>
       </div>
 
-      {/* Map coordinates section - note: actual placement happens on the map view */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium border-b pb-2">Map Information</h3>
-        
-        <div className="text-sm text-neutral-600">
-          {formData.mapCoordinates ? (
-            <p className="flex items-center">
-              <i className="ri-map-pin-fill text-primary mr-2"></i>
-              This location is placed on the map. You can reposition it by using the "Place on Map" button in the map view.
-            </p>
-          ) : (
-            <p className="flex items-center">
-              <i className="ri-map-pin-line text-neutral-500 mr-2"></i>
-              This location is not yet placed on the map. Use the dropdown in the map view to place it.
-            </p>
-          )}
-        </div>
-      </div>
+      {/* Map section removed */}
 
       {/* Submit buttons */}
       <div className="flex justify-end space-x-2 pt-2">

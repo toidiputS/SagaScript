@@ -53,8 +53,10 @@ export default function WorldPage() {
       return;
     }
 
+    // Remove mapCoordinates from locationData as we've removed map functionality
+    const { mapCoordinates, ...cleanedData } = locationData;
     addLocation({
-      ...locationData,
+      ...cleanedData,
       seriesId: currentSeries.id,
     });
     
