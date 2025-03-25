@@ -24,8 +24,6 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
 import SubscriptionsPage from '@/pages/subscriptions';
 import AICompanion from '@/pages/ai-companion';
-import { BackgroundSwitcher } from "@/components/theme/background-switcher"; // Added import
-
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,13 +38,13 @@ function Router() {
         setIsSidebarCollapsed(JSON.parse(saved));
       }
     };
-
+    
     // Initial check
     handleStorageChange();
-
+    
     // Listen for changes (needed for cross-tab syncing)
     window.addEventListener('storage', handleStorageChange);
-
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -141,7 +139,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <SimpleAuthProvider>
         <ThemeProvider>
-          <BackgroundSwitcher /> {/* Added BackgroundSwitcher */}
+          <Router />
           <Toaster />
         </ThemeProvider>
       </SimpleAuthProvider>

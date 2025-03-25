@@ -1,19 +1,10 @@
 body {
-    @apply font-sans antialiased text-foreground min-h-screen;
+    @apply font-sans antialiased text-foreground transition-colors duration-300;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
   }
-
-.content-container {
-    @apply bg-background/40 backdrop-blur-sm;
-    color: white;
-  }
-
-main {
-    background-color: transparent;
-}
 
 .subscription-tier-card {
   transition: all 0.2s ease-in-out;
