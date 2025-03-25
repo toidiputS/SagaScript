@@ -1,9 +1,14 @@
 body {
-    @apply font-sans antialiased text-foreground transition-colors duration-300;
+    @apply font-sans antialiased text-foreground;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    transition: background-image 0.5s ease-in-out;
+  }
+
+.content-container {
+    @apply relative z-10 bg-background/80 backdrop-blur-sm;
   }
 
 .subscription-tier-card {
