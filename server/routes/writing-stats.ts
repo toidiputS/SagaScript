@@ -76,7 +76,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     // Calculate streak
     let streakDays = [];
     let consecutiveDays = true;
-    let currentStreak = 0;
+    let dayStreak = 0;
     
     for (let i = 0; i < 7; i++) {
       const date = new Date();
@@ -99,13 +99,13 @@ router.get('/', isAuthenticated, async (req, res) => {
       );
       
       if (hasWordsToday && consecutiveDays) {
-        currentStreak++;
+        dayStreak++;
         streakDays.push((i + 1).toString());
       } else {
         consecutiveDays = false;
         if (i === 0) {
           // Reset streak if no writing today
-          currentStreak = 0;
+          dayStreak = 0;
           streakDays = [];
         }
       }
@@ -114,7 +114,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     return res.json({
       wordsToday,
       wordsTodayChange,
-      currentStreak,
+      currentStreak: dayStreak,
       streakDays,
     });
   } catch (error) {
