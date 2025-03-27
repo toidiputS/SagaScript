@@ -1,5 +1,5 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/simple-auth';
@@ -22,6 +22,47 @@ interface SubscriptionPlan {
 export default function SubscriptionsPage() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [loadingPlans, setLoadingPlans] = useState<{[key: string]: boolean}>({});
+
+  // Create checkout session mutation
+  const createCheckoutSession = useMutation({
+    mutationFn: async (planName: string) => {
+      const res = await apiRequest('POST', '/api/subscriptions', { planName });
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      // Redirect to Stripe checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: any) => {
+      setLoadingPlans({});
+      toast({
+        title: 'Error creating checkout session',
+        description: error.message || 'An error occurred while setting up the payment process.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  // Handle subscription
+  const handleSubscribe = (planName: string) => {
+    if (user?.plan === planName.toLowerCase()) {
+      toast({
+        title: "Already subscribed",
+        description: `You are already subscribed to the ${planName} plan.`,
+        variant: "default"
+      });
+      return;
+    }
+    
+    // Set loading state for this plan
+    setLoadingPlans(prev => ({...prev, [planName]: true}));
+    
+    // Create Stripe checkout session and redirect
+    createCheckoutSession.mutate(planName);
+  };
 
   const { data: plans, isLoading, error } = useQuery<SubscriptionPlan[]>({
     queryKey: ['/api/subscription-plans'],
@@ -143,9 +184,14 @@ export default function SubscriptionsPage() {
                         <Button 
                           className="w-full"
                           variant={user?.plan === plan.name.toLowerCase() ? "outline" : "default"}
-                          disabled={user?.plan === plan.name.toLowerCase()}
+                          disabled={user?.plan === plan.name.toLowerCase() || loadingPlans[plan.name]}
+                          onClick={() => handleSubscribe(plan.name)}
                         >
-                          {user?.plan === plan.name.toLowerCase() ? 'Current Plan' : 'Select Plan'}
+                          {user?.plan === plan.name.toLowerCase() 
+                            ? 'Current Plan' 
+                            : loadingPlans[plan.name]
+                              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
+                              : 'Select Plan'}
                         </Button>
                       </CardContent>
                     </Card>
@@ -203,9 +249,14 @@ export default function SubscriptionsPage() {
                         <Button 
                           className="w-full"
                           variant={user?.plan === plan.name.toLowerCase() ? "outline" : "default"}
-                          disabled={user?.plan === plan.name.toLowerCase()}
+                          disabled={user?.plan === plan.name.toLowerCase() || loadingPlans[plan.name]}
+                          onClick={() => handleSubscribe(plan.name)}
                         >
-                          {user?.plan === plan.name.toLowerCase() ? 'Current Plan' : 'Subscribe Monthly'}
+                          {user?.plan === plan.name.toLowerCase() 
+                            ? 'Current Plan' 
+                            : loadingPlans[plan.name]
+                              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
+                              : 'Subscribe Monthly'}
                         </Button>
                       </CardContent>
                     </Card>
@@ -270,9 +321,14 @@ export default function SubscriptionsPage() {
                         <Button 
                           className="w-full"
                           variant={user?.plan === plan.name.toLowerCase() ? "outline" : "default"}
-                          disabled={user?.plan === plan.name.toLowerCase()}
+                          disabled={user?.plan === plan.name.toLowerCase() || loadingPlans[plan.name]}
+                          onClick={() => handleSubscribe(plan.name)}
                         >
-                          {user?.plan === plan.name.toLowerCase() ? 'Current Plan' : 'Subscribe Yearly'}
+                          {user?.plan === plan.name.toLowerCase() 
+                            ? 'Current Plan' 
+                            : loadingPlans[plan.name]
+                              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
+                              : 'Subscribe Yearly'}
                         </Button>
                       </CardContent>
                     </Card>
@@ -372,9 +428,20 @@ export default function SubscriptionsPage() {
                       </tbody>
                     </table>
                   </div>
-                  <div className="flex justify-center mt-6">
-                    <Button variant="default" className="px-6">
-                      Subscribe Now
+                  <div className="flex flex-col items-center mt-6">
+                    <p className="text-muted-foreground mb-3">Ready to elevate your writing journey?</p>
+                    <Button 
+                      variant="default" 
+                      className="px-6"
+                      onClick={() => {
+                        const planName = plans?.find(p => p.mostPopular)?.name || 'wordsmith';
+                        handleSubscribe(planName);
+                      }}
+                      disabled={loadingPlans['wordsmith']}
+                    >
+                      {loadingPlans['wordsmith'] 
+                        ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
+                        : 'Subscribe Now'}
                     </Button>
                   </div>
                 </CardContent>
