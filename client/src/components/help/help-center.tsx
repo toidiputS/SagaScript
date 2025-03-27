@@ -275,6 +275,16 @@ export default function HelpCenter() {
     troubleshooting: <HelpCircle className="h-5 w-5" />
   };
   
+  const handleHelpClick = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    // Handle help click
+  };
+
+  const handleSupportClick = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    // Handle support click
+  };
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-6xl">
       <div className="flex flex-col space-y-4">
@@ -555,7 +565,7 @@ export default function HelpCenter() {
                       <ul className="list-disc ml-5 mt-2">
                         <li>Check this Help Center for guides and tutorials</li>
                         <li>Visit our <a href="/community" className="text-primary underline">Community Forum</a> to ask questions</li>
-                        <li>Contact our support team via the <a href="/support" className="text-primary underline">Support page</a></li>
+                        <li>Contact our support team via the <a href="/support" className="text-primary underline cursor-pointer" onClick={handleSupportClick}>Support page</a></li>
                         <li>Premium subscribers have access to priority support</li>
                       </ul>
                       <p className="mt-2">Our support team typically responds within 24 hours (faster for premium subscribers).</p>
