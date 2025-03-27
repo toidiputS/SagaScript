@@ -733,3 +733,88 @@ export type InsertWritingGoal = z.infer<typeof insertWritingGoalSchema>;
 
 export type PointLedgerEntry = typeof pointLedger.$inferSelect;
 export type InsertPointLedgerEntry = z.infer<typeof insertPointLedgerSchema>;
+
+// =========== MULTIMEDIA CONTENT ===========
+
+// Mood boards (visual collections for inspiration)
+export const moodBoards = pgTable("mood_boards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  seriesId: integer("series_id").references(() => series.id),
+  bookId: integer("book_id").references(() => books.id),
+  chapterId: integer("chapter_id").references(() => chapters.id),
+  characterId: integer("character_id").references(() => characters.id),
+  locationId: integer("location_id").references(() => locations.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  isPublic: boolean("is_public").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertMoodBoardSchema = createInsertSchema(moodBoards).pick({
+  userId: true,
+  seriesId: true,
+  bookId: true,
+  chapterId: true,
+  characterId: true,
+  locationId: true,
+  title: true,
+  description: true,
+  isPublic: true,
+});
+
+export type MoodBoard = typeof moodBoards.$inferSelect;
+export type InsertMoodBoard = z.infer<typeof insertMoodBoardSchema>;
+
+// Mood board items (individual images in a mood board)
+export const moodBoardItems = pgTable("mood_board_items", {
+  id: serial("id").primaryKey(),
+  moodBoardId: integer("mood_board_id").notNull().references(() => moodBoards.id),
+  imageUrl: text("image_url").notNull(),
+  caption: text("caption"),
+  source: text("source"),
+  position: integer("position").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertMoodBoardItemSchema = createInsertSchema(moodBoardItems).pick({
+  moodBoardId: true,
+  imageUrl: true,
+  caption: true,
+  source: true,
+  position: true,
+});
+
+export type MoodBoardItem = typeof moodBoardItems.$inferSelect;
+export type InsertMoodBoardItem = z.infer<typeof insertMoodBoardItemSchema>;
+
+// Voice memos (audio recordings for notes, ideas, etc.)
+export const voiceMemos = pgTable("voice_memos", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  seriesId: integer("series_id").references(() => series.id),
+  bookId: integer("book_id").references(() => books.id),
+  chapterId: integer("chapter_id").references(() => chapters.id),
+  title: text("title").notNull(),
+  audioUrl: text("audio_url").notNull(),
+  duration: integer("duration").notNull(), // Duration in seconds
+  transcription: text("transcription"), // Optional text transcription
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertVoiceMemoSchema = createInsertSchema(voiceMemos).pick({
+  userId: true,
+  seriesId: true,
+  bookId: true,
+  chapterId: true,
+  title: true,
+  audioUrl: true,
+  duration: true,
+  transcription: true,
+});
+
+export type VoiceMemo = typeof voiceMemos.$inferSelect;
+export type InsertVoiceMemo = z.infer<typeof insertVoiceMemoSchema>;

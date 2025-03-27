@@ -50,7 +50,14 @@ import {
   type WritingGoal,
   type InsertWritingGoal,
   type PointLedgerEntry,
-  type InsertPointLedgerEntry
+  type InsertPointLedgerEntry,
+  // Multimedia imports
+  type MoodBoard,
+  type InsertMoodBoard,
+  type MoodBoardItem,
+  type InsertMoodBoardItem,
+  type VoiceMemo,
+  type InsertVoiceMemo
 } from "@shared/schema";
 import fs from 'fs';
 import path from 'path';
@@ -264,6 +271,40 @@ export interface IStorage {
   getFeedbackResponses(feedbackRequestId: number): Promise<(FeedbackResponse & { user: { username: string, displayName: string } })[]>;
   updateFeedbackResponse(id: number, updates: Partial<FeedbackResponse>): Promise<FeedbackResponse | undefined>;
   deleteFeedbackResponse(id: number): Promise<boolean>;
+  
+  // ========== MULTIMEDIA METHODS ==========
+  
+  // Mood Boards
+  getMoodBoards(userId: number, filters?: { 
+    seriesId?: number; 
+    bookId?: number; 
+    chapterId?: number; 
+    characterId?: number; 
+    locationId?: number;
+  }): Promise<MoodBoard[]>;
+  getMoodBoard(id: number): Promise<MoodBoard | undefined>;
+  createMoodBoard(moodBoard: InsertMoodBoard): Promise<MoodBoard>;
+  updateMoodBoard(id: number, updates: Partial<MoodBoard>): Promise<MoodBoard | undefined>;
+  deleteMoodBoard(id: number): Promise<boolean>;
+  
+  // Mood Board Items
+  getMoodBoardItems(moodBoardId: number): Promise<MoodBoardItem[]>;
+  getMoodBoardItem(id: number): Promise<MoodBoardItem | undefined>;
+  createMoodBoardItem(item: InsertMoodBoardItem): Promise<MoodBoardItem>;
+  updateMoodBoardItem(id: number, updates: Partial<MoodBoardItem>): Promise<MoodBoardItem | undefined>;
+  deleteMoodBoardItem(id: number): Promise<boolean>;
+  updateMoodBoardItemPositions(itemsToUpdate: { id: number; position: number; }[]): Promise<boolean>;
+  
+  // Voice Memos
+  getVoiceMemos(userId: number, filters?: { 
+    seriesId?: number; 
+    bookId?: number; 
+    chapterId?: number;
+  }): Promise<VoiceMemo[]>;
+  getVoiceMemo(id: number): Promise<VoiceMemo | undefined>;
+  createVoiceMemo(memo: InsertVoiceMemo): Promise<VoiceMemo>;
+  updateVoiceMemo(id: number, updates: Partial<VoiceMemo>): Promise<VoiceMemo | undefined>;
+  deleteVoiceMemo(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -296,6 +337,11 @@ export class MemStorage implements IStorage {
   private writingStreaks: Map<number, WritingStreak>;
   private writingGoals: Map<number, WritingGoal>;
   private pointLedger: Map<number, PointLedgerEntry>;
+  
+  // Multimedia maps
+  private moodBoards: Map<number, MoodBoard>;
+  private moodBoardItems: Map<number, MoodBoardItem>;
+  private voiceMemos: Map<number, VoiceMemo>;
   
   // Session store for authentication
   public sessionStore: session.Store;
@@ -375,6 +421,11 @@ export class MemStorage implements IStorage {
     this.writingGoals = new Map();
     this.pointLedger = new Map();
     
+    // Initialize multimedia maps
+    this.moodBoards = new Map();
+    this.moodBoardItems = new Map();
+    this.voiceMemos = new Map();
+    
     // Default currentIds
     this.currentIds = {
       user: 1,
@@ -403,7 +454,11 @@ export class MemStorage implements IStorage {
       userReward: 1,
       writingStreak: 1,
       writingGoal: 1,
-      pointLedger: 1
+      pointLedger: 1,
+      // Multimedia IDs
+      moodBoard: 1,
+      moodBoardItem: 1,
+      voiceMemo: 1
     };
     
     // Load data from persistent storage if available
@@ -2914,6 +2969,233 @@ export class MemStorage implements IStorage {
     const deleted = this.feedbackResponses.delete(id);
     if (deleted) this.saveToDisk();
     return deleted;
+  }
+
+  // ========== MULTIMEDIA METHODS ==========
+  
+  // Mood Board methods
+  async getMoodBoards(userId: number, filters?: { 
+    seriesId?: number; 
+    bookId?: number; 
+    chapterId?: number; 
+    characterId?: number; 
+    locationId?: number;
+  }): Promise<MoodBoard[]> {
+    let moodBoards = Array.from(this.moodBoards.values())
+      .filter(board => board.userId === userId);
+    
+    if (filters) {
+      if (filters.seriesId) {
+        moodBoards = moodBoards.filter(board => board.seriesId === filters.seriesId);
+      }
+      if (filters.bookId) {
+        moodBoards = moodBoards.filter(board => board.bookId === filters.bookId);
+      }
+      if (filters.chapterId) {
+        moodBoards = moodBoards.filter(board => board.chapterId === filters.chapterId);
+      }
+      if (filters.characterId) {
+        moodBoards = moodBoards.filter(board => board.characterId === filters.characterId);
+      }
+      if (filters.locationId) {
+        moodBoards = moodBoards.filter(board => board.locationId === filters.locationId);
+      }
+    }
+    
+    return moodBoards;
+  }
+
+  async getMoodBoard(id: number): Promise<MoodBoard | undefined> {
+    return this.moodBoards.get(id);
+  }
+
+  async createMoodBoard(moodBoard: InsertMoodBoard): Promise<MoodBoard> {
+    const id = this.currentIds.moodBoard++;
+    const timestamp = new Date();
+    const newMoodBoard: MoodBoard = {
+      ...moodBoard,
+      id,
+      seriesId: moodBoard.seriesId || null,
+      bookId: moodBoard.bookId || null,
+      chapterId: moodBoard.chapterId || null,
+      characterId: moodBoard.characterId || null,
+      locationId: moodBoard.locationId || null,
+      description: moodBoard.description || null,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    
+    this.moodBoards.set(id, newMoodBoard);
+    this.saveToDisk();
+    return newMoodBoard;
+  }
+
+  async updateMoodBoard(id: number, updates: Partial<MoodBoard>): Promise<MoodBoard | undefined> {
+    const existingMoodBoard = this.moodBoards.get(id);
+    if (!existingMoodBoard) return undefined;
+    
+    const updatedMoodBoard: MoodBoard = {
+      ...existingMoodBoard,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.moodBoards.set(id, updatedMoodBoard);
+    this.saveToDisk();
+    return updatedMoodBoard;
+  }
+
+  async deleteMoodBoard(id: number): Promise<boolean> {
+    // Delete all associated mood board items first
+    const moodBoardItems = Array.from(this.moodBoardItems.values())
+      .filter(item => item.moodBoardId === id);
+    
+    for (const item of moodBoardItems) {
+      this.moodBoardItems.delete(item.id);
+    }
+    
+    const result = this.moodBoards.delete(id);
+    this.saveToDisk();
+    return result;
+  }
+
+  // Mood Board Item methods
+  async getMoodBoardItems(moodBoardId: number): Promise<MoodBoardItem[]> {
+    return Array.from(this.moodBoardItems.values())
+      .filter(item => item.moodBoardId === moodBoardId)
+      .sort((a, b) => a.position - b.position);
+  }
+
+  async getMoodBoardItem(id: number): Promise<MoodBoardItem | undefined> {
+    return this.moodBoardItems.get(id);
+  }
+
+  async createMoodBoardItem(item: InsertMoodBoardItem): Promise<MoodBoardItem> {
+    const id = this.currentIds.moodBoardItem++;
+    const timestamp = new Date();
+    
+    // Get the maximum position in the mood board and add 1
+    const existingItems = await this.getMoodBoardItems(item.moodBoardId);
+    const maxPosition = existingItems.length > 0 
+      ? Math.max(...existingItems.map(i => i.position)) 
+      : 0;
+    
+    const newItem: MoodBoardItem = {
+      ...item,
+      id,
+      position: item.position || maxPosition + 1,
+      caption: item.caption || null,
+      notes: item.notes || null,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    
+    this.moodBoardItems.set(id, newItem);
+    this.saveToDisk();
+    return newItem;
+  }
+
+  async updateMoodBoardItem(id: number, updates: Partial<MoodBoardItem>): Promise<MoodBoardItem | undefined> {
+    const existingItem = this.moodBoardItems.get(id);
+    if (!existingItem) return undefined;
+    
+    const updatedItem: MoodBoardItem = {
+      ...existingItem,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.moodBoardItems.set(id, updatedItem);
+    this.saveToDisk();
+    return updatedItem;
+  }
+
+  async deleteMoodBoardItem(id: number): Promise<boolean> {
+    const result = this.moodBoardItems.delete(id);
+    this.saveToDisk();
+    return result;
+  }
+
+  async updateMoodBoardItemPositions(itemsToUpdate: { id: number; position: number; }[]): Promise<boolean> {
+    for (const { id, position } of itemsToUpdate) {
+      const item = this.moodBoardItems.get(id);
+      if (item) {
+        this.moodBoardItems.set(id, { ...item, position, updatedAt: new Date() });
+      }
+    }
+    
+    this.saveToDisk();
+    return true;
+  }
+
+  // Voice Memo methods
+  async getVoiceMemos(userId: number, filters?: { 
+    seriesId?: number; 
+    bookId?: number; 
+    chapterId?: number;
+  }): Promise<VoiceMemo[]> {
+    let memos = Array.from(this.voiceMemos.values())
+      .filter(memo => memo.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Newest first
+    
+    if (filters) {
+      if (filters.seriesId) {
+        memos = memos.filter(memo => memo.seriesId === filters.seriesId);
+      }
+      if (filters.bookId) {
+        memos = memos.filter(memo => memo.bookId === filters.bookId);
+      }
+      if (filters.chapterId) {
+        memos = memos.filter(memo => memo.chapterId === filters.chapterId);
+      }
+    }
+    
+    return memos;
+  }
+
+  async getVoiceMemo(id: number): Promise<VoiceMemo | undefined> {
+    return this.voiceMemos.get(id);
+  }
+
+  async createVoiceMemo(memo: InsertVoiceMemo): Promise<VoiceMemo> {
+    const id = this.currentIds.voiceMemo++;
+    const timestamp = new Date();
+    const newMemo: VoiceMemo = {
+      ...memo,
+      id,
+      seriesId: memo.seriesId || null,
+      bookId: memo.bookId || null,
+      chapterId: memo.chapterId || null,
+      transcript: memo.transcript || null,
+      notes: memo.notes || null,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    
+    this.voiceMemos.set(id, newMemo);
+    this.saveToDisk();
+    return newMemo;
+  }
+
+  async updateVoiceMemo(id: number, updates: Partial<VoiceMemo>): Promise<VoiceMemo | undefined> {
+    const existingMemo = this.voiceMemos.get(id);
+    if (!existingMemo) return undefined;
+    
+    const updatedMemo: VoiceMemo = {
+      ...existingMemo,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.voiceMemos.set(id, updatedMemo);
+    this.saveToDisk();
+    return updatedMemo;
+  }
+
+  async deleteVoiceMemo(id: number): Promise<boolean> {
+    const result = this.voiceMemos.delete(id);
+    this.saveToDisk();
+    return result;
   }
 }
 

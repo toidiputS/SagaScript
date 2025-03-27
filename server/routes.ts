@@ -5,7 +5,9 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import collaborationRoutes from "./routes/collaboration";
 import aiRoutes from "./routes/ai";
-import writingStatsRoutes from './routes/writing-stats'; // Added import for writing-stats routes
+import writingStatsRoutes from './routes/writing-stats';
+import moodBoardRoutes from './routes/mood-boards';
+import voiceMemoRoutes from './routes/voice-memos';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe integration will be disabled.');
@@ -1520,6 +1522,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   //Mount writing stats routes
   app.use('/api/writing-stats', writingStatsRoutes);
+  
+  // Register multimedia routes
+  app.use('/api/mood-boards', isAuthenticated, moodBoardRoutes);
+  app.use('/api/voice-memos', isAuthenticated, voiceMemoRoutes);
 
   // Writing companion routes
   app.get('/api/writing-companion', isAuthenticated, async (req, res) => {
