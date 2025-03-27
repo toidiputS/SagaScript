@@ -84,7 +84,7 @@ export default function Sidebar() {
             {!isCollapsed && (
               <h1 className="font-serif font-bold text-lg text-foreground ml-2">
                 <span className="text-foreground">SagaScript</span>
-                <span className="text-[#00A3FF]">Life</span>
+                <span className="text-[#0097FB]">Life</span>
               </h1>
             )}
           </div>

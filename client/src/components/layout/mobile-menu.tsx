@@ -51,7 +51,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         <div className="p-4 border-b border-border flex items-center justify-between">
           <h1 className="font-serif font-bold text-lg">
             <span className="text-foreground">SagaScript</span>
-            <span className="text-[#00A3FF]">Life</span>
+            <span className="text-[#0097FB]">Life</span>
           </h1>
           <div className="flex items-center space-x-2">
             <ThemeSwitcher />
