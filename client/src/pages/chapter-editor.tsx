@@ -26,18 +26,19 @@ export default function ChapterEditor() {
     wordCount: 0,
     status: "in_progress",
   });
-  
+
   const [wordCount, setWordCount] = useState(0);
+  const [charCount, setCharCount] = useState(0); // Added character count state
   const [originalWordCount, setOriginalWordCount] = useState(0);
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Calculate initial word count
+    // Calculate initial word count and character count
     if (chapter.content) {
       countWords(chapter.content);
     }
@@ -73,17 +74,22 @@ export default function ChapterEditor() {
     }
   }, [chapterData, chapterId]);
 
-  // Word count function
+  // Word count function, updated to include character count
   const countWords = (text: string) => {
     if (!text) {
       setWordCount(0);
+      setCharCount(0); // Added character count reset
       return;
     }
-    
+
     // Remove extra whitespace and count words
     const words = text.trim().split(/\s+/).filter(word => word.length > 0);
     setWordCount(words.length);
-    
+
+    // Count characters
+    const characters = text.length;
+    setCharCount(characters); // Set character count
+
     // Update chapter state with new word count
     setChapter(prev => ({
       ...prev,
@@ -98,7 +104,7 @@ export default function ChapterEditor() {
       ...prev,
       content: newContent
     }));
-    
+
     countWords(newContent);
     setIsUnsaved(true);
   };
@@ -129,7 +135,7 @@ export default function ChapterEditor() {
       queryClient.invalidateQueries({ queryKey: ['/api/books', bookId, 'chapters'] });
       setLastSaved(new Date());
       setIsUnsaved(false);
-      
+
       if (!chapterId) {
         // Redirect to the new chapter if we just created one
         setLocation(`/chapter-editor?id=${data.id}&bookId=${bookId}&seriesId=${seriesId}`);
@@ -156,13 +162,13 @@ export default function ChapterEditor() {
   // Auto save timer
   useEffect(() => {
     let autoSaveTimer: NodeJS.Timeout;
-    
+
     if (autoSaveEnabled && isUnsaved && chapter.title && chapter.content) {
       autoSaveTimer = setTimeout(() => {
         handleSave();
       }, 30000); // Auto save after 30 seconds of inactivity
     }
-    
+
     return () => {
       if (autoSaveTimer) clearTimeout(autoSaveTimer);
     };
@@ -178,7 +184,7 @@ export default function ChapterEditor() {
       });
       return;
     }
-    
+
     if (!bookId) {
       toast({
         title: "Book required",
@@ -187,14 +193,14 @@ export default function ChapterEditor() {
       });
       return;
     }
-    
+
     // Ensure bookId is provided as a number
     const chapterToSave = {
       ...chapter,
       bookId: Number(bookId), // Always include bookId as a number
       wordCount: wordCount || 0,
     };
-    
+
     saveMutation.mutate(chapterToSave);
   };
 
@@ -211,19 +217,19 @@ export default function ChapterEditor() {
   // Format last saved time
   const formatLastSaved = () => {
     if (!lastSaved) return "Never saved";
-    
+
     const now = new Date();
     const diffMs = now.getTime() - lastSaved.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 1) return "Just now";
     if (diffMins === 1) return "1 minute ago";
     if (diffMins < 60) return `${diffMins} minutes ago`;
-    
+
     const hours = Math.floor(diffMins / 60);
     if (hours === 1) return "1 hour ago";
     if (hours < 24) return `${hours} hours ago`;
-    
+
     return lastSaved.toLocaleString();
   };
 
@@ -245,7 +251,7 @@ export default function ChapterEditor() {
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
             </Button>
-            
+
             <div>
               <Input
                 value={chapter.title || ""}
@@ -259,7 +265,7 @@ export default function ChapterEditor() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="text-xs flex items-center text-muted-foreground">
               <Clock className="h-3 w-3 mr-1" />
@@ -267,7 +273,7 @@ export default function ChapterEditor() {
                 {lastSaved ? `Last saved: ${formatLastSaved()}` : "Not saved yet"}
               </span>
             </div>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -276,7 +282,7 @@ export default function ChapterEditor() {
             >
               {autoSaveEnabled ? "Auto-save On" : "Auto-save Off"}
             </Button>
-            
+
             <Button 
               onClick={handleSave} 
               disabled={saveMutation.isPending || !isUnsaved}
@@ -289,7 +295,7 @@ export default function ChapterEditor() {
           </div>
         </div>
       </header>
-      
+
       {/* Main editor area */}
       <div className="flex-grow flex">
         <div className="max-w-4xl mx-auto w-full p-4 md:p-8 flex flex-col">
@@ -303,7 +309,7 @@ export default function ChapterEditor() {
             </Badge>
             <Badge variant="outline">{wordCount} total words</Badge>
           </div>
-          
+
           {/* Editor */}
           <div className="flex-grow">
             <Textarea
@@ -314,12 +320,12 @@ export default function ChapterEditor() {
             />
           </div>
         </div>
-        
+
         {/* Right sidebar */}
         <div className="hidden lg:block w-72 border-l p-4 bg-card">
           <h3 className="font-medium mb-3">Chapter Details</h3>
           <Separator className="mb-4" />
-          
+
           <div className="space-y-4">
             <div>
               <h4 className="text-sm font-medium mb-1">Status</h4>
@@ -337,14 +343,18 @@ export default function ChapterEditor() {
                 <option value="completed">Completed</option>
               </select>
             </div>
-            
+
             <div>
               <h4 className="text-sm font-medium mb-1">Word Count</h4>
               <Card>
                 <CardContent className="p-3 text-sm">
                   <div className="flex justify-between">
-                    <span>Current:</span>
+                    <span>Words:</span>
                     <span className="font-medium">{wordCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Characters:</span>
+                    <span className="font-medium">{charCount}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Previous:</span>
@@ -359,7 +369,7 @@ export default function ChapterEditor() {
                 </CardContent>
               </Card>
             </div>
-            
+
             <div>
               <h4 className="text-sm font-medium mb-1">Writing Tips</h4>
               <Card>
