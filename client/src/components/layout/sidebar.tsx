@@ -60,6 +60,7 @@ export default function Sidebar() {
     { name: "World", path: "/world", icon: "ri-earth-line" },
     { name: "Timeline", path: "/timeline", icon: "ri-time-line" },
     { name: "AI Companion", path: "/ai-companion", icon: "ri-robot-line" },
+    { name: "Writer's Companion", path: "/writers-companion", icon: "ri-quill-pen-line" }, // Added Writer's Companion
     { name: "Collaboration", path: "/collaboration", icon: "ri-team-line" },
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
     { name: "Products", path: "/products", icon: "ri-shopping-bag-3-line" },

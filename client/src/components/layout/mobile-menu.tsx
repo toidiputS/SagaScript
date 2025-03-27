@@ -25,6 +25,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
     { name: "Products", path: "/products", icon: "ri-shopping-bag-3-line" },
     { name: "Subscriptions", path: "/subscriptions", icon: "ri-vip-crown-line" },
+    { name: "Writer's Companion", path: "/ai-companion", icon: "ri-pencil-ruler-2-line" }, // Added Writer's Companion
   ];
 
   if (!isOpen) return null;
