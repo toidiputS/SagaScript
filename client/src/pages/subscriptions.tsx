@@ -3,8 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/simple-auth';
-import Sidebar from '@/components/layout/sidebar';
-import MobileNav from '@/components/layout/mobile-nav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -59,9 +57,7 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex">
-      <Sidebar />
-      
-      <main className="flex-1 md:ml-64 pt-4 md:pt-0">
+      <main className="flex-1 pt-4">
         <div className="p-4 md:p-6 max-w-7xl mx-auto">
           
 
