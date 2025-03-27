@@ -83,7 +83,10 @@ export default function Login() {
             <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground mr-2">
               <i className="ri-quill-pen-line text-xl"></i>
             </div>
-            <h1 className="font-serif font-bold text-3xl text-foreground">Saga Scribe</h1>
+            <h1 className="font-serif font-bold text-3xl">
+              <span className="text-foreground">SagaScript</span>
+              <span className="text-[#00A3FF]">Life</span>
+            </h1>
           </div>
           <p className="mt-2 text-muted-foreground">The Ultimate Series Author's Companion</p>
         </div>

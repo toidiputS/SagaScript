@@ -81,7 +81,12 @@ export default function Sidebar() {
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground">
               <i className="ri-quill-pen-line"></i>
             </div>
-            {!isCollapsed && <span className="font-serif font-bold text-lg text-foreground ml-2">SagaScript</span>}
+            {!isCollapsed && (
+              <h1 className="font-serif font-bold text-lg text-foreground ml-2">
+                <span className="text-foreground">SagaScript</span>
+                <span className="text-[#00A3FF]">Life</span>
+              </h1>
+            )}
           </div>
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
