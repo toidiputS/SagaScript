@@ -74,9 +74,9 @@ router.get('/', isAuthenticated, async (req, res) => {
       : (wordsToday > 0 ? 100 : 0);
 
     // Calculate streak
-    let currentStreak = 0;
     let streakDays = [];
     let consecutiveDays = true;
+    let currentStreak = 0;
     
     for (let i = 0; i < 7; i++) {
       const date = new Date();
