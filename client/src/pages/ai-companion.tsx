@@ -2,13 +2,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/simple-auth";
 
-import Sidebar from "@/components/layout/sidebar";
-import MobileNav from "@/components/layout/mobile-nav";
 import WriterCompanion from "@/components/dashboard/writer-companion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertCircle, Sparkles, RefreshCw, Lightbulb } from "lucide-react";
+import { Sparkles, RefreshCw, Lightbulb } from "lucide-react";
 
 export default function AICompanion() {
   const { user } = useAuth();
@@ -44,9 +42,7 @@ export default function AICompanion() {
 
   return (
     <div className="bg-background text-foreground font-sans min-h-screen flex">
-      <Sidebar />
-      
-      <main className="flex-1 md:ml-64 pt-4 md:pt-0">
+      <main className="flex-1 pt-4">
         <div className="p-4 md:p-6 max-w-7xl mx-auto">
           {/* Page header */}
           <header className="md:flex justify-between items-center mb-6">
