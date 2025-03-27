@@ -17,11 +17,33 @@ router.get('/', isAuthenticated, async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const chaptersToday = await db.query.chapters.findMany({
-      where: (chapters, { and, eq, gte }) => and(
-        eq(chapters.userId, userId),
-        gte(chapters.updatedAt, today)
-      ),
+    // Get all user chapters with updates, ordered by date
+    const allChapters = await db.query.chapters.findMany({
+      where: (chapters, { eq }) => eq(chapters.userId, userId),
+      orderBy: (chapters, { desc }) => [desc(chapters.updatedAt)]
+    });
+
+    // Calculate streak
+    let currentStreak = 0;
+    let date = new Date();
+    date.setHours(0, 0, 0, 0);
+    
+    while (true) {
+      const hasUpdates = allChapters.some(chapter => {
+        const chapterDate = new Date(chapter.updatedAt);
+        chapterDate.setHours(0, 0, 0, 0);
+        return chapterDate.getTime() === date.getTime();
+      });
+
+      if (!hasUpdates) break;
+      currentStreak++;
+      date.setDate(date.getDate() - 1);
+    }
+
+    // Calculate today's word count
+    const chaptersToday = allChapters.filter(chapter => {
+      const chapterDate = new Date(chapter.updatedAt);
+      return chapterDate >= today;
     });
 
     const wordsToday = chaptersToday.reduce((total, chapter) => {

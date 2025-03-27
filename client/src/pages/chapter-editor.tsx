@@ -74,26 +74,32 @@ export default function ChapterEditor() {
     }
   }, [chapterData, chapterId]);
 
-  // Word count function, updated to include character count
+  // Word count function with improved word counting and character count
   const countWords = (text: string) => {
     if (!text) {
       setWordCount(0);
-      setCharCount(0); // Added character count reset
+      setCharCount(0);
       return;
     }
 
-    // Remove extra whitespace and count words
-    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-    setWordCount(words.length);
-
-    // Count characters
+    // Count characters (including spaces)
     const characters = text.length;
-    setCharCount(characters); // Set character count
+    setCharCount(characters);
+
+    // Improved word counting - handles multiple spaces and punctuation
+    const words = text
+      .trim()
+      .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
+      .split(/\s+/)
+      .filter(word => word.length > 0);
+    
+    const wordCount = words.length;
+    setWordCount(wordCount);
 
     // Update chapter state with new word count
     setChapter(prev => ({
       ...prev,
-      wordCount: words.length
+      wordCount: wordCount
     }));
   };
 
