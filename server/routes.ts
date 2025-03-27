@@ -1521,6 +1521,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //Mount writing stats routes
   app.use('/api/writing-stats', writingStatsRoutes);
 
+  // Writing companion routes
+  app.get('/api/writing-companion', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id!;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Return writing companion data
+      res.status(200).json({
+        enabled: true,
+        suggestions: [],
+        analysis: null
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching writing companion data" });
+    }
+  });
+
 
 
   return httpServer;
