@@ -219,7 +219,7 @@
     - Test settings updates and persistence
     - _Requirements: 1.2, 2.1, 5.4_
 
-  - [x] 13.3 Add end-to-end tests for critical user journeys
+  - [x] 13.3 Add end-to-end tests for critical user journeyso
 
     - Test profile page navigation and data loading
     - Test avatar upload and profile editing flow
@@ -227,7 +227,6 @@
     - _Requirements: 1.1, 1.4, 4.3_
 
 - [x] 14. Performance optimization and final integration
-
 
   - Implement code splitting for tab content to reduce initial bundle size
   - Add image optimization and lazy loading for avatars and achievement badges

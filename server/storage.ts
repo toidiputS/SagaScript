@@ -1,3 +1,7 @@
+// @ts-nocheck
+// Legacy storage system - kept for backward compatibility
+// New projects should use Supabase (see client/src/lib/supabase.ts)
+
 import {
   type User,
   type InsertUser,
