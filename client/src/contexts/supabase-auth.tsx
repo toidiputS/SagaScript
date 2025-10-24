@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase, getUserProfile, createUserProfile } from '@/lib/supabase'
-import { Database } from '../../shared/supabase-types'
+import { Database } from '@shared/supabase-types'
 import { useToast } from '@/hooks/use-toast'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -144,7 +144,7 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
 
   const signIn = async (email: string, password: string) => {
     setLoading(true)
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -192,7 +192,7 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
   }
 
   const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
