@@ -22,7 +22,6 @@ import { useState } from "react";
 import { SupabaseAuthProvider } from "@/contexts/supabase-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
-import AuthPage from "@/pages/auth-page";
 import AuthCallback from "@/pages/auth-callback";
 import { AuthForm } from "@/components/auth/AuthForm";
 import SubscriptionsPage from '@/pages/subscriptions';
