@@ -24,9 +24,9 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthCallback from "@/pages/auth-callback";
 import { AuthForm } from "@/components/auth/AuthForm";
-import SubscriptionsPage from '@/pages/subscriptions';
-import AICompanion from '@/pages/ai-companion';
-import Profile from '@/pages/profile';
+import SubscriptionsPage from "@/pages/subscriptions";
+import AICompanion from "@/pages/ai-companion";
+import Profile from "@/pages/profile";
 import { useSidebarState } from "@/hooks/use-sidebar-state";
 import BackgroundLogo from "@/components/ui/background-logo";
 import { SagaScriptLogoCompact } from "@/components/ui/sagascript-logo";
@@ -37,26 +37,35 @@ function Router() {
   const { getMainContentStyle } = useSidebarState();
 
   // Check if the current route is auth-related
-  const isAuthRoute = ['/login', '/register', '/auth'].includes(location);
+  const isAuthRoute = ["/login", "/register", "/auth"].includes(location);
 
   return (
     <div className="h-screen flex overflow-hidden bg-background relative">
       {/* Background Logo */}
       <BackgroundLogo />
-      
+
       {!isAuthRoute && (
         <>
           <Sidebar />
-          <MobileMenu 
-            isOpen={isMobileMenuOpen} 
-            onClose={() => setIsMobileMenuOpen(false)} 
+          <MobileMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
           />
           <div className="md:hidden w-full bg-background border-b border-border h-16 fixed top-0 z-10 flex items-center px-4">
-            <button 
-              onClick={() => setIsMobileMenuOpen(true)} 
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
               className="p-2 rounded-md text-muted-foreground hover:text-foreground"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <line x1="3" y1="12" x2="21" y2="12"></line>
                 <line x1="3" y1="6" x2="21" y2="6"></line>
                 <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -64,15 +73,17 @@ function Router() {
             </button>
             <div className="ml-4 flex items-center gap-2">
               <SagaScriptLogoCompact size={24} className="text-primary" />
-              <span className="font-serif font-bold text-lg text-foreground">SagaScript</span>
+              <span className="font-serif font-bold text-lg text-foreground">
+                SagaScript
+              </span>
             </div>
           </div>
         </>
       )}
 
-      <main 
+      <main
         className={`flex-1 overflow-y-auto bg-background transition-all duration-300 ${
-          !isAuthRoute ? 'pt-16 lg:pt-0' : ''
+          !isAuthRoute ? "pt-16 lg:pt-0" : ""
         }`}
         style={getMainContentStyle(isAuthRoute)}
       >
@@ -89,32 +100,47 @@ function Router() {
           <ProtectedRoute path="/characters" component={() => <Characters />} />
           <ProtectedRoute path="/world" component={() => <World />} />
           <ProtectedRoute path="/timeline" component={() => <Timeline />} />
-          <ProtectedRoute path="/achievements" component={() => <Achievements />} />
-          <ProtectedRoute path="/collaboration" component={() => <Collaboration />} />
+          <ProtectedRoute
+            path="/achievements"
+            component={() => <Achievements />}
+          />
+          <ProtectedRoute
+            path="/collaboration"
+            component={() => <Collaboration />}
+          />
           <ProtectedRoute path="/products" component={() => <Products />} />
           <ProtectedRoute path="/checkout" component={() => <Checkout />} />
-          <ProtectedRoute path="/ai-companion" component={() => <AICompanion />} />
-          <ProtectedRoute path="/chapter-editor" component={() => {
-            // Extract bookId from URL
-            const params = new URLSearchParams(window.location.search);
-            const bookId = params.get("bookId");
-            const seriesId = params.get("seriesId");
+          <ProtectedRoute
+            path="/ai-companion"
+            component={() => <AICompanion />}
+          />
+          <ProtectedRoute
+            path="/chapter-editor"
+            component={() => {
+              // Extract bookId from URL
+              const params = new URLSearchParams(window.location.search);
+              const bookId = params.get("bookId");
+              const seriesId = params.get("seriesId");
 
-            // If no bookId is provided, redirect to series page or home
-            if (!bookId) {
-              // If seriesId is available, redirect to that series
-              if (seriesId) {
-                window.location.href = `/series?id=${seriesId}`;
+              // If no bookId is provided, redirect to series page or home
+              if (!bookId) {
+                // If seriesId is available, redirect to that series
+                if (seriesId) {
+                  window.location.href = `/series?id=${seriesId}`;
+                  return <div>Redirecting...</div>;
+                }
+                // Otherwise redirect to home
+                window.location.href = "/";
                 return <div>Redirecting...</div>;
               }
-              // Otherwise redirect to home
-              window.location.href = "/";
-              return <div>Redirecting...</div>;
-            }
 
-            return <ChapterEditor />;
-          }} />
-          <ProtectedRoute path="/subscriptions" component={() => <SubscriptionsPage />} />
+              return <ChapterEditor />;
+            }}
+          />
+          <ProtectedRoute
+            path="/subscriptions"
+            component={() => <SubscriptionsPage />}
+          />
           <ProtectedRoute path="/profile" component={() => <Profile />} />
 
           {/* Fallback to 404 */}
@@ -128,13 +154,14 @@ function Router() {
 function App() {
   // Register service worker for caching
   React.useEffect(() => {
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      navigator.serviceWorker.register('/sw.js')
+    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+      navigator.serviceWorker
+        .register("/sw.js")
         .then((registration) => {
-          console.log('SW registered: ', registration);
+          console.log("SW registered: ", registration);
         })
         .catch((registrationError) => {
-          console.log('SW registration failed: ', registrationError);
+          console.log("SW registration failed: ", registrationError);
         });
     }
   }, []);

@@ -19,7 +19,7 @@ export class ProfilePreloader {
   /**
    * Preload profile data when user navigates to profile page
    */
-  async preloadProfileData(userId?: string): Promise<void> {
+  async preloadProfileData(): Promise<void> {
     const promises = [
       this.preloadProfile(),
       this.preloadUserStats(),
