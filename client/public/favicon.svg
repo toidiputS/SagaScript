@@ -1,0 +1,15 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="#0f172a"/>
+  <!-- Simplified version of the book from your logo -->
+  <g transform="translate(16, 20)">
+    <!-- Book pages fanning out -->
+    <path d="M-8 -4 Q-12 -8 -14 -10 L-12 -6 Q-10 -4 -8 -2 Z" fill="#3B82F6"/>
+    <path d="M-4 -6 Q-6 -10 -8 -12 L-6 -8 Q-5 -6 -4 -4 Z" fill="#60A5FA"/>
+    <path d="M0 -8 Q0 -12 -2 -14 L0 -10 Q1 -8 0 -6 Z" fill="#3B82F6"/>
+    <path d="M4 -6 Q6 -10 8 -12 L6 -8 Q5 -6 4 -4 Z" fill="#60A5FA"/>
+    <path d="M8 -4 Q12 -8 14 -10 L12 -6 Q10 -4 8 -2 Z" fill="#3B82F6"/>
+    
+    <!-- Book binding -->
+    <ellipse cx="0" cy="0" rx="10" ry="3" fill="#1e40af"/>
+  </g>
+</svg>

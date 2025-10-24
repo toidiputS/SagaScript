@@ -5,19 +5,26 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, Save, BookOpen, Clock, X } from "lucide-react";
+import { ChevronLeft, Save, BookOpen, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useLocation, useRoute } from "wouter";
+import { useLocation } from "wouter";
 import { Chapter, Book } from "@shared/schema";
+import ChapterToolbar from "@/components/editor/chapter-toolbar";
+import { useTextEditor } from "@/hooks/use-text-editor";
+import FocusMode from "@/components/editor/focus-mode";
 
 export default function ChapterEditor() {
   const [location, setLocation] = useLocation();
   const params = new URLSearchParams(location.split("?")[1]);
   const chapterId = params.get("id") ? parseInt(params.get("id")!) : undefined;
-  const bookId = params.get("bookId") ? parseInt(params.get("bookId")!) : undefined;
-  const seriesId = params.get("seriesId") ? parseInt(params.get("seriesId")!) : undefined;
+  const bookId = params.get("bookId")
+    ? parseInt(params.get("bookId")!)
+    : undefined;
+  const seriesId = params.get("seriesId")
+    ? parseInt(params.get("seriesId")!)
+    : undefined;
 
   const [chapter, setChapter] = useState<Partial<Chapter>>({
     bookId: bookId || undefined,
@@ -33,9 +40,18 @@ export default function ChapterEditor() {
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Initialize text editor
+  const textEditor = useTextEditor(chapter.content || "", (newContent) => {
+    setChapter((prev) => ({ ...prev, content: newContent }));
+    setIsUnsaved(true);
+    countWords(newContent);
+  });
 
   useEffect(() => {
     // Calculate initial word count and character count
@@ -45,11 +61,11 @@ export default function ChapterEditor() {
   }, [chapter.content]);
 
   // Get chapter data if editing existing chapter
-  const { data: chapterData, isLoading: isLoadingChapter } = useQuery<Chapter>({
-    queryKey: ['/api/chapters', chapterId],
+  const { data: chapterData } = useQuery<Chapter>({
+    queryKey: ["/api/chapters", chapterId],
     queryFn: async () => {
       if (!chapterId) return {} as Chapter;
-      const res = await apiRequest('GET', `/api/chapters/${chapterId}`);
+      const res = await apiRequest("GET", `/api/chapters/${chapterId}`);
       return res.json();
     },
     enabled: !!chapterId,
@@ -57,10 +73,10 @@ export default function ChapterEditor() {
 
   // Get book data for context
   const { data: bookData } = useQuery<Book>({
-    queryKey: ['/api/books', bookId],
+    queryKey: ["/api/books", bookId],
     queryFn: async () => {
       if (!bookId) return {} as Book;
-      const res = await apiRequest('GET', `/api/books/${bookId}`);
+      const res = await apiRequest("GET", `/api/books/${bookId}`);
       return res.json();
     },
     enabled: !!bookId,
@@ -71,8 +87,9 @@ export default function ChapterEditor() {
       setChapter(chapterData);
       setOriginalWordCount(chapterData.wordCount || 0);
       countWords(chapterData.content || "");
+      textEditor.setValue(chapterData.content || "", false);
     }
-  }, [chapterData, chapterId]);
+  }, [chapterData, chapterId, textEditor]);
 
   // Word count function with improved word counting and character count
   const countWords = (text: string) => {
@@ -89,26 +106,27 @@ export default function ChapterEditor() {
     // Improved word counting - handles multiple spaces and punctuation
     const words = text
       .trim()
-      .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
+      .replace(/[^\w\s]/g, " ") // Replace punctuation with spaces
       .split(/\s+/)
-      .filter(word => word.length > 0);
-    
+      .filter((word) => word.length > 0);
+
     const wordCount = words.length;
     setWordCount(wordCount);
 
     // Update chapter state with new word count
-    setChapter(prev => ({
+    setChapter((prev) => ({
       ...prev,
-      wordCount: wordCount
+      wordCount: wordCount,
     }));
   };
 
   // Handle content change
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
-    setChapter(prev => ({
+    textEditor.setValue(newContent, false); // Don't add to history for every keystroke
+    setChapter((prev) => ({
       ...prev,
-      content: newContent
+      content: newContent,
     }));
 
     countWords(newContent);
@@ -117,9 +135,9 @@ export default function ChapterEditor() {
 
   // Handle title change
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setChapter(prev => ({
+    setChapter((prev) => ({
       ...prev,
-      title: e.target.value
+      title: e.target.value,
     }));
     setIsUnsaved(true);
   };
@@ -129,22 +147,26 @@ export default function ChapterEditor() {
     mutationFn: async (data: Partial<Chapter>) => {
       if (chapterId) {
         // Update existing chapter
-        const res = await apiRequest('PUT', `/api/chapters/${chapterId}`, data);
+        const res = await apiRequest("PUT", `/api/chapters/${chapterId}`, data);
         return res.json();
       } else {
         // Create new chapter
-        const res = await apiRequest('POST', `/api/chapters`, data);
+        const res = await apiRequest("POST", `/api/chapters`, data);
         return res.json();
       }
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/books', bookId, 'chapters'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/books", bookId, "chapters"],
+      });
       setLastSaved(new Date());
       setIsUnsaved(false);
 
       if (!chapterId) {
         // Redirect to the new chapter if we just created one
-        setLocation(`/chapter-editor?id=${data.id}&bookId=${bookId}&seriesId=${seriesId}`);
+        setLocation(
+          `/chapter-editor?id=${data.id}&bookId=${bookId}&seriesId=${seriesId}`
+        );
         toast({
           title: "Chapter created",
           description: "Your chapter has been created successfully",
@@ -162,7 +184,7 @@ export default function ChapterEditor() {
         description: error.message || "An error occurred while saving",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Auto save timer
@@ -194,7 +216,8 @@ export default function ChapterEditor() {
     if (!bookId) {
       toast({
         title: "Book required",
-        description: "A chapter must be associated with a book. Please select a book first.",
+        description:
+          "A chapter must be associated with a book. Please select a book first.",
         variant: "destructive",
       });
       return;
@@ -248,150 +271,297 @@ export default function ChapterEditor() {
   const progress = calculateProgress();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="border-b p-4 bg-card">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={handleBack} className="h-9 w-9 p-0">
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Back</span>
-            </Button>
+    <FocusMode
+      isActive={isFocusMode}
+      onExit={() => setIsFocusMode(false)}
+      className={isFullscreen ? "fixed inset-0 z-50" : ""}
+    >
+      <div
+        className={`${
+          isFullscreen ? "h-screen" : "min-h-screen"
+        } bg-background flex flex-col`}
+      >
+        {/* Header */}
+        <header className="border-b p-4 bg-card">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={handleBack}
+                className="h-9 w-9 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Back</span>
+              </Button>
 
-            <div>
-              <Input
-                value={chapter.title || ""}
-                onChange={handleTitleChange}
-                placeholder="Chapter Title"
-                className="text-xl font-medium border-none shadow-none focus-visible:ring-0 p-0 h-auto"
-              />
-              <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
-                <BookOpen className="h-3 w-3" />
-                <span>{bookData?.title || "Untitled Book"}</span>
+              <div>
+                <Input
+                  value={chapter.title || ""}
+                  onChange={handleTitleChange}
+                  placeholder="Chapter Title"
+                  className="text-xl font-medium border-none shadow-none focus-visible:ring-0 p-0 h-auto"
+                />
+                <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
+                  <BookOpen className="h-3 w-3" />
+                  <span>{bookData?.title || "Untitled Book"}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-xs flex items-center text-muted-foreground">
-              <Clock className="h-3 w-3 mr-1" />
-              <span>
-                {lastSaved ? `Last saved: ${formatLastSaved()}` : "Not saved yet"}
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="text-xs flex items-center text-muted-foreground">
+                <Clock className="h-3 w-3 mr-1" />
+                <span>
+                  {lastSaved
+                    ? `Last saved: ${formatLastSaved()}`
+                    : "Not saved yet"}
+                </span>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
+                className={`text-xs ${autoSaveEnabled ? "bg-primary/10" : ""}`}
+              >
+                {autoSaveEnabled ? "Auto-save On" : "Auto-save Off"}
+              </Button>
+
+              <Button
+                onClick={handleSave}
+                disabled={saveMutation.isPending || !isUnsaved}
+                className="text-white"
+                size="sm"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {saveMutation.isPending ? "Saving..." : "Save"}
+              </Button>
             </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
-              className={`text-xs ${autoSaveEnabled ? 'bg-primary/10' : ''}`}
-            >
-              {autoSaveEnabled ? "Auto-save On" : "Auto-save Off"}
-            </Button>
-
-            <Button 
-              onClick={handleSave} 
-              disabled={saveMutation.isPending || !isUnsaved}
-              className="text-white"
-              size="sm"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saveMutation.isPending ? "Saving..." : "Save"}
-            </Button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main editor area */}
-      <div className="flex-grow flex">
-        <div className="max-w-4xl mx-auto w-full p-4 md:p-8 flex flex-col">
-          {/* Status badges */}
-          <div className="flex items-center gap-2 mb-4">
-            <Badge variant="outline">
-              {chapter.status === "completed" ? "Completed" : chapter.status === "draft" ? "Draft" : "In Progress"}
-            </Badge>
-            <Badge variant={progress >= 0 ? "secondary" : "destructive"}>
-              {progress >= 0 ? `+${progress}` : progress} words
-            </Badge>
-            <Badge variant="outline">{wordCount} total words</Badge>
-          </div>
-
-          {/* Editor */}
-          <div className="flex-grow">
-            <Textarea
-              value={chapter.content || ""}
-              onChange={handleContentChange}
-              placeholder="Start writing your chapter here..."
-              className="w-full h-full min-h-[calc(100vh-250px)] resize-none p-4 text-lg leading-relaxed focus-visible:ring-0"
+        {/* Writing Toolbar */}
+        <div className="p-4 bg-background">
+          <div className="max-w-7xl mx-auto">
+            <ChapterToolbar
+              onSave={handleSave}
+              onFocusMode={() => setIsFocusMode(true)}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+              wordCount={wordCount}
+              targetWordCount={2000} // You can make this configurable
+              readingTime={Math.ceil(wordCount / 200)} // Approximate reading time
+              canUndo={textEditor.actions.canUndo}
+              canRedo={textEditor.actions.canRedo}
+              onAction={(action, value) => {
+                // Handle toolbar actions
+                switch (action) {
+                  case "bold":
+                    textEditor.actions.bold();
+                    break;
+                  case "italic":
+                    textEditor.actions.italic();
+                    break;
+                  case "underline":
+                    textEditor.actions.underline();
+                    break;
+                  case "undo":
+                    textEditor.actions.undo();
+                    break;
+                  case "redo":
+                    textEditor.actions.redo();
+                    break;
+                  case "list":
+                    textEditor.actions.list(value);
+                    break;
+                  case "quote":
+                    textEditor.actions.quote();
+                    break;
+                  case "find":
+                    // Open find dialog (you can implement this)
+                    const searchTerm = prompt("Find:");
+                    if (searchTerm) {
+                      // Simple find implementation
+                      const content = textEditor.value;
+                      const index = content
+                        .toLowerCase()
+                        .indexOf(searchTerm.toLowerCase());
+                      if (index !== -1) {
+                        textEditor.setSelection(
+                          index,
+                          index + searchTerm.length
+                        );
+                      } else {
+                        toast({
+                          title: "Not found",
+                          description: `"${searchTerm}" was not found in the document.`,
+                        });
+                      }
+                    }
+                    break;
+                  case "ai-assist":
+                    toast({
+                      title: "AI Assistant",
+                      description: "AI writing assistance coming soon!",
+                    });
+                    break;
+                  default:
+                    console.log("Unhandled action:", action, value);
+                }
+              }}
             />
           </div>
         </div>
 
-        {/* Right sidebar */}
-        <div className="hidden lg:block w-72 border-l p-4 bg-card">
-          <h3 className="font-medium mb-3">Chapter Details</h3>
-          <Separator className="mb-4" />
+        {/* Main editor area */}
+        <div className="flex-grow flex">
+          <div className="max-w-4xl mx-auto w-full p-4 md:p-8 flex flex-col">
+            {/* Status badges */}
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="outline">
+                {chapter.status === "completed"
+                  ? "Completed"
+                  : chapter.status === "draft"
+                  ? "Draft"
+                  : "In Progress"}
+              </Badge>
+              <Badge variant={progress >= 0 ? "secondary" : "destructive"}>
+                {progress >= 0 ? `+${progress}` : progress} words
+              </Badge>
+              <Badge variant="outline">{wordCount} total words</Badge>
+            </div>
 
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium mb-1">Status</h4>
-              <select
-                value={chapter.status || "in_progress"}
-                onChange={(e) => {
-                  setChapter(prev => ({ ...prev, status: e.target.value }));
-                  setIsUnsaved(true);
+            {/* Editor */}
+            <div className="flex-grow">
+              <Textarea
+                ref={textEditor.textareaRef}
+                value={textEditor.value}
+                onChange={handleContentChange}
+                placeholder="Start writing your chapter here..."
+                className="w-full h-full min-h-[calc(100vh-250px)] resize-none p-4 text-lg leading-relaxed focus-visible:ring-0"
+                onKeyDown={(e) => {
+                  // Handle keyboard shortcuts
+                  if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                      case "b":
+                        e.preventDefault();
+                        textEditor.actions.bold();
+                        break;
+                      case "i":
+                        e.preventDefault();
+                        textEditor.actions.italic();
+                        break;
+                      case "u":
+                        e.preventDefault();
+                        textEditor.actions.underline();
+                        break;
+                      case "z":
+                        if (e.shiftKey) {
+                          e.preventDefault();
+                          textEditor.actions.redo();
+                        } else {
+                          e.preventDefault();
+                          textEditor.actions.undo();
+                        }
+                        break;
+                      case "y":
+                        e.preventDefault();
+                        textEditor.actions.redo();
+                        break;
+                      case "s":
+                        e.preventDefault();
+                        handleSave();
+                        break;
+                    }
+                  }
+
+                  // Handle F11 for fullscreen
+                  if (e.key === "F11") {
+                    e.preventDefault();
+                    setIsFullscreen(!isFullscreen);
+                  }
+
+                  // Handle Escape for focus mode
+                  if (e.key === "Escape" && isFocusMode) {
+                    setIsFocusMode(false);
+                  }
                 }}
-                className="w-full p-2 rounded-md border text-sm"
-              >
-                <option value="in_progress">In Progress</option>
-                <option value="draft">Draft</option>
-                <option value="revision">Revision</option>
-                <option value="completed">Completed</option>
-              </select>
+              />
             </div>
+          </div>
 
-            <div>
-              <h4 className="text-sm font-medium mb-1">Word Count</h4>
-              <Card>
-                <CardContent className="p-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>Words:</span>
-                    <span className="font-medium">{wordCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Characters:</span>
-                    <span className="font-medium">{charCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Previous:</span>
-                    <span>{originalWordCount}</span>
-                  </div>
-                  <div className="flex justify-between font-medium">
-                    <span>Change:</span>
-                    <span className={progress >= 0 ? "text-green-600" : "text-red-600"}>
-                      {progress >= 0 ? `+${progress}` : progress}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Right sidebar */}
+          <div className="hidden lg:block w-72 border-l p-4 bg-card">
+            <h3 className="font-medium mb-3">Chapter Details</h3>
+            <Separator className="mb-4" />
 
-            <div>
-              <h4 className="text-sm font-medium mb-1">Writing Tips</h4>
-              <Card>
-                <CardContent className="p-3 text-sm">
-                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Use descriptive language to paint a vivid picture</li>
-                    <li>Show, don't tell - let readers experience the story</li>
-                    <li>Maintain consistent character voices</li>
-                    <li>Take breaks to refresh your perspective</li>
-                  </ul>
-                </CardContent>
-              </Card>
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium mb-1">Status</h4>
+                <select
+                  value={chapter.status || "in_progress"}
+                  onChange={(e) => {
+                    setChapter((prev) => ({ ...prev, status: e.target.value }));
+                    setIsUnsaved(true);
+                  }}
+                  className="w-full p-2 rounded-md border text-sm"
+                >
+                  <option value="in_progress">In Progress</option>
+                  <option value="draft">Draft</option>
+                  <option value="revision">Revision</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-1">Word Count</h4>
+                <Card>
+                  <CardContent className="p-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>Words:</span>
+                      <span className="font-medium">{wordCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Characters:</span>
+                      <span className="font-medium">{charCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Previous:</span>
+                      <span>{originalWordCount}</span>
+                    </div>
+                    <div className="flex justify-between font-medium">
+                      <span>Change:</span>
+                      <span
+                        className={
+                          progress >= 0 ? "text-green-600" : "text-red-600"
+                        }
+                      >
+                        {progress >= 0 ? `+${progress}` : progress}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-1">Writing Tips</h4>
+                <Card>
+                  <CardContent className="p-3 text-sm">
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                      <li>Use descriptive language to paint a vivid picture</li>
+                      <li>
+                        Show, don't tell - let readers experience the story
+                      </li>
+                      <li>Maintain consistent character voices</li>
+                      <li>Take breaks to refresh your perspective</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </FocusMode>
   );
 }

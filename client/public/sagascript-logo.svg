@@ -1,0 +1,103 @@
+<svg width="800" height="480" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
+  <!-- SagaScript Life Logo - Exact Recreation -->
+  
+  <!-- Open book with pages fanning out -->
+  <g transform="translate(400, 240)">
+    <!-- Book spine/binding (curved bottom) -->
+    <path d="M-160 40 Q0 60 160 40" 
+          fill="none" stroke="#4A90E2" stroke-width="8" stroke-linecap="round"/>
+    
+    <!-- Left side pages (fanning outward) -->
+    <!-- Page 1 (leftmost) -->
+    <path d="M-160 40 Q-200 -20 -220 -80 Q-200 -60 -160 20 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 2 -->
+    <path d="M-140 35 Q-170 -25 -185 -85 Q-165 -65 -140 15 Z" 
+          fill="#5BA0F2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 3 -->
+    <path d="M-120 30 Q-140 -30 -150 -90 Q-130 -70 -120 10 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 4 -->
+    <path d="M-100 25 Q-110 -35 -115 -95 Q-95 -75 -100 5 Z" 
+          fill="#5BA0F2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 5 -->
+    <path d="M-80 20 Q-80 -40 -80 -100 Q-60 -80 -80 0 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 6 -->
+    <path d="M-60 15 Q-50 -45 -45 -105 Q-25 -85 -60 -5 Z" 
+          fill="#5BA0F2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 7 -->
+    <path d="M-40 10 Q-20 -50 -10 -110 Q10 -90 -40 -10 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Center pages -->
+    <path d="M-20 5 Q10 -55 25 -115 Q45 -95 -20 -15 Z" 
+          fill="#357ABD" stroke="#2E5F99" stroke-width="1.5"/>
+    
+    <!-- Right side pages (fanning outward) -->
+    <!-- Page 1 -->
+    <path d="M20 5 Q50 -55 65 -115 Q85 -95 20 -15 Z" 
+          fill="#5BA0F2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 2 -->
+    <path d="M40 10 Q80 -50 100 -110 Q120 -90 40 -10 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 3 -->
+    <path d="M60 15 Q110 -45 135 -105 Q155 -85 60 -5 Z" 
+          fill="#5BA0F2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 4 -->
+    <path d="M80 20 Q140 -40 170 -100 Q190 -80 80 0 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 5 -->
+    <path d="M100 25 Q170 -35 205 -95 Q225 -75 100 5 Z" 
+          fill="#5BA0F2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 6 -->
+    <path d="M120 30 Q200 -30 240 -90 Q260 -70 120 10 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 7 (rightmost) -->
+    <path d="M140 35 Q230 -25 275 -85 Q295 -65 140 15 Z" 
+          fill="#5BA0F2" stroke="#357ABD" stroke-width="1.5"/>
+    
+    <!-- Page 8 (rightmost) -->
+    <path d="M160 40 Q260 -20 310 -80 Q330 -60 160 20 Z" 
+          fill="#4A90E2" stroke="#357ABD" stroke-width="1.5"/>
+  </g>
+  
+  <!-- SagaScript text (elegant script font) -->
+  <text x="400" y="380" text-anchor="middle" 
+        fill="white" 
+        font-family="Brush Script MT, cursive" 
+        font-size="72" 
+        font-weight="normal"
+        style="font-style: italic;">
+    SagaScript
+  </text>
+  
+  <!-- Underline for SagaScript -->
+  <line x1="180" y1="390" x2="620" y2="390" stroke="white" stroke-width="3"/>
+  <line x1="180" y1="395" x2="620" y2="395" stroke="white" stroke-width="1"/>
+  
+  <!-- Life text (elegant script, smaller) -->
+  <text x="650" y="350" text-anchor="start" 
+        fill="white" 
+        font-family="Brush Script MT, cursive" 
+        font-size="48" 
+        font-weight="normal"
+        style="font-style: italic;">
+    Life
+  </text>
+  
+  <!-- Decorative line extending from Life -->
+  <line x1="650" y1="360" x2="750" y2="360" stroke="white" stroke-width="2"/>
+</svg>

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Link } from "wouter";
+import { SagaScriptLogoCompact } from "@/components/ui/sagascript-logo";
 
 // Login form schema
 const loginSchema = z.object({
@@ -80,8 +81,8 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground mr-2">
-              <i className="ri-quill-pen-line text-xl"></i>
+            <div className="w-12 h-12 flex items-center justify-center text-primary mr-2">
+              <SagaScriptLogoCompact size={48} className="text-primary" />
             </div>
             <h1 className="font-serif font-bold text-3xl">
               <span className="text-foreground">SagaScript</span>

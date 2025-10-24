@@ -82,7 +82,7 @@ export default function LocationCard({ location }: LocationCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="rounded-[30px] bg-card overflow-hidden shadow-[10px_10px_20px_rgba(33,150,243,0.12),-10px_-10px_20px_rgba(66,165,245,0.08)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.18),-15px_-15px_25px_rgba(66,165,245,0.12)] transition-shadow duration-300">
       <div className="relative">
         {location.image ? (
           <img 
@@ -91,13 +91,13 @@ export default function LocationCard({ location }: LocationCardProps) {
             className="w-full h-40 object-cover"
           />
         ) : (
-          <div className="w-full h-40 bg-neutral-100 flex items-center justify-center text-neutral-400">
+          <div className="w-full h-40 bg-muted flex items-center justify-center text-muted-foreground">
             <i className="ri-map-pin-line text-4xl"></i>
           </div>
         )}
         {location.importance === "main" && (
           <div className="absolute top-2 right-2">
-            <div className="px-2 py-1 bg-white/80 backdrop-blur-sm rounded-md text-xs font-medium text-neutral-700">
+            <div className="px-2 py-1 bg-primary/80 backdrop-blur-sm rounded-md text-xs font-medium text-primary-foreground">
               Main Setting
             </div>
           </div>
@@ -106,14 +106,14 @@ export default function LocationCard({ location }: LocationCardProps) {
       <div className="p-5">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-serif font-bold text-xl text-neutral-800">{location.name}</h3>
-            <p className="text-neutral-600 text-sm">{location.locationType || "Location"}</p>
+            <h3 className="font-serif font-bold text-xl text-card-foreground">{location.name}</h3>
+            <p className="text-muted-foreground text-sm">{location.locationType || "Location"}</p>
           </div>
         </div>
-        <p className="mt-3 text-sm text-neutral-700 line-clamp-3">
+        <p className="mt-3 text-sm text-card-foreground line-clamp-3">
           {location.description || "No description provided."}
         </p>
-        <div className="mt-4 text-xs text-neutral-500">
+        <div className="mt-4 text-xs text-muted-foreground">
           Appears in: {formatBookAppearances()}
         </div>
         <div className="mt-5 flex justify-between">
@@ -141,14 +141,14 @@ export default function LocationCard({ location }: LocationCardProps) {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500 h-auto"
+              className="p-1.5 rounded hover:bg-muted text-muted-foreground h-auto"
               onClick={() => setIsEditDialogOpen(true)}
             >
               <i className="ri-edit-line"></i>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-1.5 rounded hover:bg-neutral-100 text-neutral-500 h-auto">
+                <Button variant="ghost" size="sm" className="p-1.5 rounded hover:bg-muted text-muted-foreground h-auto">
                   <i className="ri-more-2-fill"></i>
                 </Button>
               </DropdownMenuTrigger>

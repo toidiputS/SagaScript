@@ -22,7 +22,7 @@ export default function StatsCard({
   streakDays
 }: StatsCardProps) {
   return (
-    <div className="bg-card rounded-lg shadow-sm border border-border p-5">
+    <div className="rounded-[30px] bg-card text-card-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.12),-10px_-10px_20px_rgba(66,165,245,0.08)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.18),-15px_-15px_25px_rgba(66,165,245,0.12)] transition-shadow duration-300 p-5">
       <div className="flex items-center">
         <div className={`p-3 ${iconBg} rounded-lg`}>
           <i className={`${icon} text-xl ${iconColor}`}></i>

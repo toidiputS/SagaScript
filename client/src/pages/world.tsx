@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { type Location } from "@shared/schema";
 
 export default function WorldPage() {
@@ -115,17 +115,33 @@ export default function WorldPage() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-neutral-200 mb-6">
-          <Tabs defaultValue="locations" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex overflow-x-auto pb-1 hide-scrollbar">
-              <TabsTrigger value="locations" className="px-4 py-2 whitespace-nowrap">Locations</TabsTrigger>
-              <TabsTrigger value="cultures" className="px-4 py-2 whitespace-nowrap">Cultures</TabsTrigger>
-              <TabsTrigger value="magic" className="px-4 py-2 whitespace-nowrap">Magic Systems</TabsTrigger>
-              <TabsTrigger value="flora" className="px-4 py-2 whitespace-nowrap">Flora & Fauna</TabsTrigger>
-              <TabsTrigger value="technology" className="px-4 py-2 whitespace-nowrap">Technology</TabsTrigger>
-              <TabsTrigger value="politics" className="px-4 py-2 whitespace-nowrap">Politics</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-3 justify-center">
+            {[
+              { value: 'locations', label: 'Locations', icon: 'ri-map-pin-line' },
+              { value: 'cultures', label: 'Cultures', icon: 'ri-group-line' },
+              { value: 'magic', label: 'Magic Systems', icon: 'ri-magic-line' },
+              { value: 'flora', label: 'Flora & Fauna', icon: 'ri-leaf-line' },
+              { value: 'technology', label: 'Technology', icon: 'ri-cpu-line' },
+              { value: 'politics', label: 'Politics', icon: 'ri-government-line' }
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`
+                  rounded-[30px] px-6 py-3 text-sm font-medium transition-all duration-300 flex items-center gap-2
+                  ${activeTab === tab.value 
+                    ? 'bg-primary text-primary-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.2),-10px_-10px_20px_rgba(66,165,245,0.15)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.25),-15px_-15px_25px_rgba(66,165,245,0.2)]' 
+                    : 'bg-card text-card-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.12),-10px_-10px_20px_rgba(66,165,245,0.08)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.18),-15px_-15px_25px_rgba(66,165,245,0.12)]'
+                  }
+                  border-0 hover:scale-105
+                `}
+              >
+                <i className={`${tab.icon} text-lg`}></i>
+                <span className="whitespace-nowrap">{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* World Map - removed as requested */}
@@ -152,12 +168,12 @@ export default function WorldPage() {
         {activeTab === "locations" && (
           <>
             {!currentSeries ? (
-              <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-                <div className="text-neutral-500 mb-4">
+              <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
+                <div className="text-muted-foreground mb-4">
                   <i className="ri-map-pin-line text-4xl"></i>
                 </div>
                 <h3 className="text-lg font-medium mb-2">No Series Selected</h3>
-                <p className="text-neutral-600 mb-4">Please select a series to manage its locations</p>
+                <p className="text-muted-foreground mb-4">Please select a series to manage its locations</p>
               </div>
             ) : isLoadingLocations ? (
               <div className="flex items-center justify-center py-12">
@@ -173,12 +189,12 @@ export default function WorldPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-                <div className="text-neutral-500 mb-4">
+              <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
+                <div className="text-muted-foreground mb-4">
                   <i className="ri-map-pin-line text-4xl"></i>
                 </div>
                 <h3 className="text-lg font-medium mb-2">No Locations Found</h3>
-                <p className="text-neutral-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   {searchQuery 
                     ? "No locations match your search criteria" 
                     : "No locations in this series yet"}
@@ -196,12 +212,12 @@ export default function WorldPage() {
 
         {/* Other tabs - placeholder content */}
         {activeTab !== "locations" && (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="text-neutral-500 mb-4">
+          <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
+            <div className="text-muted-foreground mb-4">
               <i className="ri-tools-line text-4xl"></i>
             </div>
             <h3 className="text-lg font-medium mb-2">Coming Soon</h3>
-            <p className="text-neutral-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               This feature is currently under development. Please check back later!
             </p>
           </div>

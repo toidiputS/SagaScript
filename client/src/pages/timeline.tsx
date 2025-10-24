@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Book, Character, Location, TimelineEvent } from "@shared/schema";
 import TimelineEventCard from "@/components/timeline/timeline-event-card";
@@ -293,17 +293,29 @@ export default function TimelinePage() {
         {/* Timeline view options */}
         <div className="border-b border-border mb-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4 pb-4">
-            <Tabs 
-              defaultValue="chronological"
-              value={viewMode}
-              onValueChange={(value) => setViewMode(value as any)}
-            >
-              <TabsList className="flex">
-                <TabsTrigger value="chronological" className="px-4 py-2">Chronological</TabsTrigger>
-                <TabsTrigger value="narrative" className="px-4 py-2">Narrative</TabsTrigger>
-                <TabsTrigger value="character" className="px-4 py-2">Character-Based</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex gap-3">
+              {[
+                { value: 'chronological', label: 'Chronological', icon: 'ri-time-line' },
+                { value: 'narrative', label: 'Narrative', icon: 'ri-book-open-line' },
+                { value: 'character', label: 'Character-Based', icon: 'ri-user-star-line' }
+              ].map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setViewMode(tab.value as any)}
+                  className={`
+                    rounded-[30px] px-4 py-2 text-sm font-medium transition-all duration-300 flex items-center gap-2
+                    ${viewMode === tab.value 
+                      ? 'bg-primary text-primary-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.2),-10px_-10px_20px_rgba(66,165,245,0.15)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.25),-15px_-15px_25px_rgba(66,165,245,0.2)]' 
+                      : 'bg-card text-card-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.12),-10px_-10px_20px_rgba(66,165,245,0.08)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.18),-15px_-15px_25px_rgba(66,165,245,0.12)]'
+                    }
+                    border-0 hover:scale-105
+                  `}
+                >
+                  <i className={`${tab.icon} text-lg`}></i>
+                  <span className="whitespace-nowrap">{tab.label}</span>
+                </button>
+              ))}
+            </div>
 
             {/* Character selector shown only when in character view mode */}
             {viewMode === "character" && characters && characters.length > 0 && (
@@ -326,7 +338,7 @@ export default function TimelinePage() {
 
         {/* Timeline Content */}
         {!currentSeries ? (
-          <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+          <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
             <div className="text-muted-foreground mb-4">
               <i className="ri-time-line text-4xl"></i>
             </div>
@@ -446,7 +458,7 @@ export default function TimelinePage() {
             )}
           </div>
         ) : (
-          <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+          <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
             <div className="text-muted-foreground mb-4">
               <i className="ri-time-line text-4xl"></i>
             </div>

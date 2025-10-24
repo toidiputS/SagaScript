@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
-import { useSimpleAuth } from "@/contexts/simple-auth";
+import { useSupabaseAuth } from "@/contexts/supabase-auth";
 
 export function ProtectedRoute({
   path,
@@ -9,13 +9,16 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
-  const { user, isLoading } = useSimpleAuth();
+  const { user, loading } = useSupabaseAuth();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <Route path={path}>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-border" />
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+            <p className="text-muted-foreground">Loading your workspace...</p>
+          </div>
         </div>
       </Route>
     );

@@ -73,6 +73,10 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
+  getUserStats(userId: number): Promise<any>;
+  getWritingStatsByPeriod(userId: number, period: string): Promise<any[]>;
   updateStripeCustomerId(userId: number, customerId: string): Promise<User | undefined>;
   updateUserStripeInfo(userId: number, data: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
   
@@ -134,6 +138,7 @@ export interface IStorage {
   getUserAchievements(userId: number): Promise<(UserAchievement & { achievement: Achievement })[]>;
   createUserAchievement(userAchievement: InsertUserAchievement): Promise<UserAchievement>;
   checkAndAwardAchievements(userId: number): Promise<UserAchievement[]>;
+  getAchievementProgress(userId: number): Promise<{ [achievementId: number]: number }>;
   
   // Subscription Plan methods
   getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
@@ -740,6 +745,173 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    const updatedUser = { ...user, ...updates };
+    this.users.set(id, updatedUser);
+    this.saveToDisk();
+    return updatedUser;
+  }
+
+  async getUserStats(userId: number): Promise<any> {
+    const user = await this.getUser(userId);
+    if (!user) return null;
+
+    // Get all series by user
+    const userSeries = Array.from(this.series.values()).filter(s => s.userId === userId);
+    
+    // Get all books for user's series
+    const userBooks = Array.from(this.books.values()).filter(book => 
+      userSeries.some(series => series.id === book.seriesId)
+    );
+    
+    // Get all chapters for user's books
+    const userChapters = Array.from(this.chapters.values()).filter(chapter =>
+      userBooks.some(book => book.id === chapter.bookId)
+    );
+
+    // Calculate total words from all chapters
+    const totalWords = userChapters.reduce((sum, chapter) => sum + (chapter.wordCount || 0), 0);
+
+    // Get writing stats for streak calculation
+    const writingStats = Array.from(this.writingStats.values()).filter(stat => stat.userId === userId);
+    
+    // Calculate streaks (simplified - just count consecutive days with writing)
+    const sortedStats = writingStats
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    
+    if (sortedStats.length > 0) {
+      const today = new Date();
+      const lastWritingDate = new Date(sortedStats[0].date);
+      const daysDiff = Math.floor((today.getTime() - lastWritingDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // If last writing was today or yesterday, start counting streak
+      if (daysDiff <= 1) {
+        currentStreak = 1;
+        tempStreak = 1;
+        
+        // Count consecutive days
+        for (let i = 1; i < sortedStats.length; i++) {
+          const currentDate = new Date(sortedStats[i-1].date);
+          const prevDate = new Date(sortedStats[i].date);
+          const diff = Math.floor((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (diff === 1) {
+            currentStreak++;
+            tempStreak++;
+          } else {
+            longestStreak = Math.max(longestStreak, tempStreak);
+            tempStreak = 1;
+          }
+        }
+        longestStreak = Math.max(longestStreak, tempStreak);
+      }
+    }
+
+    // Calculate average words per day
+    const totalWritingDays = new Set(writingStats.map(stat => 
+      new Date(stat.date).toDateString()
+    )).size;
+    
+    const averageWordsPerDay = totalWritingDays > 0 ? Math.round(totalWords / totalWritingDays) : 0;
+
+    return {
+      totalWords,
+      totalChapters: userChapters.length,
+      totalBooks: userBooks.length,
+      totalSeries: userSeries.length,
+      currentStreak,
+      longestStreak,
+      averageWordsPerDay,
+      totalWritingDays,
+      joinDate: user.createdAt,
+      lastActiveDate: sortedStats.length > 0 ? sortedStats[0].date : user.createdAt,
+    };
+  }
+
+  async getWritingStatsByPeriod(userId: number, period: string): Promise<any[]> {
+    const now = new Date();
+    let startDate: Date;
+    
+    // Determine date range based on period
+    switch (period) {
+      case 'day':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+        break;
+      case 'week':
+        startDate = new Date(now.getTime() - 8 * 7 * 24 * 60 * 60 * 1000); // Last 8 weeks
+        break;
+      case 'month':
+        startDate = new Date(now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000); // Last 12 months
+        break;
+      case 'year':
+        startDate = new Date(now.getTime() - 5 * 365 * 24 * 60 * 60 * 1000); // Last 5 years
+        break;
+      default:
+        startDate = new Date(now.getTime() - 8 * 7 * 24 * 60 * 60 * 1000); // Default to weeks
+    }
+
+    // Get writing stats for the user within the date range
+    const userStats = Array.from(this.writingStats.values())
+      .filter(stat => 
+        stat.userId === userId && 
+        new Date(stat.date) >= startDate
+      )
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Group stats by period
+    const groupedStats = new Map<string, { wordsWritten: number; minutesActive: number; sessionsCount: number }>();
+    
+    userStats.forEach(stat => {
+      const date = new Date(stat.date);
+      let groupKey: string;
+      
+      switch (period) {
+        case 'day':
+          groupKey = date.toISOString().split('T')[0];
+          break;
+        case 'week':
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          groupKey = weekStart.toISOString().split('T')[0];
+          break;
+        case 'month':
+          groupKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+          break;
+        case 'year':
+          groupKey = `${date.getFullYear()}-01-01`;
+          break;
+        default:
+          const defaultWeekStart = new Date(date);
+          defaultWeekStart.setDate(date.getDate() - date.getDay());
+          groupKey = defaultWeekStart.toISOString().split('T')[0];
+      }
+      
+      if (!groupedStats.has(groupKey)) {
+        groupedStats.set(groupKey, { wordsWritten: 0, minutesActive: 0, sessionsCount: 0 });
+      }
+      
+      const group = groupedStats.get(groupKey)!;
+      group.wordsWritten += stat.wordsWritten || 0;
+      group.minutesActive += stat.minutesActive || 0;
+      group.sessionsCount += 1;
+    });
+
+    // Convert to array format
+    return Array.from(groupedStats.entries()).map(([date, stats]) => ({
+      date,
+      wordsWritten: stats.wordsWritten,
+      minutesActive: stats.minutesActive,
+      sessionsCount: stats.sessionsCount,
+    }));
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentIds.user++;
     const timestamp = new Date();
@@ -1330,6 +1502,99 @@ export class MemStorage implements IStorage {
     }
     
     return newAchievements;
+  }
+
+  async getAchievementProgress(userId: number): Promise<{ [achievementId: number]: number }> {
+    const achievements = await this.getAchievements();
+    const userAchievements = await this.getUserAchievements(userId);
+    const progress: { [achievementId: number]: number } = {};
+    
+    // Get current user stats
+    const writingStats = await this.getWritingStatsByUser(userId);
+    const userSeries = await this.getAllSeriesByUser(userId);
+    
+    // Get characters, locations, books, and chapters
+    const characters = userSeries.flatMap(async series => await this.getCharactersBySeries(series.id));
+    const locations = userSeries.flatMap(async series => await this.getLocationsBySeries(series.id));
+    
+    const books = await Promise.all(userSeries.map(async series => {
+      return await this.getBooksBySeries(series.id);
+    }));
+    
+    const allBooks = books.flat();
+    const completedBooks = allBooks.filter(book => book.status === 'completed');
+    
+    const chapters = await Promise.all(allBooks.map(async book => {
+      return await this.getChaptersByBook(book.id);
+    }));
+    const allChapters = chapters.flat();
+    const completedChapters = allChapters.filter(chapter => chapter.status === 'completed');
+    
+    // Total words written
+    const totalWords = writingStats.reduce((sum, stat) => sum + stat.wordsWritten, 0);
+    
+    // Calculate streak
+    const dates = writingStats
+      .map(stat => new Date(stat.date).toISOString().split('T')[0])
+      .sort();
+    
+    let maxStreak = 1;
+    let currentStreak = 1;
+    
+    for (let i = 1; i < dates.length; i++) {
+      const prevDate = new Date(dates[i-1]);
+      const currDate = new Date(dates[i]);
+      
+      const diffTime = Math.abs(currDate.getTime() - prevDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else if (diffDays > 1) {
+        currentStreak = 1;
+      }
+    }
+    
+    // Calculate progress for each achievement
+    for (const achievement of achievements) {
+      // Skip if user already has this achievement
+      const alreadyAwarded = userAchievements.some(ua => ua.achievementId === achievement.id);
+      
+      if (alreadyAwarded) {
+        progress[achievement.id] = 100;
+        continue;
+      }
+      
+      let currentValue = 0;
+      
+      switch (achievement.type) {
+        case 'streak':
+          currentValue = maxStreak;
+          break;
+        case 'words':
+          currentValue = totalWords;
+          break;
+        case 'characters':
+          currentValue = (await Promise.all(characters)).flat().length;
+          break;
+        case 'chapters':
+          currentValue = completedChapters.length;
+          break;
+        case 'locations':
+          currentValue = (await Promise.all(locations)).flat().length;
+          break;
+        case 'books':
+          currentValue = completedBooks.length;
+          break;
+      }
+      
+      // Calculate percentage progress
+      const progressPercent = Math.min(100, Math.round((currentValue / achievement.requiredValue) * 100));
+      progress[achievement.id] = progressPercent;
+    }
+    
+    return progress;
   }
 
   // Initialize predefined subscription plans

@@ -36,7 +36,7 @@ export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineE
   };
 
   return (
-    <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-l-4 relative group" 
+    <Card className="border-l-4 relative group" 
       style={{ borderLeftColor: event.color || "#6366f1" }}>
       {/* Drag handle indicator - always visible for better accessibility */}
       <div className="absolute -left-3 top-1/2 transform -translate-y-1/2 bg-muted hover:bg-accent rounded-md p-1.5 shadow-sm cursor-grab border border-border">
@@ -44,7 +44,7 @@ export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineE
       </div>
       <CardHeader className="pb-2 flex flex-row justify-between items-start">
         <div>
-          <CardTitle className="text-lg font-semibold text-foreground">
+          <CardTitle className="text-lg font-semibold text-card-foreground">
             {event.title}
           </CardTitle>
           <div className="flex items-center mt-1 text-sm text-muted-foreground">
@@ -69,7 +69,7 @@ export default function TimelineEventCard({ event, onEdit, onDelete }: TimelineE
       </CardHeader>
       
       <CardContent className="pb-2">
-        <p className="text-sm text-foreground">
+        <p className="text-sm text-card-foreground">
           {event.description || "No description provided."}
         </p>
       </CardContent>

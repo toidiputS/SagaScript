@@ -12,6 +12,29 @@ export const users = pgTable("users", {
   plan: text("plan").notNull().default("apprentice"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  avatar: text("avatar"),
+  bio: text("bio"),
+  location: text("location"),
+  website: text("website"),
+  socialLinks: jsonb("social_links").default({}),
+  preferences: jsonb("preferences").default({
+    theme: "system",
+    notifications: {
+      email: true,
+      push: true,
+      writingReminders: true,
+      achievementAlerts: true
+    },
+    privacy: {
+      profileVisibility: "public",
+      showStats: true,
+      showAchievements: true
+    },
+    writing: {
+      defaultGoal: 500,
+      autoSave: true
+    }
+  }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -818,3 +841,80 @@ export const insertVoiceMemoSchema = createInsertSchema(voiceMemos).pick({
 
 export type VoiceMemo = typeof voiceMemos.$inferSelect;
 export type InsertVoiceMemo = z.infer<typeof insertVoiceMemoSchema>;
+
+// =========== PROFILE-SPECIFIC TYPES ===========
+
+// User Profile interfaces
+export interface UserProfile extends User {
+  stats: UserStats;
+}
+
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'spooky' | 'system';
+  notifications: {
+    email: boolean;
+    push: boolean;
+    writingReminders: boolean;
+    achievementAlerts: boolean;
+  };
+  privacy: {
+    profileVisibility: 'public' | 'private';
+    showStats: boolean;
+    showAchievements: boolean;
+  };
+  writing: {
+    defaultGoal: number;
+    reminderTime?: string;
+    autoSave: boolean;
+  };
+}
+
+export interface UserStats {
+  totalWords: number;
+  totalChapters: number;
+  totalBooks: number;
+  totalSeries: number;
+  currentStreak: number;
+  longestStreak: number;
+  averageWordsPerDay: number;
+  totalWritingDays: number;
+  joinDate: string;
+  lastActiveDate?: string;
+}
+
+export interface PlanUsage {
+  series: {
+    used: number;
+    limit: number;
+  };
+  aiPrompts: {
+    used: number;
+    limit: number;
+    resetDate: string;
+  };
+  collaborators: {
+    used: number;
+    limit: number;
+  };
+  storage: {
+    used: number; // in MB
+    limit: number; // in MB
+  };
+}
+
+export interface WritingStatsWithPeriod {
+  date: string;
+  wordsWritten: number;
+  minutesActive: number;
+  sessionsCount: number;
+}
+
+export interface RecentActivity {
+  id: string;
+  type: 'chapter_edited' | 'character_added' | 'achievement_earned' | 'book_completed' | 'series_created';
+  description: string;
+  timestamp: string;
+  relatedId?: number;
+  relatedType?: 'series' | 'book' | 'chapter' | 'character';
+  relatedTitle?: string;
+}

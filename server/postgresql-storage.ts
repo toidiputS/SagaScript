@@ -113,6 +113,170 @@ export class PostgreSQLStorage implements IStorage {
     }
   }
 
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    try {
+      const results = await db.update(users)
+        .set(updates)
+        .where(eq(users.id, id))
+        .returning();
+      return results[0];
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return undefined;
+    }
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      // Delete user and all related data (cascade should handle most of this)
+      const results = await db.delete(users)
+        .where(eq(users.id, id))
+        .returning();
+      return results.length > 0;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      return false;
+    }
+  }
+
+  async getUserStats(userId: number): Promise<any> {
+    try {
+      const user = await this.getUser(userId);
+      if (!user) return null;
+
+      // Get all series by user
+      const userSeries = await db.select().from(series).where(eq(series.userId, userId));
+      
+      // Get all books for user's series
+      const seriesIds = userSeries.map(s => s.id);
+      const userBooks = seriesIds.length > 0 
+        ? await db.select().from(books).where(inArray(books.seriesId, seriesIds))
+        : [];
+      
+      // Get all chapters for user's books
+      const bookIds = userBooks.map(b => b.id);
+      const userChapters = bookIds.length > 0
+        ? await db.select().from(chapters).where(inArray(chapters.bookId, bookIds))
+        : [];
+
+      // Calculate total words from all chapters
+      const totalWords = userChapters.reduce((sum, chapter) => sum + (chapter.wordCount || 0), 0);
+
+      // Get writing stats for streak calculation
+      const userWritingStats = await db.select()
+        .from(writingStats)
+        .where(eq(writingStats.userId, userId))
+        .orderBy(desc(writingStats.date));
+      
+      // Calculate streaks (simplified - just count consecutive days with writing)
+      let currentStreak = 0;
+      let longestStreak = 0;
+      
+      if (userWritingStats.length > 0) {
+        const today = new Date();
+        const lastWritingDate = new Date(userWritingStats[0].date);
+        const daysDiff = Math.floor((today.getTime() - lastWritingDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // If last writing was today or yesterday, start counting streak
+        if (daysDiff <= 1) {
+          currentStreak = 1;
+          let tempStreak = 1;
+          
+          // Count consecutive days
+          for (let i = 1; i < userWritingStats.length; i++) {
+            const currentDate = new Date(userWritingStats[i-1].date);
+            const prevDate = new Date(userWritingStats[i].date);
+            const diff = Math.floor((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+            
+            if (diff === 1) {
+              tempStreak++;
+              currentStreak = tempStreak;
+            } else {
+              break;
+            }
+          }
+          
+          longestStreak = Math.max(longestStreak, currentStreak);
+        }
+      }
+
+      // Calculate average words per day
+      const totalWritingDays = userWritingStats.length;
+      const averageWordsPerDay = totalWritingDays > 0 ? Math.round(totalWords / totalWritingDays) : 0;
+
+      return {
+        totalWords,
+        totalChapters: userChapters.length,
+        totalBooks: userBooks.length,
+        totalSeries: userSeries.length,
+        currentStreak,
+        longestStreak,
+        averageWordsPerDay,
+        totalWritingDays,
+        joinDate: user.createdAt,
+      };
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      return null;
+    }
+  }
+
+  async getWritingStatsByPeriod(userId: number, period: string): Promise<any[]> {
+    try {
+      const now = new Date();
+      let startDate: Date;
+      let groupBy: string;
+      
+      // Determine date range and grouping based on period
+      switch (period) {
+        case 'day':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+          groupBy = 'DATE(date)';
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - 8 * 7 * 24 * 60 * 60 * 1000); // Last 8 weeks
+          groupBy = 'DATE_TRUNC(\'week\', date)';
+          break;
+        case 'month':
+          startDate = new Date(now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000); // Last 12 months
+          groupBy = 'DATE_TRUNC(\'month\', date)';
+          break;
+        case 'year':
+          startDate = new Date(now.getTime() - 5 * 365 * 24 * 60 * 60 * 1000); // Last 5 years
+          groupBy = 'DATE_TRUNC(\'year\', date)';
+          break;
+        default:
+          startDate = new Date(now.getTime() - 8 * 7 * 24 * 60 * 60 * 1000); // Default to weeks
+          groupBy = 'DATE_TRUNC(\'week\', date)';
+      }
+
+      // Query writing stats grouped by period
+      const results = await db.execute(sql`
+        SELECT 
+          ${sql.raw(groupBy)} as date,
+          SUM(words_written) as words_written,
+          SUM(minutes_active) as minutes_active,
+          COUNT(*) as sessions_count
+        FROM writing_stats 
+        WHERE user_id = ${userId} 
+          AND date >= ${startDate.toISOString()}
+        GROUP BY ${sql.raw(groupBy)}
+        ORDER BY date ASC
+      `);
+
+      // Transform results to match expected format
+      return results.rows.map((row: any) => ({
+        date: new Date(row.date).toISOString().split('T')[0],
+        wordsWritten: parseInt(row.words_written) || 0,
+        minutesActive: parseInt(row.minutes_active) || 0,
+        sessionsCount: parseInt(row.sessions_count) || 0,
+      }));
+    } catch (error) {
+      console.error('Error getting writing stats by period:', error);
+      return [];
+    }
+  }
+
   async updateStripeCustomerId(userId: number, customerId: string): Promise<User | undefined> {
     try {
       const results = await db.update(users)
@@ -649,6 +813,26 @@ export class PostgreSQLStorage implements IStorage {
     } catch (error) {
       console.error('Error checking and awarding achievements:', error);
       return [];
+    }
+  }
+
+  async getAchievementProgress(userId: number): Promise<{ [achievementId: number]: number }> {
+    // Simplified implementation - returns random progress for now
+    // In a real implementation, this would calculate actual progress based on user activity
+    try {
+      const allAchievements = await this.getAchievements();
+      const userAchievements = await this.getUserAchievements(userId);
+      const progress: { [achievementId: number]: number } = {};
+      
+      allAchievements.forEach(achievement => {
+        const isEarned = userAchievements.some(ua => ua.achievementId === achievement.id);
+        progress[achievement.id] = isEarned ? 100 : Math.floor(Math.random() * 80);
+      });
+      
+      return progress;
+    } catch (error) {
+      console.error('Error getting achievement progress:', error);
+      return {};
     }
   }
 

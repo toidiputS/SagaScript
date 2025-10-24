@@ -16,7 +16,7 @@ export function FeatureCard({ icon, title, description, className = '' }: Featur
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className={`feature-card ${className}`}
     >
-      <Card className="h-full overflow-hidden relative bg-primary/10 border-primary/20">
+      <Card className="h-full overflow-hidden relative">
         <CardHeader className="pb-2">
           <div className="flex items-start space-x-4">
             <div className="relative w-12 h-12 flex items-center justify-center">
@@ -33,7 +33,7 @@ export function FeatureCard({ icon, title, description, className = '' }: Featur
           </div>
         </CardHeader>
         <CardContent>
-          <CardDescription className="text-sm text-foreground/80">
+          <CardDescription className="text-sm text-card-foreground/80">
             {description}
           </CardDescription>
         </CardContent>

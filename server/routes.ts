@@ -8,6 +8,7 @@ import aiRoutes from "./routes/ai";
 import writingStatsRoutes from './routes/writing-stats';
 import moodBoardRoutes from './routes/mood-boards';
 import voiceMemoRoutes from './routes/voice-memos';
+import setupProfileRoutes from './routes/profile';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe integration will be disabled.');
@@ -45,7 +46,7 @@ import {
   generateSingleSuggestion, 
   analyzeWriting,
   type SuggestionType
-} from "./services/openai";
+} from "./services/gemini";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -811,6 +812,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/achievement-progress", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id!;
+      const progress = await storage.getAchievementProgress(userId);
+      res.status(200).json(progress);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching achievement progress" });
+    }
+  });
+
   // Helper function to check if Stripe is available
   const checkStripe = (res: Response) => {
     if (!stripe) {
@@ -968,6 +979,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(updated);
     } catch (error) {
       res.status(500).json({ message: "Error canceling subscription" });
+    }
+  });
+
+  // Get plan usage statistics
+  app.get("/api/plan-usage", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id!;
+      
+      // Get user's current subscription and plan
+      const subscription = await storage.getUserSubscription(userId);
+      let planLimits = {
+        maxSeries: 1,
+        maxBooksPerSeries: 3,
+        maxCharactersPerSeries: 10,
+        maxLocationsPerSeries: 5,
+        aiSuggestionsLimit: 10,
+        maxCollaborators: 0,
+        storageLimit: 100 // MB
+      };
+
+      if (subscription) {
+        const plan = await storage.getSubscriptionPlan(subscription.planId);
+        if (plan && plan.limits) {
+          planLimits = { ...planLimits, ...plan.limits };
+        }
+      } else {
+        // Get default plan limits based on user's plan
+        const user = await storage.getUser(userId);
+        if (user) {
+          const plans = await storage.getSubscriptionPlans();
+          const userPlan = plans.find(p => p.name.toLowerCase() === user.plan.toLowerCase());
+          if (userPlan && userPlan.limits) {
+            planLimits = { ...planLimits, ...userPlan.limits };
+          }
+        }
+      }
+
+      // Calculate current usage
+      const userSeries = await storage.getAllSeriesByUser(userId);
+      const seriesCount = userSeries.length;
+
+      // Calculate total characters and locations across all series
+      let totalCharacters = 0;
+      let totalLocations = 0;
+      let totalWordCount = 0;
+
+      for (const series of userSeries) {
+        const characters = await storage.getCharactersBySeries(series.id);
+        const locations = await storage.getLocationsBySeries(series.id);
+        const books = await storage.getBooksBySeries(series.id);
+        
+        totalCharacters += characters.length;
+        totalLocations += locations.length;
+        
+        // Calculate total word count for storage estimation
+        for (const book of books) {
+          totalWordCount += book.wordCount || 0;
+        }
+      }
+
+      // Estimate storage usage (rough calculation: ~2KB per 1000 words + metadata)
+      const estimatedStorageUsed = Math.ceil((totalWordCount * 2) / 1000); // MB
+
+      // Calculate AI prompts usage (this would need to be tracked separately)
+      // For now, we'll use a placeholder based on some activity
+      const aiPromptsUsed = Math.min(Math.floor(totalWordCount / 5000), planLimits.aiSuggestionsLimit || 0);
+
+      // Calculate collaborators usage (placeholder - would need actual collaboration tracking)
+      const collaboratorsUsed = 0;
+
+      // Calculate reset date for AI prompts (monthly reset)
+      const now = new Date();
+      const resetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+      const usage = {
+        series: {
+          used: seriesCount,
+          limit: planLimits.maxSeries || -1
+        },
+        aiPrompts: {
+          used: aiPromptsUsed,
+          limit: planLimits.aiSuggestionsLimit || -1,
+          resetDate: resetDate.toISOString()
+        },
+        collaborators: {
+          used: collaboratorsUsed,
+          limit: planLimits.maxCollaborators || -1
+        },
+        storage: {
+          used: estimatedStorageUsed,
+          limit: planLimits.storageLimit || -1
+        }
+      };
+
+      res.status(200).json(usage);
+    } catch (error) {
+      console.error("Error fetching plan usage:", error);
+      res.status(500).json({ message: "Error fetching plan usage" });
     }
   });
 
@@ -1513,6 +1622,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error generating AI suggestion" });
     }
   });
+
+  // Mount profile routes
+  setupProfileRoutes(app);
 
   // Mount collaboration routes
   app.use('/api/collaboration', isAuthenticated, collaborationRoutes);

@@ -7,12 +7,15 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { SagaScriptLogoCompact } from "@/components/ui/sagascript-logo";
+import { useProfilePreloader } from "@/lib/profile-preloader";
 
 export default function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
   const { currentSeries } = useSeries();
   const { toast } = useToast();
+  const { preloadProfileData } = useProfilePreloader();
   const [isCollapsed, setIsCollapsed] = useState(() => {
     // Initialize from localStorage if available
     if (typeof window !== 'undefined') {
@@ -26,6 +29,10 @@ export default function Sidebar() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+      // Dispatch custom event for other components to listen
+      window.dispatchEvent(new CustomEvent('sidebar-toggle', { 
+        detail: { collapsed: isCollapsed } 
+      }));
     }
   }, [isCollapsed]);
 
@@ -63,6 +70,7 @@ export default function Sidebar() {
     { name: "Writer's Companion", path: "/writers-companion", icon: "ri-quill-pen-line" }, // Added Writer's Companion
     { name: "Collaboration", path: "/collaboration", icon: "ri-team-line" },
     { name: "Achievements", path: "/achievements", icon: "ri-award-line" },
+    { name: "Profile", path: "/profile", icon: "ri-user-line" },
     { name: "Products", path: "/products", icon: "ri-shopping-bag-3-line" },
     { name: "Subscriptions", path: "/subscriptions", icon: "ri-vip-crown-line" },
   ];
@@ -78,8 +86,8 @@ export default function Sidebar() {
         {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-3 sm:px-4 border-b border-border">
           <div className={cn("flex items-center", isCollapsed ? "justify-center w-full" : "")}>
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground">
-              <i className="ri-quill-pen-line"></i>
+            <div className="w-8 h-8 flex items-center justify-center text-primary">
+              <SagaScriptLogoCompact size={32} className="text-primary" />
             </div>
             {!isCollapsed && (
               <h1 className="font-serif font-bold text-lg text-foreground ml-2">
@@ -119,6 +127,12 @@ export default function Sidebar() {
                     ? "bg-primary/10 text-primary"
                     : "text-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
+                onMouseEnter={() => {
+                  // Preload profile data when hovering over profile link
+                  if (link.path === "/profile" && user) {
+                    preloadProfileData();
+                  }
+                }}
               >
                 <i className={cn(link.icon, "text-lg", isCollapsed ? "" : "mr-3")}></i>
                 {!isCollapsed && <span>{link.name}</span>}

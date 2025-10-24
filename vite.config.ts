@@ -32,5 +32,34 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          'react-vendor': ['react', 'react-dom'],
+          'router-vendor': ['wouter'],
+          'query-vendor': ['@tanstack/react-query'],
+          'ui-vendor': ['@radix-ui/react-tabs', '@radix-ui/react-dialog', '@radix-ui/react-select'],
+          
+          // Profile page chunks
+          'profile-core': [
+            './client/src/components/profile/ProfileHeader.tsx',
+            './client/src/components/profile/ProfileTabs.tsx',
+            './client/src/components/profile/OverviewTab.tsx'
+          ],
+          'profile-stats': [
+            './client/src/components/profile/StatisticsTab.tsx',
+            './client/src/components/profile/WritingStatsChart.tsx'
+          ],
+          'profile-achievements': ['./client/src/components/profile/AchievementsTab.tsx'],
+          'profile-subscription': ['./client/src/components/profile/SubscriptionTab.tsx'],
+          'profile-settings': ['./client/src/components/profile/SettingsTab.tsx'],
+          
+          // Chart libraries (if installed)
+          // 'chart-vendor': ['chart.js', 'react-chartjs-2']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
   },
 });

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { PlusIcon, MapPinIcon, SearchIcon, MapIcon, Settings2 } from "lucide-react";
 import { DirectMapGenerator } from "@/components/map-generator/direct-map-generator";
 
@@ -81,37 +81,38 @@ export default function WorldBuilding() {
                 <label htmlFor="world-building-tabs" className="block text-sm font-medium text-foreground mb-1">
                   View
                 </label>
-                <Tabs
-                  defaultValue="atlas"
-                  className="w-full"
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  id="world-building-tabs"
-                >
-                  <TabsList className="w-full bg-background border border-input">
-                    <TabsTrigger
-                      value="atlas"
-                      className="flex-1 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    >
-                      <MapIcon className="h-4 w-4 mr-2" />
-                      Atlas
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="list"
-                      className="flex-1 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                    >
-                      <Settings2 className="h-4 w-4 mr-2" />
-                      List
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <div className="flex gap-3 justify-center">
+                  {[
+                    { value: 'atlas', label: 'Atlas', icon: MapIcon },
+                    { value: 'list', label: 'List', icon: Settings2 }
+                  ].map((tab) => {
+                    const IconComponent = tab.icon;
+                    return (
+                      <button
+                        key={tab.value}
+                        onClick={() => setActiveTab(tab.value)}
+                        className={`
+                          rounded-[30px] px-6 py-3 text-sm font-medium transition-all duration-300 flex items-center gap-2
+                          ${activeTab === tab.value 
+                            ? 'bg-primary text-primary-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.2),-10px_-10px_20px_rgba(66,165,245,0.15)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.25),-15px_-15px_25px_rgba(66,165,245,0.2)]' 
+                            : 'bg-card text-card-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.12),-10px_-10px_20px_rgba(66,165,245,0.08)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.18),-15px_-15px_25px_rgba(66,165,245,0.12)]'
+                          }
+                          border-0 hover:scale-105
+                        `}
+                      >
+                        <IconComponent className="h-4 w-4" />
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Content based on selection */}
           {!selectedSeries ? (
-            <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+            <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
               <MapIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
               <h2 className="text-xl font-semibold mb-2">Select a Series</h2>
               <p className="text-muted-foreground mb-6">
@@ -177,7 +178,7 @@ export default function WorldBuilding() {
                       </Button>
                     </div>
 
-                    <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+                    <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
                       <MapPinIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                       <h3 className="text-lg font-semibold mb-2">No Locations Found</h3>
                       <p className="text-muted-foreground mb-6">
@@ -194,7 +195,7 @@ export default function WorldBuilding() {
 
               {/* List View - Shown when List tab is active */}
               {activeTab === "list" && (
-                <div className="bg-card rounded-lg shadow-sm border border-border p-8 text-center">
+                <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
                   <MapPinIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                   <h3 className="text-lg font-semibold mb-2">Location List View</h3>
                   <p className="text-muted-foreground mb-6">

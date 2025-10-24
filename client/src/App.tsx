@@ -1,3 +1,4 @@
+import React from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -17,44 +18,33 @@ import ChapterEditor from "@/pages/chapter-editor";
 import Collaboration from "@/pages/collaboration";
 import Sidebar from "@/components/layout/sidebar";
 import MobileMenu from "@/components/layout/mobile-menu";
-import { useState, useEffect } from "react";
-import { SimpleAuthProvider } from "@/contexts/simple-auth";
+import { useState } from "react";
+import { SupabaseAuthProvider } from "@/contexts/supabase-auth";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
+import AuthCallback from "@/pages/auth-callback";
+import { AuthForm } from "@/components/auth/AuthForm";
 import SubscriptionsPage from '@/pages/subscriptions';
 import AICompanion from '@/pages/ai-companion';
+import Profile from '@/pages/profile';
+import { useSidebarState } from "@/hooks/use-sidebar-state";
+import BackgroundLogo from "@/components/ui/background-logo";
+import { SagaScriptLogoCompact } from "@/components/ui/sagascript-logo";
 
 function Router() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  // Check sidebar state from localStorage
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem('sidebar-collapsed');
-      if (saved) {
-        setIsSidebarCollapsed(JSON.parse(saved));
-      }
-    };
-    
-    // Initial check
-    handleStorageChange();
-    
-    // Listen for changes (needed for cross-tab syncing)
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+  const { getMainContentStyle } = useSidebarState();
 
   // Check if the current route is auth-related
   const isAuthRoute = ['/login', '/register', '/auth'].includes(location);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-background">
+    <div className="h-screen flex overflow-hidden bg-background relative">
+      {/* Background Logo */}
+      <BackgroundLogo />
+      
       {!isAuthRoute && (
         <>
           <Sidebar />
@@ -73,7 +63,8 @@ function Router() {
                 <line x1="3" y1="18" x2="21" y2="18"></line>
               </svg>
             </button>
-            <div className="ml-4 flex items-center">
+            <div className="ml-4 flex items-center gap-2">
+              <SagaScriptLogoCompact size={24} className="text-primary" />
               <span className="font-serif font-bold text-lg text-foreground">SagaScript</span>
             </div>
           </div>
@@ -82,14 +73,14 @@ function Router() {
 
       <main 
         className={`flex-1 overflow-y-auto bg-background transition-all duration-300 ${
-          !isAuthRoute ? 'pt-16 md:pt-0' : ''
-        } ${
-          !isAuthRoute ? (isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64') : ''
+          !isAuthRoute ? 'pt-16 lg:pt-0' : ''
         }`}
+        style={getMainContentStyle(isAuthRoute)}
       >
         <Switch>
           {/* Auth routes */}
-          <Route path="/auth" component={AuthPage} />
+          <Route path="/auth" component={() => <AuthForm />} />
+          <Route path="/auth/callback" component={AuthCallback} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
 
@@ -125,6 +116,7 @@ function Router() {
             return <ChapterEditor />;
           }} />
           <ProtectedRoute path="/subscriptions" component={() => <SubscriptionsPage />} />
+          <ProtectedRoute path="/profile" component={() => <Profile />} />
 
           {/* Fallback to 404 */}
           <Route component={NotFound} />
@@ -135,14 +127,27 @@ function Router() {
 }
 
 function App() {
+  // Register service worker for caching
+  React.useEffect(() => {
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('SW registered: ', registration);
+        })
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <SimpleAuthProvider>
+      <SupabaseAuthProvider>
         <ThemeProvider>
           <Router />
           <Toaster />
         </ThemeProvider>
-      </SimpleAuthProvider>
+      </SupabaseAuthProvider>
     </QueryClientProvider>
   );
 }

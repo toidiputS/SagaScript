@@ -154,12 +154,12 @@ export default function CharactersPage() {
 
         {/* Character Grid */}
         {!currentSeries ? (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="text-neutral-500 mb-4">
+          <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
+            <div className="text-muted-foreground mb-4">
               <i className="ri-user-star-line text-4xl"></i>
             </div>
             <h3 className="text-lg font-medium mb-2">No Series Selected</h3>
-            <p className="text-neutral-600 mb-4">Please select a series to manage its characters</p>
+            <p className="text-muted-foreground mb-4">Please select a series to manage its characters</p>
           </div>
         ) : isLoadingCharacters ? (
           <div className="flex items-center justify-center py-12">
@@ -175,12 +175,12 @@ export default function CharactersPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="text-neutral-500 mb-4">
+          <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
+            <div className="text-muted-foreground mb-4">
               <i className="ri-user-star-line text-4xl"></i>
             </div>
             <h3 className="text-lg font-medium mb-2">No Characters Found</h3>
-            <p className="text-neutral-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               {searchQuery 
                 ? "No characters match your search criteria" 
                 : `No ${activeTab} characters in this series yet`}

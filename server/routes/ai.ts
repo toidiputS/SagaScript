@@ -5,7 +5,7 @@ import {
   generateWritingSuggestions, 
   generateSingleSuggestion, 
   type SuggestionType
-} from '../services/openai';
+} from '../services/gemini';
 import { z } from 'zod';
 
 const router = Router();

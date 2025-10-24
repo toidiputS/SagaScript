@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/simple-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Loader2, CreditCard, Rocket, Crown, Sparkles } from 'lucide-react';
 
 // Define types for our subscription plans
@@ -23,6 +23,7 @@ export default function SubscriptionsPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [loadingPlans, setLoadingPlans] = useState<{[key: string]: boolean}>({});
+  const [activeTab, setActiveTab] = useState('all-plans');
 
   // Create checkout session mutation
   const createCheckoutSession = useMutation({
@@ -111,32 +112,40 @@ export default function SubscriptionsPage() {
           </header>
 
           {/* Tabs for different views */}
-          <Tabs defaultValue="all-plans" className="mb-6">
-            <TabsList className="w-full md:w-auto grid grid-cols-4">
-              <TabsTrigger value="all-plans" className="flex items-center">
-                <CreditCard className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">All Plans</span>
-                <span className="md:hidden">All</span>
-              </TabsTrigger>
-              <TabsTrigger value="monthly" className="flex items-center">
-                <Sparkles className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">Monthly</span>
-                <span className="md:hidden">Month</span>
-              </TabsTrigger>
-              <TabsTrigger value="yearly" className="flex items-center">
-                <Rocket className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">Yearly (Save 20%)</span>
-                <span className="md:hidden">Year</span>
-              </TabsTrigger>
-              <TabsTrigger value="compare" className="flex items-center">
-                <Crown className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">Compare Features</span>
-                <span className="md:hidden">Compare</span>
-              </TabsTrigger>
-            </TabsList>
+          <div className="mb-6">
+            <div className="flex flex-wrap gap-3 justify-center">
+              {[
+                { value: 'all-plans', label: 'All Plans', shortLabel: 'All', icon: CreditCard },
+                { value: 'monthly', label: 'Monthly', shortLabel: 'Month', icon: Sparkles },
+                { value: 'yearly', label: 'Yearly (Save 20%)', shortLabel: 'Year', icon: Rocket },
+                { value: 'compare', label: 'Compare Features', shortLabel: 'Compare', icon: Crown }
+              ].map((tab) => {
+                const IconComponent = tab.icon;
+                return (
+                  <button
+                    key={tab.value}
+                    onClick={() => setActiveTab(tab.value)}
+                    className={`
+                      rounded-[30px] px-4 py-3 text-sm font-medium transition-all duration-300 flex items-center gap-2
+                      ${activeTab === tab.value 
+                        ? 'bg-primary text-primary-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.2),-10px_-10px_20px_rgba(66,165,245,0.15)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.25),-15px_-15px_25px_rgba(66,165,245,0.2)]' 
+                        : 'bg-card text-card-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.12),-10px_-10px_20px_rgba(66,165,245,0.08)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.18),-15px_-15px_25px_rgba(66,165,245,0.12)]'
+                      }
+                      border-0 hover:scale-105
+                    `}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    <span className="hidden md:inline">{tab.label}</span>
+                    <span className="md:hidden">{tab.shortLabel}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
             {/* All Plans Content */}
-            <TabsContent value="all-plans" className="mt-6">
+            {activeTab === 'all-plans' && (
+              <div className="mt-6">
               <div className="grid gap-6 md:grid-cols-4">
                 {isLoading ? (
                   <div className="col-span-4 flex justify-center items-center py-12">
@@ -198,10 +207,12 @@ export default function SubscriptionsPage() {
                   ))
                 )}
               </div>
-            </TabsContent>
+              </div>
+            )}
 
             {/* Monthly Plans Content */}
-            <TabsContent value="monthly" className="mt-6">
+            {activeTab === 'monthly' && (
+              <div className="mt-6">
               <div className="grid gap-6 md:grid-cols-4">
                 {isLoading ? (
                   <div className="col-span-4 flex justify-center items-center py-12">
@@ -263,10 +274,12 @@ export default function SubscriptionsPage() {
                   ))
                 )}
               </div>
-            </TabsContent>
+              </div>
+            )}
 
             {/* Yearly Plans Content */}
-            <TabsContent value="yearly" className="mt-6">
+            {activeTab === 'yearly' && (
+              <div className="mt-6">
               <div className="grid gap-6 md:grid-cols-4">
                 {isLoading ? (
                   <div className="col-span-4 flex justify-center items-center py-12">
@@ -335,10 +348,12 @@ export default function SubscriptionsPage() {
                   ))
                 )}
               </div>
-            </TabsContent>
+              </div>
+            )}
 
             {/* Compare Features Content */}
-            <TabsContent value="compare" className="mt-6">
+            {activeTab === 'compare' && (
+              <div className="mt-6">
               <Card className="border">
                 <CardHeader>
                   <CardTitle>Plan Comparison</CardTitle>
@@ -446,8 +461,8 @@ export default function SubscriptionsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+              </div>
+            )}
         </div>
       </main>
     </div>

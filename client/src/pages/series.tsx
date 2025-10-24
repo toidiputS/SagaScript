@@ -264,12 +264,12 @@ export default function SeriesPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="text-neutral-500 mb-4">
+          <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
+            <div className="text-muted-foreground mb-4">
               <i className="ri-book-open-line text-4xl"></i>
             </div>
             <h3 className="text-lg font-medium mb-2">No Series Yet</h3>
-            <p className="text-neutral-600 mb-4">Create your first series to start organizing your books and chapters</p>
+            <p className="text-muted-foreground mb-4">Create your first series to start organizing your books and chapters</p>
             <Button 
               onClick={() => setIsCreatingNewSeries(true)}
               className="bg-primary hover:bg-primary-dark text-white"
@@ -343,12 +343,12 @@ export default function SeriesPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-8 text-center">
-                <div className="text-neutral-500 mb-4">
+              <div className="rounded-[30px] bg-card text-card-foreground shadow-[15px_15px_30px_rgba(59,130,246,0.15),-15px_-15px_30px_rgba(147,197,253,0.1)] hover:shadow-[20px_20px_40px_rgba(59,130,246,0.2),-20px_-20px_40px_rgba(147,197,253,0.15)] transition-shadow duration-300 p-8 text-center">
+                <div className="text-muted-foreground mb-4">
                   <i className="ri-book-line text-4xl"></i>
                 </div>
                 <h3 className="text-lg font-medium mb-2">No Books Yet</h3>
-                <p className="text-neutral-600 mb-4">Add your first book to this series</p>
+                <p className="text-muted-foreground mb-4">Add your first book to this series</p>
                 <Button 
                   onClick={() => setIsCreatingNewBook(true)}
                   className="bg-primary hover:bg-primary-dark text-white"

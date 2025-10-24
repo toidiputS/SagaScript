@@ -9,5 +9,17 @@
     "stripeCustomerId": null,
     "stripeSubscriptionId": null,
     "createdAt": "2025-03-21T14:44:57.840Z"
+  },
+  {
+    "username": "Trader",
+    "displayName": "Trader",
+    "password": "de3f8ae232b0421d9dd0c4a78fd7184d3e2ada509851bf24c9d8b5bdcd91e8b575a2393d054e97fbacf78161177d12e68f1acb08fe0e13ce3289313194e9a56a.60f5bb1ca48d2febb42b27c5aa17f603",
+    "confirmPassword": "ItsSaga@1979",
+    "plan": "apprentice",
+    "id": 2,
+    "email": null,
+    "stripeCustomerId": null,
+    "stripeSubscriptionId": null,
+    "createdAt": "2025-10-22T11:53:49.412Z"
   }
 ]

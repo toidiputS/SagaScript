@@ -40,7 +40,7 @@ import {
   generateSingleSuggestion, 
   analyzeWriting,
   type SuggestionType
-} from "./services/openai";
+} from "./services/gemini";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {

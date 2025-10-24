@@ -5,6 +5,7 @@ import AISuggestions from "@/components/dashboard/ai-suggestions";
 import AchievementsDisplay from "@/components/dashboard/achievements-display";
 import BadgeProgression from "@/components/dashboard/badge-progression";
 import BadgeShowcase from "@/components/dashboard/badge-showcase";
+import { SagaScriptLogoCompact } from "@/components/ui/sagascript-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { useSeries } from "@/hooks/use-series";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -48,7 +49,7 @@ const WritingStats = ({ wordsToday, currentStreak }: { wordsToday: number; curre
     <StatsCard 
       title="Words Today" 
       value={wordsToday}
-      icon="ri-quill-pen-line"
+      icon="ri-edit-line"
       iconBg="bg-primary/10"
       iconColor="text-primary"
       trend={{
@@ -299,7 +300,7 @@ export default function Dashboard() {
               onClick={handleStartWriting}
               className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md font-medium flex items-center"
             >
-              <i className="ri-quill-pen-line mr-2"></i>
+              <SagaScriptLogoCompact size={20} className="text-current mr-2" />
               <span>Start Writing</span>
             </button>
           </div>
@@ -319,8 +320,8 @@ export default function Dashboard() {
         {/* Current Project & Companion */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Current Project */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 spooky:bg-gray-800/90 rounded-lg shadow-sm border border-neutral-200 dark:border-gray-700 spooky:border-gray-700/70 overflow-hidden">
-            <div className="border-b border-neutral-200 dark:border-gray-700 spooky:border-gray-700/70 px-5 py-4 flex justify-between items-center">
+          <div className="lg:col-span-2 rounded-[30px] bg-card text-card-foreground shadow-[10px_10px_20px_rgba(33,150,243,0.12),-10px_-10px_20px_rgba(66,165,245,0.08)] hover:shadow-[15px_15px_25px_rgba(33,150,243,0.18),-15px_-15px_25px_rgba(66,165,245,0.12)] transition-shadow duration-300 overflow-hidden">
+            <div className="border-b border-border px-5 py-4 flex justify-between items-center">
               <h2 className="font-serif font-bold text-lg text-foreground">Current Project</h2>
               {currentSeries && (
                 <div className="flex space-x-2">
